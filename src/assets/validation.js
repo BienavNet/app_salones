@@ -12,12 +12,13 @@ export class Validaciones {
     }
 
     static cedula(cedula) {
-        if (typeof cedula !== 'number') throw new Error('Cédula debe ser un número');
-        if (cedula.toString().length !== 10) throw new Error('La cédula debe tener exactamente 10 caracteres.');
+        if (typeof cedula !== 'number'|| !Number.isInteger(cedula)) throw new Error('Cédula debe ser un número');
+        if (cedula.toString().length > 10) throw new Error('La cédula debe tener no puede ser mayor a 10 caracteres');
+        if (cedula.toString().length < 8) throw new Error('La cédula debe tener no puede ser menor a 10 caracteres');
     }
 
     static correo(correo) {
-        const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
+        const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
         if (typeof correo !== 'string') throw new Error('Correo debe ser una cadena de texto');
         if (!emailRegex.test(correo)) throw new Error('Correo debe tener un formato válido');
         if (correo.length < 4) throw new Error('Contraseña debe tener al menos 6 caracteres');

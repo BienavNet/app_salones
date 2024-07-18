@@ -37,32 +37,32 @@ const getDocenteIdByCedula = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
-// const getDocenteByCedula = async (req, res) => {
-//     try {
-//         if (req.params !== undefined) {
-//             const { cedula } = req.params
-//             const connection = await database.getConnection()
-//             //const result = await connection.query("SELECT p.*, d.* FROM persona as p, docente as d WHERE p.cedula = " +cedula+ " and d.persona = p.id")
-//             const result = await connection.query("SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona WHERE persona.cedula = " + cedula + ";")
-//             res.status(200).json(result)
-//         } else {
-//             res.send(400, "Bad Request")
-//         }
-//     } catch (error) {
-//         res.status(500).send('Internal Server Error: ' + error.message)
-//     }
-// }
-const getDocenteByCedula = async (cedula) => {
-  try {
-    const connection = await database.getConnection();
-    return await connection.query("SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona WHERE persona.cedula = " +cedula + ";");
-  } catch (error) {
-    throw new Error({
-        status: 500,
-        message: "Internal Server Error:" + error.message,
-    });
-  }
-};
+const getDocenteByCedula = async (req, res) => {
+    try {
+        if (req.params !== undefined) {
+            const { cedula } = req.params
+            const connection = await database.getConnection()
+            //const result = await connection.query("SELECT p.*, d.* FROM persona as p, docente as d WHERE p.cedula = " +cedula+ " and d.persona = p.id")
+            const result = await connection.query("SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona WHERE persona.cedula = " + cedula + ";")
+            res.status(200).json(result)
+        } else {
+            res.send(400, "Bad Request")
+        }
+    } catch (error) {
+        res.status(500).send('Internal Server Error: ' + error.message)
+    }
+}
+// const getDocenteByCedula = async (cedula) => {
+//   try {
+//     const connection = await database.getConnection();
+//     return await connection.query("SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona WHERE persona.cedula = " +cedula + ";");
+//   } catch (error) {
+//     throw new Error({
+//         status: 500,
+//         message: "Internal Server Error:" + error.message,
+//     });
+//   }
+// };
 
 const getDocenteByCorreo = async (correo) => {
   try {
@@ -100,29 +100,29 @@ const saveDocente = async (req, res) => {
     }
 
     // validamos que no se repita la cedula
-    const existCedula = await getDocenteByCedula(cedula);
-    if (existCedula.length > 0) {
-      return res
-        .status(409)
-        .json({
-          status: "error",
-          message: "El docente con esta cédula ya existe.",
-        });
-    }
+    // const existCedula = await getDocenteByCedula(cedula);
+    // if (existCedula.length > 0) {
+    //   return res
+    //     .status(409)
+    //     .json({
+    //       status: "error",
+    //       message: "El docente con esta cédula ya existe.",
+    //     });
+    // }
 
     // validamos que no se repita el correo
-    const existCorreo = await getDocenteByCorreo(correo);
-    if (existCorreo.length > 0) {
-      return res
-        .status(409)
-        .json({
-          status: "error",
-          message: "El docente con este correo ya existe.",
-        });
-    }
+    // const existCorreo = await getDocenteByCorreo(correo);
+    // if (existCorreo.length > 0) {
+    //   return res
+    //     .status(409)
+    //     .json({
+    //       status: "error",
+    //       message: "El docente con este correo ya existe.",
+    //     });
+    // }
 
     //generamos los id de la tabla persona
-    const _id = crypto.randomUUID();
+    const id = crypto.randomUUID();
 
     //antes de crear el user haseamos la password
     const hashedPassword = await bcrypt.hash(contrasena, SALTROUNDS);
@@ -132,7 +132,7 @@ const saveDocente = async (req, res) => {
     try {
       await connection.beginTransaction();
       const formatData = {
-        id: _id,
+        id:id,
         nombre,
         apellido,
         correo,

@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS persona (
 	id int primary key,
     nombre varchar(30) not null,
     apellido varchar(30) not null,
-    cedula int(10) unsigned not null,
-    correo varchar(40) not null,
+    cedula int(10) unsigned unique not null,
+    correo varchar(40) unique not null,
     contrasena varchar(40) not null
 );
 
