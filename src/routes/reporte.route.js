@@ -9,6 +9,6 @@ router.get("/clase/:clase", reporteMethods.getReporteByClase)
 router.get("/salon/:salon", reporteMethods.getReporteBySalon)
 router.post("/register", reporteMethods.registrarReporte)
 router.post("/update/:id", reporteMethods.updateReporte)
-router.get("/delete/:id", reporteMethods.deleteReporte)
+router.delete("/delete/:id", reporteMethods.deleteReporte)
 
 export default router

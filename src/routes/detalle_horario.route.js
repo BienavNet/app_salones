@@ -8,7 +8,7 @@ router.get("/docente/:cedula", detalle_horarioMethods.getDetallesHorarioByDocent
 router.get("/horario/:horario", detalle_horarioMethods.getDetallesHorariosByHorario)
 router.get("/", detalle_horarioMethods.getAllDetallesHorario)
 router.post("/save", detalle_horarioMethods.saveDetalleHorario)
-router.get("/delete/:id", detalle_horarioMethods.deleteDetalleHorario)
+router.delete("/delete/:id", detalle_horarioMethods.deleteDetalleHorario)
 router.post("/update/:id", detalle_horarioMethods.updateDetalleHorario)
 
 export default router

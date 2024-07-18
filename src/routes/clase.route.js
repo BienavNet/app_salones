@@ -9,7 +9,7 @@ router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor)
 router.get("/horario/:horario", claseMethods.getClaseByHorario)
 router.get("/salon/:salon", claseMethods.getClaseBySalon)
 router.post("/register", claseMethods.registerClase)
-router.get("/delete/:id", claseMethods.deleteClase)
+router.delete("/delete/:id", claseMethods.deleteClase)
 router.post("/update/:id", claseMethods.updateClase)
 
 

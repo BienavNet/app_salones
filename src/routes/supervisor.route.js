@@ -14,6 +14,6 @@ router.post("/save", supervisorMethods.saveSupervisor)
 
 router.post("/update/:cedula", supervisorMethods.updateSupervisor)
 
-router.get('/delete/:cedula', supervisorMethods.deleteSupervisor)
+router.delete('/delete/:cedula', supervisorMethods.deleteSupervisor)
 
 export default router;
