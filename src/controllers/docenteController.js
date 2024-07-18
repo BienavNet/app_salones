@@ -124,11 +124,18 @@ const deleteDocente = async (req, res) => {
     }
 }
 
+const countDocente = async (req, res) => {
+    const connection = await database.getConnection()
+    const [result] = await connection.query("SELECT COUNT(*) FROM docente")
+    res.json(result[0]("COUNT(*)"))
+}
+
 export const methods = {
     getDocentes,
     getDocenteIdByCedula,
     getDocenteByCedula,
     saveDocente,
     updateDocente,
-    deleteDocente
+    deleteDocente,
+    countDocente
 }
