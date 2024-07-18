@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS app;
 USE app;
 
 CREATE TABLE IF NOT EXISTS persona (
-	id int auto_increment primary key,
+	id int primary key,
     nombre varchar(30) not null,
     apellido varchar(30) not null,
     cedula int(10) unsigned not null,

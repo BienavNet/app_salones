@@ -10,5 +10,6 @@ export default {
 }
 
 export const {
-    PORT = 5000
+    PORT = 5000,
+    SALTROUNDS = 10
 } = process.env
