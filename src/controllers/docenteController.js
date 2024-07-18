@@ -16,6 +16,8 @@ const getDocentes = async (req, res) => {
   }
 };
 
+ /// # Hay que arreglar este methodo 
+
 const getDocenteIdByCedula = async (req, res) => {
   try {
     if (!req.params || !req.params.cedula) {
@@ -37,6 +39,7 @@ const getDocenteIdByCedula = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
 const getDocenteByCedula = async (req, res) => {
     try {
         if (req.params !== undefined) {
@@ -45,9 +48,9 @@ const getDocenteByCedula = async (req, res) => {
             //const result = await connection.query("SELECT p.*, d.* FROM persona as p, docente as d WHERE p.cedula = " +cedula+ " and d.persona = p.id")
             const result = await connection.query("SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona WHERE persona.cedula = " + cedula + ";")
             res.status(200).json(result)
-        } else {
-            res.send(400, "Bad Request")
-        }
+            return
+        } 
+        res.status(400).json({"status": "error", "message": "Bad request."})
     } catch (error) {
         res.status(500).send('Internal Server Error: ' + error.message)
     }
