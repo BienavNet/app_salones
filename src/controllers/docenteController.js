@@ -16,6 +16,9 @@ const getDocentes = async (req, res) => {
   }
 };
 
+ /// # Hay que arreglar este methodo 
+
+
 const getDocenteIdByCedula = async (req, res) => {
   try {
     if (!req.params || !req.params.cedula) {
@@ -37,6 +40,7 @@ const getDocenteIdByCedula = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
 const getDocenteByCedula = async (req, res) => {
     try {
         if (req.params !== undefined) {
@@ -45,9 +49,9 @@ const getDocenteByCedula = async (req, res) => {
             //const result = await connection.query("SELECT p.*, d.* FROM persona as p, docente as d WHERE p.cedula = " +cedula+ " and d.persona = p.id")
             const result = await connection.query("SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona WHERE persona.cedula = " + cedula + ";")
             res.status(200).json(result)
-        } else {
-            res.send(400, "Bad Request")
-        }
+            return
+        } 
+        res.status(400).json({"status": "error", "message": "Bad request."})
     } catch (error) {
         res.status(500).send('Internal Server Error: ' + error.message)
     }
@@ -110,6 +114,16 @@ const saveDocente = async (req, res) => {
     //     });
     // }
 
+    // validamos que no se repita la cedula
+    // const existCedula = await getDocenteByCedula(cedula);
+    // if (existCedula.length > 0) {
+    //   return res
+    //     .status(409)
+    //     .json({
+    //       status: "error",
+    //       message: "El docente con esta cédula ya existe.",
+    //     });
+    // }
     // validamos que no se repita el correo
     // const existCorreo = await getDocenteByCorreo(correo);
     // if (existCorreo.length > 0) {
@@ -214,7 +228,6 @@ const deleteDocente = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-
       const connection = await database.getConnection();
       const result = await connection.query(
         "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
@@ -223,7 +236,14 @@ const deleteDocente = async (req, res) => {
       );
 
       const { affectedRows } = result;
+      const connection = await database.getConnection();
+      const result = await connection.query(
+        "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
+          cedula +
+          ""
+      );
 
+      const { affectedRows } = result;
       if (affectedRows > 0) {
         res.status(200).json({
           status: "ok",
