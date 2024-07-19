@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS app;
 USE app;
 
 CREATE TABLE IF NOT EXISTS persona (
-	id int primary key,
+	id int auto_increment primary key,
     nombre varchar(30) not null,
     apellido varchar(30) not null,
     cedula int(10) unsigned unique not null,
@@ -18,13 +18,13 @@ CREATE TABLE IF NOT EXISTS director (
 
 CREATE TABLE IF NOT EXISTS supervisor (
 	id int auto_increment primary key,
-    persona int ,
+    persona int,
     foreign key (persona) references persona(id)
 );
 
 CREATE TABLE IF NOT EXISTS docente (
 	id int auto_increment primary key,
-    persona int , 
+    persona int, 
     foreign key (persona) references persona(id)
 );
 
