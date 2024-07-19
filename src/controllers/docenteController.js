@@ -113,6 +113,16 @@ const saveDocente = async (req, res) => {
         .status(400)
         .json({ status: "Bad Request", message: validationError.message });
     }
+    // validamos que no se repita la cedula
+    // const existCedula = await getDocenteByCedula(cedula);
+    // if (existCedula.length > 0) {
+    //   return res
+    //     .status(409)
+    //     .json({
+    //       status: "error",
+    //       message: "El docente con esta cédula ya existe.",
+    //     });
+    // }
 
     // validamos que no se repita la cedula
     const existCedula = await getCedulaDocente(cedula);
@@ -221,12 +231,21 @@ const deleteDocente = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      const connection = await database.getConnection();
+     const connection = await database.getConnection();
       const result = await connection.query(
         "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
           cedula +
           ""
       );
+
+      // const { affectedRows } = result;
+      // const connection = await database.getConnection();
+      // const result = await connection.query(
+      //   "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
+      //     cedula +
+      //     ""
+      // );
+
 
     // if (req.params !== undefined) {
     //   const { cedula } = req.params;
@@ -260,12 +279,29 @@ const deleteDocente = async (req, res) => {
     //   }
     //   return;
     // }
+
+      const { affectedRows } = result;
+      if (affectedRows > 0) {
+        res.status(200).json({
+          status: "ok",
+          message: "Datos eliminados de la base de datos.",
+        });
+      } else {
+        res.status(400).json({
+          status: "bad request",
+          message: "No se encontro la cedula en los registros.",
+        });
+      }
+      return;
+    }
+
     res.status(400).send("Bad Request.");
   }
-} catch (error) {
-  res.status(500).send("Internal Server Error: " + error.message);
-}
-}
+  catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+} 
+
 
 const countDocente = async (req, res) => {
   const connection = await database.getConnection();
