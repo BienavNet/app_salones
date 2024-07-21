@@ -1,8 +1,8 @@
 import { methods as database } from "./../database/database.js";
 import { Validaciones } from "../assets/validation.js";
-import crypto from "crypto";
 import bcrypt from "bcrypt";
 import { SALTROUNDS } from "../config.js";
+import jwt from "jsonwebtoken";
 
 const getDocentes = async (req, res) => {
   try {
@@ -27,7 +27,7 @@ const getDocenteIdByCedula = async (req, res) => {
     try {
       const result = await connection.query(
         "SELECT docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
-          cedula +
+          "cedula" +
           ""
       );
     } catch (error) {
@@ -46,11 +46,10 @@ const getDocenteByCedula = async (req, res) => {
       //const result = await connection.query("SELECT p.*, d.* FROM persona as p, docente as d WHERE p.cedula = " +cedula+ " and d.persona = p.id")
       const result = await connection.query(
         "SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona WHERE persona.cedula = " +
-          cedula +
+          "cedula" +
           ";"
       );
-      res.status(200).json(result);
-      return;
+      return res.status(200).json(result);
     }
     res.status(400).json({ status: "error", message: "Bad request." });
   } catch (error) {
@@ -58,15 +57,40 @@ const getDocenteByCedula = async (req, res) => {
   }
 };
 
+const getPersonaByCorreo = async (correo, cedula) => {
+  const connection = await database.getConnection();
+  const query = `
+    SELECT * 
+    FROM persona 
+    WHERE correo = ? OR cedula = ? 
+    LIMIT 1;
+  `;
+  try {
+    const result = await connection.query(query, [correo, cedula]);
+    if (result.length === 0) {
+      return null; // No se encontró la persona
+    }
+    return result;
+  } catch (error) {
+    console.error("Error en la consulta de persona:", error);
+    throw new Error({
+      status: 500,
+      message: "Internal Server Error:" + error.message,
+    });
+  }
+};
+
 // ✅
 const getCedulaDocente = async (cedula) => {
+  const connection = await database.getConnection();
+  const query = `
+  SELECT persona.*, docente.id as docente_id 
+  FROM persona
+  INNER JOIN docente ON persona.id = docente.persona
+  WHERE persona.cedula = ?`;
   try {
-    const connection = await database.getConnection();
-    return await connection.query(
-      "SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona WHERE persona.cedula = " +
-        cedula +
-        " LIMIT 1;"
-    );
+    const result = await connection.query(query, [cedula]);
+    return result.length === 0 ? null : result
   } catch (error) {
     throw new Error({
       status: 500,
@@ -78,12 +102,14 @@ const getCedulaDocente = async (cedula) => {
 // ✅
 const getDocenteByCorreo = async (correo) => {
   const connection = await database.getConnection();
+  const query = `
+  SELECT persona.*, docente.id as docente_id 
+  FROM persona 
+  INNER JOIN docente ON persona.id = docente.persona 
+  WHERE persona.correo = ?`;
   try {
-    return await connection.query(
-      "SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona WHERE persona.correo = " +
-        "correo" +
-        " LIMIT 1"
-    );
+    const result =  await connection.query(query, [correo])
+    return result.length === 0 ? null : result
   } catch (error) {
     throw new Error({
       status: 500,
@@ -94,13 +120,13 @@ const getDocenteByCorreo = async (correo) => {
 
 // ✅
 const saveDocente = async (req, res) => {
+  
+  if (!req.body) res.status(400).send("Bad Request.");
   try {
     res.setHeader("Content-Type", "application/json");
 
-    if (!req.body) res.status(400).send("Bad Request.");
-
     const { nombre, apellido, cedula, correo, contrasena } = req.body;
-
+    
     try {
       // validaciones simples
       Validaciones.nombre(nombre);
@@ -111,42 +137,28 @@ const saveDocente = async (req, res) => {
     } catch (validationError) {
       return res
         .status(400)
-        .json({ status: "Bad Request", message: validationError.message });
+        .json({ status: "Bad Request.", message: validationError.message });
     }
-    // validamos que no se repita la cedula
-    // const existCedula = await getDocenteByCedula(cedula);
-    // if (existCedula.length > 0) {
-    //   return res
-    //     .status(409)
-    //     .json({
-    //       status: "error",
-    //       message: "El docente con esta cédula ya existe.",
-    //     });
-    // }
-
-    // validamos que no se repita la cedula
-    const existCedula = await getCedulaDocente(cedula);
-    console.log(existCedula, "existCedula ??? ");
-    if (existCedula.length > 0) {
-      return res.status(409).json({
-        message: "El docente con esta cédula ya existe.",
-        status: "ok",
-      });
-    }
-    
-    // validamos que no se repita el correo
-    const existCorreo = await getDocenteByCorreo(correo);
-    console.log("existCorreo:", existCorreo);
-    if (existCorreo.length > 0) {
-      return res
-        .status(409)
-        .json({ message: "El correo ya está registrado.", status: "ok" });
+    const persona = await getPersonaByCorreo(correo, cedula);
+    if (persona) {
+      const isDocentecorreo = await getDocenteByCorreo(correo);
+      const isDocentecedual = await getCedulaDocente(cedula);
+      if (isDocentecorreo || isDocentecedual) {
+        return res.status(409).json({
+          message: "El docente con esta cédula o correo ya existe.",
+          status: "ok",
+        });
+      } else {
+        return res.status(409).json({
+          message: "El correo o cédula ya está registrado pero NO es un DOCENTE.",
+          status: "ok",
+        });
+      }
     }
 
     //antes de crear el user haseamos la password
     const hashedPassword = await bcrypt.hash(contrasena, SALTROUNDS);
     const connection = await database.getConnection();
-
     try {
       await connection.beginTransaction();
       const formatData = {
@@ -189,6 +201,63 @@ const saveDocente = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+
+const loginDocente = async (req, res) => {
+  if (!req.body) res.status(400).send("Bad Request.");
+    const {cedula, correo, contrasena } = req.body;
+  try {
+    console.log("data :", cedula, correo, contrasena);
+    try {
+      Validaciones.cedula(cedula);
+      Validaciones.correo(correo);
+      Validaciones.contrasena(contrasena);
+    } catch (validationError) {
+      return res
+        .status(400)
+        .json({ status: "Bad Request", message: validationError.message });
+    }
+    // validamos que la cedula ya exista
+    const existCedula = await getCedulaDocente(cedula);
+    // const aggCedula = existCedula[0].cedula;
+    console.log("existecedual",existCedula)
+    if (!existCedula){
+      return res.status(404).json({ message: 'Cedula no encontrada.' });
+    }
+    
+
+    // validamos que el correo ya exista
+    const existCorreo = await getDocenteByCorreo(correo);
+    // const aggCorreo = existCorreo[0].correo;
+    console.log("existCorreo",existCorreo)
+    if (!existCorreo)  {
+      return res.status(404).json({ message: 'Correo no encontrado.' });
+    }
+
+    //validar la password 
+    const isValid = await bcrypt.compare(contrasena, existCorreo.contrasena);
+    console.log("isValid",isValid)
+    if (!isValid) throw new Error('Invalid password')
+    
+    // Generamos el token JWT
+    const token = jwt.sign({ id: existCorreo.id, correo: existCorreo.correo }, JWT_SECRET, {
+      expiresIn: '1h'
+    });
+    const { contrasena: _, ...loginDocente } = existCorreo
+    return res.status(200).json({
+      status: 'ok',
+      message: 'Login exitoso',
+      token,
+      docente: loginDocente
+    });
+
+  } catch (error) {
+    res.status(401).send({
+      message:"Unauthorized: Incorrect username or password"
+    })
+  }
+};
+
 
 const updateDocente = async (req, res) => {
   try {
@@ -317,4 +386,5 @@ export const methods = {
   updateDocente,
   deleteDocente,
   countDocente,
+  loginDocente,
 };
