@@ -220,7 +220,7 @@ const loginDocente = async (req, res) => {
     console.log("data :", cedula, correo, contrasena);
     const persona = await getPersonaByCorreo(correo, cedula);
     console.log("persona ------->:", persona);
-    if (!persona) {
+    if (!persona || persona.length === 0) {
       return res
         .status(404)
         .json({ message: "Correo o cedula no registrados." });
@@ -251,7 +251,7 @@ const loginDocente = async (req, res) => {
     // Generamos el token JWT
     const token = jwt.sign(
       { 
-        id: persona.id, 
+        id: persona[0].id, 
         correo:persona[0].correo, 
         role: 'docente' 
       },
@@ -269,7 +269,8 @@ const loginDocente = async (req, res) => {
         nombre: persona[0].nombre,
         apellido: persona[0].apellido,
         correo: persona[0].correo,
-        cedula: persona[0].cedula
+        cedula: persona[0].cedula,
+        role: 'docente'
       }
     });
   } catch (error) {
