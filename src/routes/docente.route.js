@@ -12,6 +12,8 @@ router.get('/cedula/:cedula', docenteMethods.getDocenteByCedula)
 
 router.post("/save", docenteMethods.saveDocente)
 
+router.post("/login", docenteMethods.loginDocente)
+
 router.post("/update/:cedula", docenteMethods.updateDocente)
 
 router.delete('/delete/:cedula', docenteMethods.deleteDocente)
