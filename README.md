@@ -13,4 +13,5 @@ instalamo la libreria de bcrypt
 //añadimos json web token JWT
 > npm install jsonwebtoken [link:] ()
 
-//añadimos 
+//añadimos las cookies
+ > npm install cookie-parser // otro tipo de middleware

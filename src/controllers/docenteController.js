@@ -1,6 +1,6 @@
 import { methods as database } from "./../database/database.js";
 import { Validaciones } from "../assets/validation.js";
-import bcrypt, { compareSync } from "bcrypt";
+import bcrypt from "bcrypt";
 import { SALTROUNDS } from "../config.js";
 import jwt from "jsonwebtoken";
 
@@ -250,20 +250,43 @@ const loginDocente = async (req, res) => {
       {
         expiresIn: '1h',
       }
-    );
-    return res.status(200).json({
-      status: "ok",
-      message: "Login exitoso",
-      token,
-      docente: {
-        id: persona[0].id,
-        nombre: persona[0].nombre,
-        apellido: persona[0].apellido,
-        correo: persona[0].correo,
-        cedula: persona[0].cedula,
-        role: 'docente'
-      }
+    )    
+    res.cookie('access_token', token,{
+      httpOnly:true, // la cookie solo se puede acceder en el servidor
+      secure: process.env.NODE_ENV === 'production', // solo en el entorno de producción, la cookie solo se puede acceder desde https
+      sameSite: 'strict', // la cookie solo se puede acceder en el mismo dominio
+      maxAge: 1000 * 60 * 60 // la cookie tiene tiempo de valides de solo 1 hora
+  
     });
+    console.log("token ----> ", token);
+    const refreshToken = jwt.sign(
+      {
+        id: persona[0].id,
+        correo: persona[0].correo,
+        role: 'docente'
+      },
+      process.env.JWT_REFRESH_SECRET_KEY,
+      { expiresIn: '7d' }
+    )
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60 * 24 * 7 // 7 días
+    })
+    .send({ token, refreshToken, persona})
+    console.log("refresh_token ----> ", refreshToken);
+    // return res.status(200).json({
+    //   token,
+    //   docente: {
+    //     id: persona[0].id,
+    //     nombre: persona[0].nombre,
+    //     apellido: persona[0].apellido,
+    //     correo: persona[0].correo,
+    //     cedula: persona[0].cedula,
+    //     role: 'docente'
+    //   }
+    // });
   } catch (error) {
     res.status(401).send({
       message: "Unauthorized: Incorrect username or password",
@@ -271,6 +294,31 @@ const loginDocente = async (req, res) => {
   }
 };
 
+const protectedHome = (req, res) => {
+ const token = req.cookies.access_token
+ if(!token){
+  return res.status(403).send({
+    message: "Access not allowed",
+  })
+ }
+try {
+  const data = jwt.verify(token, process.env.JWT_SECRET_KEY);
+  console.log(data, "data verified token JWT")
+} catch (error) {
+  res.status(401).send({
+    message: "Access not autorized",
+  })
+}
+
+}
+
+const logoutS = (req, res) => {
+  res.clearCookie('access_token')
+  .json({
+    message: "Logged out successfully",
+    status: "ok",
+  })
+ }
 const updateDocente = async (req, res) => {
   try {
     res.setHeader("Content-Type", "application/json");
@@ -395,4 +443,5 @@ export const methods = {
   deleteDocente,
   countDocente,
   loginDocente,
+  protectedHome
 };
