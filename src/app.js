@@ -1,6 +1,8 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors"
+import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
 
 // Import Routes
 import docenteRoute from "./routes/docente.route.js"
@@ -23,6 +25,18 @@ app.set("port", PORT)
 app.use(cors())
 app.use(morgan("dev"))
 app.use(express.json())
+app.use(cookieParser())
+
+app.use((req, res, next)=>{
+    const token = req.cookies.access_token
+    req.session = { user : null}
+    try {
+        const data = jwt.verify(token, process.env.JWT_SECRET_KEY)
+        req.session.user = data
+    } catch{}
+
+    next() // -> sigue la siguiente ruta o middleware
+})
 
 // Routes
 app.use("/api/docentes/", docenteRoute)
