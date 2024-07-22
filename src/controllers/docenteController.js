@@ -1,6 +1,6 @@
 import { methods as database } from "./../database/database.js";
 import { Validaciones } from "../assets/validation.js";
-import bcrypt from "bcrypt";
+import bcrypt, { compareSync } from "bcrypt";
 import { SALTROUNDS } from "../config.js";
 import jwt from "jsonwebtoken";
 
@@ -90,7 +90,7 @@ const getCedulaDocente = async (cedula) => {
   WHERE persona.cedula = ?`;
   try {
     const result = await connection.query(query, [cedula]);
-    return result.length === 0 ? null : result
+    return result.length === 0 ? null : result;
   } catch (error) {
     throw new Error({
       status: 500,
@@ -108,8 +108,8 @@ const getDocenteByCorreo = async (correo) => {
   INNER JOIN docente ON persona.id = docente.persona 
   WHERE persona.correo = ?`;
   try {
-    const result =  await connection.query(query, [correo])
-    return result.length === 0 ? null : result
+    const result = await connection.query(query, [correo]);
+    return result.length === 0 ? null : result;
   } catch (error) {
     throw new Error({
       status: 500,
@@ -120,13 +120,12 @@ const getDocenteByCorreo = async (correo) => {
 
 // ✅
 const saveDocente = async (req, res) => {
-  
   if (!req.body) res.status(400).send("Bad Request.");
   try {
     res.setHeader("Content-Type", "application/json");
 
     const { nombre, apellido, cedula, correo, contrasena } = req.body;
-    
+
     try {
       // validaciones simples
       Validaciones.nombre(nombre);
@@ -150,7 +149,8 @@ const saveDocente = async (req, res) => {
         });
       } else {
         return res.status(409).json({
-          message: "El correo o cédula ya está registrado pero NO es un DOCENTE.",
+          message:
+            "El correo o cédula ya está registrado pero NO es un DOCENTE.",
           status: "ok",
         });
       }
@@ -202,62 +202,83 @@ const saveDocente = async (req, res) => {
   }
 };
 
-
 const loginDocente = async (req, res) => {
   if (!req.body) res.status(400).send("Bad Request.");
-    const {cedula, correo, contrasena } = req.body;
+  const { cedula, correo, contrasena } = req.body;
+
+  try {
+    Validaciones.cedula(cedula);
+    Validaciones.correo(correo);
+    Validaciones.contrasena(contrasena);
+  } catch (validationError) {
+    return res
+      .status(400)
+      .json({ status: "Bad Request", message: validationError.message });
+  }
+
   try {
     console.log("data :", cedula, correo, contrasena);
-    try {
-      Validaciones.cedula(cedula);
-      Validaciones.correo(correo);
-      Validaciones.contrasena(contrasena);
-    } catch (validationError) {
+    const persona = await getPersonaByCorreo(correo, cedula);
+    console.log("persona ------->:", persona);
+    if (!persona || persona.length === 0) {
       return res
-        .status(400)
-        .json({ status: "Bad Request", message: validationError.message });
+        .status(404)
+        .json({ message: "Correo o cedula no registrados." });
     }
-    // validamos que la cedula ya exista
-    const existCedula = await getCedulaDocente(cedula);
-    // const aggCedula = existCedula[0].cedula;
-    console.log("existecedual",existCedula)
-    if (!existCedula){
-      return res.status(404).json({ message: 'Cedula no encontrada.' });
-    }
-    
+    console.log("persona 1 :", persona);
+    console.log("persona y contrasena:", persona[0].contrasena);
+    //validar la password
+    console.log("conparacion entre ambas",contrasena, persona[0].contrasena )
+    console.log("conparacion entre ambas typeof",typeof contrasena, typeof persona[0].contrasena )
+    const isValid = await bcrypt.compare(contrasena, persona[0].contrasena);
+    console.log("isValid", isValid);
+    if (!isValid) throw new Error({ message: "Contraseña incorrecta" });
 
-    // validamos que el correo ya exista
-    const existCorreo = await getDocenteByCorreo(correo);
-    // const aggCorreo = existCorreo[0].correo;
-    console.log("existCorreo",existCorreo)
-    if (!existCorreo)  {
-      return res.status(404).json({ message: 'Correo no encontrado.' });
-    }
+    const isDocentecorreo = await getDocenteByCorreo(correo);
+    const isDocentecedula = await getCedulaDocente(cedula);
+    console.log("docente correo --->", isDocentecorreo);
+    console.log("docente cedula --->", isDocentecedula);
 
-    //validar la password 
-    const isValid = await bcrypt.compare(contrasena, existCorreo.contrasena);
-    console.log("isValid",isValid)
-    if (!isValid) throw new Error('Invalid password')
-    
+    // Verificar si el usuario es un docente
+    if (!isDocentecorreo || !isDocentecedula) {
+      return res
+        .status(403)
+        .json({
+          message: "El correo o cédula no está registrado o NO es un DOCENTE.",
+          status: "ok",
+        });
+    }
     // Generamos el token JWT
-    const token = jwt.sign({ id: existCorreo.id, correo: existCorreo.correo }, JWT_SECRET, {
-      expiresIn: '1h'
-    });
-    const { contrasena: _, ...loginDocente } = existCorreo
+    const token = jwt.sign(
+      { 
+        id: persona[0].id, 
+        correo:persona[0].correo, 
+        role: 'docente' 
+      },
+      process.env.JWT_SECRET_KEY,
+      {
+        expiresIn: '1h',
+      }
+    );
     return res.status(200).json({
-      status: 'ok',
-      message: 'Login exitoso',
+      status: "ok",
+      message: "Login exitoso",
       token,
-      docente: loginDocente
+      docente: {
+        id: persona[0].id,
+        nombre: persona[0].nombre,
+        apellido: persona[0].apellido,
+        correo: persona[0].correo,
+        cedula: persona[0].cedula,
+        role: 'docente'
+      }
     });
-
   } catch (error) {
     res.status(401).send({
-      message:"Unauthorized: Incorrect username or password"
-    })
+      message: "Unauthorized: Incorrect username or password",
+    });
   }
 };
-
 
 const updateDocente = async (req, res) => {
   try {
@@ -300,7 +321,7 @@ const deleteDocente = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-     const connection = await database.getConnection();
+      const connection = await database.getConnection();
       const result = await connection.query(
         "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
           cedula +
@@ -315,39 +336,37 @@ const deleteDocente = async (req, res) => {
       //     ""
       // );
 
+      // if (req.params !== undefined) {
+      //   const { cedula } = req.params;
+      //  const connection = await database.getConnection();
+      //   const result = await connection.query(
+      //     "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
+      //       cedula +
+      //       ""
+      //   );
 
-    // if (req.params !== undefined) {
-    //   const { cedula } = req.params;
-    //  const connection = await database.getConnection();
-    //   const result = await connection.query(
-    //     "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
-    //       cedula +
-    //       ""
-    //   );
+      //   const { affectedRows } = result;
+      //   const connection = await database.getConnection();
+      //   const result = await connection.query(
+      //     "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
+      //       cedula +
+      //       ""
+      //   );
 
-
-    //   const { affectedRows } = result;
-    //   const connection = await database.getConnection();
-    //   const result = await connection.query(
-    //     "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
-    //       cedula +
-    //       ""
-    //   );
-
-    //   const { affectedRows } = result;
-    //   if (affectedRows > 0) {
-    //     res.status(200).json({
-    //       status: "ok",
-    //       message: "Datos eliminados de la base de datos.",
-    //     });
-    //   } else {
-    //     res.status(400).json({
-    //       status: "bad request",
-    //       message: "No se encontro la cedula en los registros.",
-    //     });
-    //   }
-    //   return;
-    // }
+      //   const { affectedRows } = result;
+      //   if (affectedRows > 0) {
+      //     res.status(200).json({
+      //       status: "ok",
+      //       message: "Datos eliminados de la base de datos.",
+      //     });
+      //   } else {
+      //     res.status(400).json({
+      //       status: "bad request",
+      //       message: "No se encontro la cedula en los registros.",
+      //     });
+      //   }
+      //   return;
+      // }
 
       const { affectedRows } = result;
       if (affectedRows > 0) {
@@ -365,12 +384,10 @@ const deleteDocente = async (req, res) => {
     }
 
     res.status(400).send("Bad Request.");
-  }
-  catch (error) {
+  } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
-} 
-
+};
 
 const countDocente = async (req, res) => {
   const connection = await database.getConnection();
