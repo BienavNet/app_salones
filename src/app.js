@@ -1,5 +1,6 @@
 import express from "express";
 import morgan from "morgan";
+import cors from "cors"
 
 // Import Routes
 import docenteRoute from "./routes/docente.route.js"
@@ -11,13 +12,15 @@ import comentarioRoute from "./routes/comentario.route.js"
 import detalle_horarioRoute from "./routes/detalle_horario.route.js"
 import reporteRoute from "./routes/reporte.route.js"
 import salonRoute from "./routes/salon.route.js"
+import { PORT } from "./config.js";
 
 const app = express();
 
 // Settings app
-app.set("port", 5000)
+app.set("port", PORT)
 
 // Middlewares
+app.use(cors())
 app.use(morgan("dev"))
 app.use(express.json())
 

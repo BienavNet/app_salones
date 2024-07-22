@@ -13,7 +13,7 @@ router.get("/", horarioMethods.getHorarios)
 
 router.post("/update/:id", horarioMethods.updateHorario)
 
-router.get("/detele/:id", horarioMethods.deleteHorario)
+router.delete("/detele/:id", horarioMethods.deleteHorario)
 
 router.post("/save", horarioMethods.saveHorario)
 
