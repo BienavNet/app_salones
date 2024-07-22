@@ -14,6 +14,8 @@ router.post("/save", docenteMethods.saveDocente)
 
 router.post("/login", docenteMethods.loginDocente)
 
+router.get("/protected", docenteMethods.protectedHome)
+
 router.post("/update/:cedula", docenteMethods.updateDocente)
 
 router.delete('/delete/:cedula', docenteMethods.deleteDocente)
