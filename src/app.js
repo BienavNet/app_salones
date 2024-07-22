@@ -29,6 +29,11 @@ app.use(cookieParser())
 
 app.use((req, res, next)=>{
     const token = req.cookies.access_token
+    req.session = { persona : null}
+    try {
+        const data = jwt.verify(token, process.env.JWT_SECRET_KEY)
+        req.session.persona = data
+    } catch{}
     req.session = { user : null}
     try {
         const data = jwt.verify(token, process.env.JWT_SECRET_KEY)
