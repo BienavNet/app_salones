@@ -197,11 +197,12 @@ const saveDocente = async (req, res) => {
       throw error;
     }
   } catch (error) {
-    console.log("error catch, aqui entra el error", error.message);
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
 
+
+// ✅
 const loginDocente = async (req, res) => {
   if (!req.body) res.status(400).send("Bad Request.");
   const { cedula, correo, contrasena } = req.body;
@@ -215,29 +216,19 @@ const loginDocente = async (req, res) => {
       .status(400)
       .json({ status: "Bad Request", message: validationError.message });
   }
-
   try {
-    console.log("data :", cedula, correo, contrasena);
     const persona = await getPersonaByCorreo(correo, cedula);
-    console.log("persona ------->:", persona);
     if (!persona || persona.length === 0) {
       return res
         .status(404)
         .json({ message: "Correo o cedula no registrados." });
     }
-    console.log("persona 1 :", persona);
-    console.log("persona y contrasena:", persona[0].contrasena);
     //validar la password
-    console.log("conparacion entre ambas",contrasena, persona[0].contrasena )
-    console.log("conparacion entre ambas typeof",typeof contrasena, typeof persona[0].contrasena )
     const isValid = await bcrypt.compare(contrasena, persona[0].contrasena);
-    console.log("isValid", isValid);
     if (!isValid) throw new Error({ message: "Contraseña incorrecta" });
 
     const isDocentecorreo = await getDocenteByCorreo(correo);
     const isDocentecedula = await getCedulaDocente(cedula);
-    console.log("docente correo --->", isDocentecorreo);
-    console.log("docente cedula --->", isDocentecedula);
 
     // Verificar si el usuario es un docente
     if (!isDocentecorreo || !isDocentecedula) {
