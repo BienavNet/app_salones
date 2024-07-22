@@ -34,7 +34,6 @@ app.use((req, res, next)=>{
         const data = jwt.verify(token, process.env.JWT_SECRET_KEY)
         req.session.persona = data
     } catch{}
-
     next() // -> sigue la siguiente ruta o middleware
 })
 
