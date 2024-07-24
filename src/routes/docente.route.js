@@ -6,12 +6,7 @@ import { methods } from "../database/database.js";
 
 const router = Router();
 
-const isAuthorized = () =>{
-}
-
-
-try {
-    
+const isAuthorized = (roles) =>{
     router.use((req, res, next) => {
         const token = req.get("Authorization")
         var access_token = undefined
@@ -27,7 +22,8 @@ try {
             if (typeof token_decoded !== "undefined" && access_token !== "token expired"){
                 const { user, rol } = token_decoded
                 if (typeof user !== "undefined" && typeof rol !== "undefined"){
-                    if (rol == "docente"){
+                    const getRole = roles.find((item)=> item == rol)
+                    if (typeof getRole !== "undefined"){
                         next()
                         return
                     }
@@ -39,12 +35,21 @@ try {
         } 
         res.status(403).send("You are not allowed to do this.")
     })
+}
+
+
+try {
+    
+    isAuthorized(["docente", "administrador"])
+
+    router.get('/cedula/:cedula', docenteMethods.getDocenteByCedula)
+    
+    isAuthorized(["administrador"])
 
     router.get("/", docenteMethods.getDocentes)
     
     router.get("/:cedula", docenteMethods.getDocenteIdByCedula)
     
-    router.get('/cedula/:cedula', docenteMethods.getDocenteByCedula)
     
     router.post("/save", docenteMethods.saveDocente)
     
