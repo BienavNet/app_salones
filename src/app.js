@@ -12,6 +12,8 @@ import comentarioRoute from "./routes/comentario.route.js"
 import detalle_horarioRoute from "./routes/detalle_horario.route.js"
 import reporteRoute from "./routes/reporte.route.js"
 import salonRoute from "./routes/salon.route.js"
+
+//Crypto port file gen 
 import { PORT } from "./config.js";
 
 const app = express();
