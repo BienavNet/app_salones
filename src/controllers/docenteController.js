@@ -11,6 +11,7 @@ const getDocentes = async (req, res) => {
       "SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona"
     );
     res.status(200).json(result);
+    console.log("result", result);
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -205,10 +206,10 @@ const saveDocente = async (req, res) => {
 // ✅
 const loginDocente = async (req, res) => {
   if (!req.body) res.status(400).send("Bad Request.");
-  const { cedula, correo, contrasena } = req.body;
+  const {correo, contrasena } = req.body;
 
   try {
-    Validaciones.cedula(cedula);
+    // Validaciones.cedula(cedula);
     Validaciones.correo(correo);
     Validaciones.contrasena(contrasena);
   } catch (validationError) {
@@ -228,14 +229,14 @@ const loginDocente = async (req, res) => {
     if (!isValid) throw new Error({ message: "Contraseña incorrecta" });
 
     const isDocentecorreo = await getDocenteByCorreo(correo);
-    const isDocentecedula = await getCedulaDocente(cedula);
+    // const isDocentecedula = await getCedulaDocente(cedula);
 
     // Verificar si el usuario es un docente
-    if (!isDocentecorreo || !isDocentecedula) {
+    if (!isDocentecorreo) {
       return res
         .status(403)
         .json({
-          message: "El correo o cédula no está registrado o NO es un DOCENTE.",
+          message: "El correo no está registrado o NO es un DOCENTE.",
           status: "ok",
         });
     }
