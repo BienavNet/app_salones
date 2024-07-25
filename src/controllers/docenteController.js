@@ -2,7 +2,6 @@ import { methods as database } from "./../database/database.js";
 import { Validaciones } from "../assets/validation.js";
 import bcrypt from "bcrypt";
 import { SALTROUNDS } from "../config.js";
-// import jwt from "jsonwebtoken";
 
 const getDocentes = async (req, res, next) => {
   try {
@@ -11,7 +10,6 @@ const getDocentes = async (req, res, next) => {
       "SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona"
     );
     res.status(200).json(result);
-
     console.log("result", result);
     next()
   } catch (error) {
@@ -296,6 +294,7 @@ const loginDocente = async (req, res) => {
     });
   }
 };
+
 
 const protectedHome = (req, res) => {
  const token = req.cookies.access_token
