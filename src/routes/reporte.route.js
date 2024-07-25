@@ -1,14 +1,18 @@
 import { Router } from "express";
 import { methods as reporteMethods} from "./../controllers/reporteController.js"
+import { tokensMethods } from "../functions.js";
 
 const router = Router();
 
-router.get("/", reporteMethods.getReportes)
+tokensMethods.isAuthorized(router, ["supervisor", "administrador"])
 router.get("/supervisor/:id", reporteMethods.getReporteBySupervisor)
-router.get("/clase/:clase", reporteMethods.getReporteByClase)
-router.get("/salon/:salon", reporteMethods.getReporteBySalon)
 router.post("/register", reporteMethods.registrarReporte)
 router.post("/update/:id", reporteMethods.updateReporte)
+
+tokensMethods.isAuthorized(router, ["administrador"])
+router.get("/", reporteMethods.getReportes)
+router.get("/clase/:clase", reporteMethods.getReporteByClase)
+router.get("/salon/:salon", reporteMethods.getReporteBySalon)
 router.delete("/delete/:id", reporteMethods.deleteReporte)
 
 export default router

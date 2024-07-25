@@ -1,23 +1,26 @@
 import { Router } from "express";
-import { methods as docenteMethods} from "./../controllers/docenteController.js"
+import { methods as docenteMethods } from "./../controllers/docenteController.js"
+import { tokensMethods } from "../functions.js";
 
 
 const router = Router();
 
-router.get("/", docenteMethods.getDocentes)
 
-router.get("/:cedula", docenteMethods.getDocenteIdByCedula)
+try {
 
-router.get('/cedula/:cedula', docenteMethods.getDocenteByCedula)
+    tokensMethods.isAuthorized(router, ["docente", "administrador"])
+    router.get('/cedula/:cedula', docenteMethods.getDocenteByCedula)
 
-router.post("/save", docenteMethods.saveDocente)
+    tokensMethods.isAuthorized(router, ["administrador"])
+    router.get("/", docenteMethods.getDocentes)
+    router.get("/:cedula", docenteMethods.getDocenteIdByCedula)
+    router.post("/save", docenteMethods.saveDocente)
+    router.post("/update/:cedula", docenteMethods.updateDocente)
+    router.delete('/delete/:cedula', docenteMethods.deleteDocente)
 
-router.post("/login", docenteMethods.loginDocente)
+} catch (error) {
+    console.log(error.message)
+}
 
-router.get("/protected", docenteMethods.protectedHome)
-
-router.post("/update/:cedula", docenteMethods.updateDocente)
-
-router.delete('/delete/:cedula', docenteMethods.deleteDocente)
 
 export default router;
