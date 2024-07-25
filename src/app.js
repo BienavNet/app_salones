@@ -46,8 +46,8 @@ app.use((req, res, next)=>{
 })
 
 // Routes
-app.use("/api/docentes/", docenteRoute)
-app.use("/api/supervisores/", supervisorRoute)
+app.use("/api/docente", docenteRoute)
+app.use("/api/supervisor", supervisorRoute)
 app.use("/login", loginRoute)
 app.use("/api/horarios/", horarioRoute)
 app.use("/api/clase/", claseRoute)
