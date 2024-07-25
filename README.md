@@ -17,4 +17,3 @@ instalamo la libreria de bcrypt
  > npm install cookie-parser // otro tipo de middleware
 
 19/2
-![js](https://github.com/user-attachments/assets/0f2d9d45-ae27-4e82-9204-905372e83f48)
