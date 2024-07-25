@@ -15,5 +15,3 @@ instalamo la libreria de bcrypt
 
 //añadimos las cookies
  > npm install cookie-parser // otro tipo de middleware
->
->![vuejs](https://github.com/user-attachments/assets/ff7c574c-4085-437e-841f-8aaf7259da9d)
