@@ -4,7 +4,7 @@ import { tokensMethods } from "../functions.js";
 
 const router = Router();
 
-tokensMethods.isAuthorized(router, ["administrador"])
+tokensMethods.isAuthorized(router, ["director"])
 
 router.get("/:id", salonMethods.getSalonById)
 router.get("/", salonMethods.getSalones)

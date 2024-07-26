@@ -3,13 +3,18 @@ import { methods as database } from "./../database/database.js";
 import { tokensMethods as tokens } from "./../functions.js";
 
 const checkLogin = async (req, res) => {
-  if (!req.body || typeof req.body !== 'object' || Object.keys(req.body).length === 0)
-    res.status(400).json({
+  if (
+    !req.body ||
+    typeof req.body !== "object" ||
+    Object.keys(req.body).length === 0
+  )
+    return res.status(400).json({
       status: "Bad Request.",
       message: "El cuerpo de la peticion no puede estar vacia.",
     });
   try {
     const { correo, contrasena, rol } = req.body;
+    console.log("correo: " + correo, "contrasena: " + contrasena, "rol: ", rol);
     try {
       Validaciones.correo(correo);
       Validaciones.contrasena(contrasena);
@@ -20,9 +25,10 @@ const checkLogin = async (req, res) => {
         .json({ status: "Bad Request", message: validationError.message });
     }
     const connection = await database.getConnection();
-    const query = "SELECT id, nombre FROM persona WHERE correo = ? AND contrasena = ?";
-    var result = await connection.query(query,[correo, contrasena]);
-    if(result.length > 0){
+    const query =
+      "SELECT id, nombre FROM persona WHERE correo = ? AND contrasena = ?";
+    var result = await connection.query(query, [correo, contrasena]);
+    if (result.length > 0) {
       const { id, nombre } = result[0];
       if (id !== undefined && id !== "") {
         var result = await connection.query(
@@ -31,37 +37,33 @@ const checkLogin = async (req, res) => {
         if (result.length > 0) {
           const { id_rol } = result[0];
           if (id_rol !== undefined && id_rol !== "") {
-            const token = tokens.signToken({ 
-              nombre:nombre,
-              user: correo, 
-              rol: rol });
-            res.set({
-              Authorization: token,
+            const token = tokens.signToken({
+              nombre,
+              user: correo,
+              rol,
             });
+            res.set({ Authorization: token });
             res.cookie("access_token", token, {
               httpOnly: true, // la cookie solo se puede acceder en el servidor
-              // secure: process.env.NODE_ENV === 'production', // solo en el entorno de producción, la cookie solo se puede acceder desde https
               sameSite: "strict", // la cookie solo se puede acceder en el mismo dominio
               maxAge: 1000 * 60 * 60, // la cookie tiene tiempo de valides de solo 1 hora
             });
-            res
-              .status(200)
-              .json({ status: "ok", message: "Login Correcto.!", token: token });
-            return;
+            return res.status(200).json({
+              status: "ok",
+              message: "Login Correcto.!",
+              token: token,
+            });
           }
         }
-        res
+        return res
           .status(200)
           .json({ status: "error", message: "Error al determinar el rol." });
-        return;
       }
-      // res.status(200).json({ "status": "Bad Request", "message": "Credenciales incorrectas." })
-      // return
-    }else{
-      res.status(200).json({ "status": "Bad Request", "message": "Credenciales incorrectas." })
-      return
+    } else {
+      return res
+        .status(200)
+        .json({ status: "Bad Request", message: "Credenciales incorrectas." });
     }
-   
   } catch (error) {
     console.log("entro", error);
     res.status(500).send("Internal Server Error: " + error.message);

@@ -4,7 +4,9 @@ import config from "./config.js";
 //Registra un nuevo token
 const signToken = (payload) => {
     try {
-        const token = jwt.sign(payload, config.JWT_SECRET_KEY, {
+        const token = jwt.sign(
+            payload, 
+            config.JWT_SECRET_KEY, {
             expiresIn: '1h'
         })
         return token
@@ -30,6 +32,7 @@ const verifyToken = (token) => {
     }
 }
 
+// valida el token y verifica los roles permitidos para acceder a ciertas rutas
 const isAuthorized = (router, roles) =>{
     router.use((req, res, next) => {
         const token = req.get("Authorization")
@@ -37,7 +40,8 @@ const isAuthorized = (router, roles) =>{
     
         if (typeof token !== "undefined"){
             access_token = token
-        }else{
+        }
+        else{
             access_token = req.cookies.access_token
         }
     
@@ -61,8 +65,45 @@ const isAuthorized = (router, roles) =>{
     })
 }
 
+const checkSession = (req, res) => {
+    const token = req.cookies.access_token;
+    if (!token) {
+        return res.status(401).json({ status: "Unauthorized", message: "No token provided." });
+    }
+    try {
+        const decoded = verifyToken(token);
+        return res.status(200).json({ status: "ok", user: decoded });
+    } catch (error) {
+        return res.status(401).json({ status: "Unauthorized", message: "Invalid token." });
+    }
+};
+
+const isSession = (roles) => (req, res, next) => {
+    const token = req.get("Authorization")?.split(" ")[1] || req.cookies.access_token;
+    if (!token) {
+        return res.status(403).send("You are not allowed to do this.");
+    }
+
+    const token_decoded = verifyToken(token);
+    if (token_decoded === "token expired") {
+        return res.status(401).send("Your token has expired. Please just re-log in and try again.");
+    }
+
+    if (!token_decoded || !token_decoded.user || !token_decoded.rol) {
+        return res.status(403).send("You are not allowed to do this.");
+    }
+
+    if (!roles.includes(token_decoded.rol)) {
+        return res.status(403).send("You are not allowed to do this.");
+    }
+
+    next();
+};
+
 export const tokensMethods = {
     signToken,
     verifyToken,
-    isAuthorized
+    isAuthorized,
+    checkSession, 
+    isSession
 }

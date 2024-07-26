@@ -5,10 +5,10 @@ import { tokensMethods } from "../functions.js";
 
 const router = Router();
 
-tokensMethods.isAuthorized(router, ["administrador", "supervisor"])
+tokensMethods.isAuthorized(router, ["director", "supervisor"])
 router.get('/cedula/:cedula', supervisorMethods.getSupervisorByCedula)
 
-tokensMethods.isAuthorized(router, ["adminsitrador"])
+tokensMethods.isAuthorized(router, ["director"])
 router.get("/", supervisorMethods.getSupervisores)
 router.get("/:cedula", supervisorMethods.getSupervisorIdByCedula)
 router.post("/save", supervisorMethods.saveSupervisor)

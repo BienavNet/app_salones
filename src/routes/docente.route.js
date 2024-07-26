@@ -8,10 +8,10 @@ const router = Router();
 
 try {
 
-    tokensMethods.isAuthorized(router, ["docente", "administrador"])
+    tokensMethods.isAuthorized(router, ["docente", "director"])
     router.get('/cedula/:cedula', docenteMethods.getDocenteByCedula)
 
-    tokensMethods.isAuthorized(router, ["administrador"])
+    tokensMethods.isAuthorized(router, ["director"])
     router.get("/", docenteMethods.getDocentes)
     router.get("/:cedula", docenteMethods.getDocenteIdByCedula)
     router.post("/save", docenteMethods.saveDocente)
