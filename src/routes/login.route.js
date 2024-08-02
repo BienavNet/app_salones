@@ -5,7 +5,7 @@ import { tokensMethods } from "../functions.js";
 
 const router = Router();
 
-router.post("/", loginMethods.checkLogin);
-router.get("/sesion", tokensMethods.isSession(["director", "supervisor", "docente"]), tokensMethods.checkSession);
+router.post("/", loginMethods.checkLogin); // ✅
+router.get("/sesion", tokensMethods.checkSession); // ✅
 
 export default router;

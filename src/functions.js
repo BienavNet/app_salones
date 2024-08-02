@@ -18,8 +18,10 @@ const signToken = (payload) => {
 
 //desencripta el token pasado
 const verifyToken = (token) => {
+    console.log("Ver toke de veritoken", token);
     try {
         const token_decoded = jwt.verify(token, config.JWT_SECRET_KEY)
+
         if (token_decoded) {
             return token_decoded
         }
@@ -36,18 +38,20 @@ const verifyToken = (token) => {
 const isAuthorized = (router, roles) =>{
     router.use((req, res, next) => {
         const token = req.get("Authorization")
-        var access_token = undefined
+        let access_token;
+
+        // var access_token = undefined
     
-        if (typeof token !== "undefined"){
-            access_token = token
+        if (token && token.startsWith('Bearer ')) {
+            access_token = token.split(' ')[1]  // extrae el token sin el prefijo "Bearer"
         }
         else{
             access_token = req.cookies.access_token
         }
     
-        if (typeof access_token !== "undefined"){
+        if (access_token){
             const token_decoded = verifyToken(access_token)
-            if (typeof token_decoded !== "undefined" && access_token !== "token expired"){
+            if (token_decoded !== "token expired" && token_decoded !== "Bad token"){
                 const { user, rol } = token_decoded
                 if (typeof user !== "undefined" && typeof rol !== "undefined"){
                     const getRole = roles.find((item)=> item == rol)
@@ -67,6 +71,7 @@ const isAuthorized = (router, roles) =>{
 
 const checkSession = (req, res) => {
     const token = req.cookies.access_token;
+    console.log('checking session', token)
     if (!token) {
         return res.status(401).json({ status: "Unauthorized", message: "No token provided." });
     }
@@ -78,32 +83,9 @@ const checkSession = (req, res) => {
     }
 };
 
-const isSession = (roles) => (req, res, next) => {
-    const token = req.get("Authorization")?.split(" ")[1] || req.cookies.access_token;
-    if (!token) {
-        return res.status(403).send("You are not allowed to do this.");
-    }
-
-    const token_decoded = verifyToken(token);
-    if (token_decoded === "token expired") {
-        return res.status(401).send("Your token has expired. Please just re-log in and try again.");
-    }
-
-    if (!token_decoded || !token_decoded.user || !token_decoded.rol) {
-        return res.status(403).send("You are not allowed to do this.");
-    }
-
-    if (!roles.includes(token_decoded.rol)) {
-        return res.status(403).send("You are not allowed to do this.");
-    }
-
-    next();
-};
-
 export const tokensMethods = {
     signToken,
     verifyToken,
     isAuthorized,
-    checkSession, 
-    isSession
+    checkSession,
 }

@@ -51,17 +51,17 @@ const checkLogin = async (req, res) => {
             return res.status(200).json({
               status: "ok",
               message: "Login Correcto.!",
-              token: token,
+              access_token: token,
             });
           }
         }
         return res
-          .status(200)
+          .status(400)
           .json({ status: "error", message: "Error al determinar el rol." });
       }
     } else {
       return res
-        .status(200)
+        .status(401)
         .json({ status: "Bad Request", message: "Credenciales incorrectas." });
     }
   } catch (error) {

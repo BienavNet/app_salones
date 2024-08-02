@@ -12,9 +12,9 @@ try {
     router.get('/cedula/:cedula', docenteMethods.getDocenteByCedula)
 
     tokensMethods.isAuthorized(router, ["director"])
-    router.get("/", docenteMethods.getDocentes)
+    router.get("/", docenteMethods.getDocentes) // ✅
     router.get("/:cedula", docenteMethods.getDocenteIdByCedula)
-    router.post("/save", docenteMethods.saveDocente)
+    router.post("/save", docenteMethods.saveDocente)  // ✅
     router.post("/update/:cedula", docenteMethods.updateDocente)
     router.delete('/delete/:cedula', docenteMethods.deleteDocente)
 

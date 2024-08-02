@@ -15,7 +15,7 @@ export class Validaciones {
 
     static cedula(cedula) {
         if (typeof cedula !== 'number'|| !Number.isInteger(cedula)) throw new Error('Cédula debe ser un número');
-        if (cedula.trim().length === 0) throw new Error('Cedula no puede estar vacío');
+        if (!cedula || cedula.toString().trim().length === 0) throw new Error('Cedula no puede estar vacío');
         if (cedula.toString().length > 10) throw new Error('La cédula debe tener no puede ser mayor a 10 caracteres');
         if (cedula.toString().length < 8) throw new Error('La cédula debe tener no puede ser menor a 10 caracteres');
     }
