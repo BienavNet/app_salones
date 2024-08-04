@@ -3,14 +3,12 @@ import { Validaciones } from "../assets/validation.js";
 import bcrypt from "bcrypt";
 import { SALTROUNDS } from "../config.js";
 
+// ✅
 const getDocentes = async (req, res, next) => {
   try {
     const connection = await database.getConnection();
-    const result = await connection.query(
-      "SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona"
-    );
+    const result = await connection.query("SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona");
     res.status(200).json(result);
-    console.log("result", result);
     next()
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
@@ -19,18 +17,16 @@ const getDocentes = async (req, res, next) => {
 
 const getDocenteIdByCedula = async (req, res) => {
   try {
-    if (!req.params || !req.params.cedula) {
-      return res.status(400).send("Bad Request");
-    }
-
     const { cedula } = req.params;
+
+    if (!cedula) {
+      return res.status(400).send("Bad Request: Missing cedula");
+    }
     const connection = await database.getConnection();
     try {
       const result = await connection.query(
-        "SELECT docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
-        "cedula" +
-        ""
-      );
+        "SELECT persona.*, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +"cedula" +"");
+        return res.status(200).json(result);
     } catch (error) {
       res.status(500).send("Internal Server Error: " + error.message);
     }
@@ -682,7 +678,8 @@ export const methods = {
   saveDocente,
   updateDocente,
   deleteDocente,
-  countDocente
+  countDocente,
+  getCedulaDocente
   // loginDocente,
   // protectedHome
 };

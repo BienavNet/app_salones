@@ -18,16 +18,13 @@ const signToken = (payload) => {
 
 //desencripta el token pasado
 const verifyToken = (token) => {
-    console.log("Ver toke de veritoken", token);
     try {
         const token_decoded = jwt.verify(token, config.JWT_SECRET_KEY)
-
         if (token_decoded) {
             return token_decoded
         }
         return "Bad token"
     } catch (error) {
-        
         if (typeof error.message === "string" && error.message === "jwt expired")
             return "token expired"
         throw new Error("Error al obtener el token: " + error.message)
@@ -39,9 +36,6 @@ const isAuthorized = (router, roles) =>{
     router.use((req, res, next) => {
         const token = req.get("Authorization")
         let access_token;
-
-        // var access_token = undefined
-    
         if (token && token.startsWith('Bearer ')) {
             access_token = token.split(' ')[1]  // extrae el token sin el prefijo "Bearer"
         }
@@ -71,7 +65,6 @@ const isAuthorized = (router, roles) =>{
 
 const checkSession = (req, res) => {
     const token = req.cookies.access_token;
-    console.log('checking session', token)
     if (!token) {
         return res.status(401).json({ status: "Unauthorized", message: "No token provided." });
     }

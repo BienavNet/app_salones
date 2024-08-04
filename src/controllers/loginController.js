@@ -14,7 +14,6 @@ const checkLogin = async (req, res) => {
     });
   try {
     const { correo, contrasena, rol } = req.body;
-    console.log("correo: " + correo, "contrasena: " + contrasena, "rol: ", rol);
     try {
       Validaciones.correo(correo);
       Validaciones.contrasena(contrasena);
@@ -65,7 +64,6 @@ const checkLogin = async (req, res) => {
         .json({ status: "Bad Request", message: "Credenciales incorrectas." });
     }
   } catch (error) {
-    console.log("entro", error);
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };

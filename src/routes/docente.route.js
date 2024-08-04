@@ -9,16 +9,16 @@ const router = Router();
 try {
 
     tokensMethods.isAuthorized(router, ["docente", "director"])
-    router.get('/cedula/:cedula', docenteMethods.getDocenteByCedula)
+    router.get('/cedula/:cedula', docenteMethods.getDocenteIdByCedula)
 
     tokensMethods.isAuthorized(router, ["director"])
     router.get("/", docenteMethods.getDocentes) // ✅
     router.get("/:cedula", docenteMethods.getDocenteIdByCedula)
     router.post("/save", docenteMethods.saveDocente)  // ✅
     router.post("/update/:cedula", docenteMethods.updateDocente)
-    router.delete('/delete/:cedula', docenteMethods.deleteDocente)
+    router.delete('/delete/:cedula', docenteMethods.deleteDocente) // ✅
 
-} catch (error) {
+} catch (error) {   
     console.log(error.message)
 }
 
