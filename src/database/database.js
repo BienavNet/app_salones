@@ -9,7 +9,7 @@ const connection = mysql.createConnection({
 })
 
 const getConnection = ()=> {
-    return connection;
+   return connection
 }
 
 export const methods = {

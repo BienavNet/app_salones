@@ -4,10 +4,10 @@ import { tokensMethods } from "../functions.js";
 
 const router = Router()
 
-tokensMethods.isAuthorized(router, ["docente", "administrador"])
+tokensMethods.isAuthorized(router, ["docente", "director"])
 router.get("/:cedula", horarioMethods.getHorariosByDocente)
 
-tokensMethods.isAuthorized(router, ["administrador"])
+tokensMethods.isAuthorized(router, ["director"])
 router.get("/:id", horarioMethods.getHorarioById)
 router.get("/", horarioMethods.getHorarios)
 router.post("/update/:id", horarioMethods.updateHorario)

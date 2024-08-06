@@ -8,17 +8,17 @@ const router = Router();
 
 try {
 
-    tokensMethods.isAuthorized(router, ["docente", "administrador"])
-    router.get('/cedula/:cedula', docenteMethods.getDocenteByCedula)
+    tokensMethods.isAuthorized(router, ["docente", "director"])
+    router.get('/cedula/:cedula', docenteMethods.getDocenteIdByCedula)
 
-    tokensMethods.isAuthorized(router, ["administrador"])
-    router.get("/", docenteMethods.getDocentes)
-    router.get("/:cedula", docenteMethods.getDocenteIdByCedula)
-    router.post("/save", docenteMethods.saveDocente)
-    router.post("/update/:cedula", docenteMethods.updateDocente)
-    router.delete('/delete/:cedula', docenteMethods.deleteDocente)
+    tokensMethods.isAuthorized(router, ["director"])
+    router.get("/", docenteMethods.getDocentes) // ✅
+    router.get("/:cedula", docenteMethods.getDocenteIdByCedula) // ✅
+    router.post("/save", docenteMethods.saveDocente)  // ✅
+    router.patch("/update/:cedula", docenteMethods.updateDocente)  // ✅
+    router.delete('/delete/:cedula', docenteMethods.deleteDocente) // ✅
 
-} catch (error) {
+} catch (error) {   
     console.log(error.message)
 }
 
