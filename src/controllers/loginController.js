@@ -28,6 +28,9 @@ const checkLogin = async (req, res) => {
       "SELECT id, nombre FROM persona WHERE correo = ? AND contrasena = ?";
     var result = await connection.query(query, [correo, contrasena]);
     if (result.length > 0) {
+    const query = "SELECT id, nombre FROM persona WHERE correo = ? AND contrasena = ?";
+    var result = await connection.query(query,[correo, contrasena]);
+    if(result.length > 0){
       const { id, nombre } = result[0];
       if (id !== undefined && id !== "") {
         var result = await connection.query(
@@ -62,6 +65,36 @@ const checkLogin = async (req, res) => {
       return res
         .status(401)
         .json({ status: "Bad Request", message: "Credenciales incorrectas." });
+    }
+            const token = tokens.signToken({ 
+              nombre:nombre,
+              user: correo, 
+              rol: rol });
+            res.set({
+              Authorization: token,
+            });
+            res.cookie("access_token", token, {
+              httpOnly: true, // la cookie solo se puede acceder en el servidor
+              // secure: process.env.NODE_ENV === 'production', // solo en el entorno de producción, la cookie solo se puede acceder desde https
+              sameSite: "strict", // la cookie solo se puede acceder en el mismo dominio
+              maxAge: 1000 * 60 * 60, // la cookie tiene tiempo de valides de solo 1 hora
+            });
+            res
+              .status(200)
+              .json({ status: "ok", message: "Login Correcto.!", token: token });
+            return;
+          }
+        }
+        res
+          .status(200)
+          .json({ status: "error", message: "Error al determinar el rol." });
+        return;
+      }
+      // res.status(200).json({ "status": "Bad Request", "message": "Credenciales incorrectas." })
+      // return
+    }else{
+      res.status(200).json({ "status": "Bad Request", "message": "Credenciales incorrectas." })
+      return
     }
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);

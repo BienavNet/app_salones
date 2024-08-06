@@ -38,6 +38,7 @@ export class Validaciones {
 
     static role(rol){
         const validRoles = ['docente', 'director', 'supervisor']
+        if (rol.trim().length === 0) throw new Error('Rol no puede estar vacío');
         if (typeof rol !== 'string') throw new Error('rol debe ser una cadena de texto')
         if (rol.trim().length === 0) throw new Error('Rol no puede estar vacío');
         if(!validRoles.includes(rol)) throw new Error('Por favor, verfique su rol asignado');
