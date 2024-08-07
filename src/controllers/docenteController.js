@@ -203,7 +203,7 @@ const saveDocente = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
-
+// ✅
 const updateDocente = async (req, res) => {
   try {
     res.setHeader("Content-Type", "application/json");
@@ -211,7 +211,6 @@ const updateDocente = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
       if (req.body !== undefined) {
-        // const { nombre, apellido, correo, contrasena } = req.body
         const connection = await database.getConnection();
         const result = await connection.query(
           "UPDATE persona SET ? WHERE cedula = ?",
