@@ -23,7 +23,7 @@ const getSupervisorIdByCedula = async (req, res) => {
           cedula +
           ""
       );
-      res.status(200).json(result);
+      return res.status(200).json(result);
     } else {
       res.send(400, "Bad Request");
     }
@@ -97,11 +97,10 @@ const updateSupervisor = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
       if (req.body !== undefined) {
-        // const { nombre, apellido, correo, contrasena } = req.body
         const connection = await database.getConnection();
         const result = await connection.query(
-          "UPDATE persona SET ? WHERE cedula = " + cedula + "",
-          req.body
+          "UPDATE persona SET ? WHERE cedula = ?",
+          [req.body, cedula]
         );
 
         const { affectedRows } = result;

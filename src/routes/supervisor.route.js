@@ -12,7 +12,7 @@ tokensMethods.isAuthorized(router, ["director"])
 router.get("/", supervisorMethods.getSupervisores) // ✅
 router.get("/:cedula", supervisorMethods.getSupervisorIdByCedula) // ✅
 router.post("/save", supervisorMethods.saveSupervisor) // ✅
-router.patch("/update/:cedula", supervisorMethods.updateSupervisor)
+router.patch("/update/:cedula", supervisorMethods.updateSupervisor) // ✅
 router.delete('/delete/:cedula', supervisorMethods.deleteSupervisor) // ✅
 
 export default router;

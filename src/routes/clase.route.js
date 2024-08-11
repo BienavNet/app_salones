@@ -11,10 +11,11 @@ router.get("/salon/:salon", claseMethods.getClaseBySalon)
 
 tokensMethods.isAuthorized(router, ["supervisor", "director"])
 router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor)
-router.get("/", claseMethods.getClases)
 
 tokensMethods.isAuthorized(router, ["director"])
+router.get("/", claseMethods.getClases)
 router.post("/register", claseMethods.registerClase)
+router.post("/:id", claseMethods.getIdClase)
 router.delete("/delete/:id", claseMethods.deleteClase)
 router.post("/update/:id", claseMethods.updateClase)
 

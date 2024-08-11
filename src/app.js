@@ -48,7 +48,7 @@ app.use(cookieParser())
 // Routes
 app.use("/api/docente", docenteRoute)
 app.use("/api/supervisor", supervisorRoute)
-app.use("/login", loginRoute)
+app.use("/api/login", loginRoute)
 app.use("/api/horarios/", horarioRoute)
 app.use("/api/clase/", claseRoute)
 app.use("/api/comentarios/", comentarioRoute)

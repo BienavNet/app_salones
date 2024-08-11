@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS docente (
 CREATE TABLE IF NOT EXISTS horario (
 	id INT auto_increment PRIMARY KEY,
     docente INT ,
-    asignatura VARCHAR(30) NOT NULL,
+    asignatura VARCHAR(100) NOT NULL,
     FOREIGN KEY (docente) references docente(id)
 );
 
