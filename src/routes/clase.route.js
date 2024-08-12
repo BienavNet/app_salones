@@ -17,7 +17,7 @@ router.get("/", claseMethods.getClases)
 router.post("/register", claseMethods.registerClase)
 router.post("/:id", claseMethods.getIdClase)
 router.delete("/delete/:id", claseMethods.deleteClase)
-router.post("/update/:id", claseMethods.updateClase)
+router.patch("/update/:id", claseMethods.updateClase)
 
 
 export default router

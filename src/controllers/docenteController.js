@@ -10,6 +10,7 @@ const getDocentes = async (req, res, next) => {
     const result = await connection.query(
       "SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona"
     );
+    console.log(result, "results: " );
     res.status(200).json(result);
     next();
   } catch (error) {
