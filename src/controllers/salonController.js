@@ -25,7 +25,7 @@ const getSalones = async (req, res) => {
     try {
         const connection = await database.getConnection()
         const result = await connection.query("SELECT * FROM salon")
-
+        console.log("result the salon", result)
         if (result !== undefined){
             res.status(200).json(result)
             return

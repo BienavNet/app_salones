@@ -73,13 +73,15 @@ const updateHorario =  async (req, res) => {
 }
 
 const deleteHorario = async (req, res) => {
+    console.log("id delete backen", req.params.id)
     try {
         if (req.params !== undefined) {
             const { id } = req.params
-
+            console.log(`deleting  ${id}`);
             const connection = await database.getConnection()
-            const result = await connection.query("DELETE horario, detalle_horario, clase FROM horario JOIN detalle_horario ON horario.id = detalle_horario.horario JOIN clase ON horario.id = clase.horario WHERE horario.id = " +id+ "")
-
+            // DELETE horario, detalle_horario, clase FROM horario JOIN detalle_horario ON horario.id = detalle_horario.horario JOIN clase ON horario.id = clase.horario WHERE horario.id = " +id+ ""
+            const result = await connection.query("DELETE FROM horario WHERE id = " +id+ "")
+            console.log("result the id horario deleted", result)
             const { affectedRows } = result
 
             if (affectedRows > 0) {

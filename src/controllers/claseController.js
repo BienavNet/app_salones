@@ -14,7 +14,28 @@ const getClases = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
-
+const getClassHorarioId = async (req, res) => {
+  try {
+      if (req.params !== undefined) {
+          const { id } = req.params
+          console.log('id entrando', id)
+          const connection = await database.getConnection()
+          const result = await connection.query("SELECT id, horario FROM clase WHERE horario = " +id+ "")
+           console.log("result", result);
+          if (result !== undefined) {
+              res.status(200).json(result)
+              return
+          }
+          res.status(200).json({"status": "error", "message": "No se obtuvo ningun dato desde el servidor."})
+          return
+      }
+      res.status(400).json({"status": "error", "message": "Bad Request."})
+      return
+  } catch (error) {
+      res.status(500).send('Internal Server Error: ' + error.message)
+  }
+ 
+}
 const getIdClase = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -149,11 +170,7 @@ const deleteClase = async (req, res) => {
       const { id } = req.params;
 
       const connection = await database.getConnection();
-      const result = await connection.query(
-        "DELETE clase, reporte FROM clase JOIN reporte ON clase.id = reporte.clase WHERE clase.id = " +
-          id +
-          ""
-      );
+      const result = await connection.query("DELETE clase, reporte FROM clase JOIN reporte ON clase.id = reporte.clase WHERE clase.id = ?", [id]);
 
       const { affectedRows } = result;
 
@@ -176,6 +193,8 @@ const deleteClase = async (req, res) => {
 };
 
 const updateClase = async (req, res) => {
+  // fecha, supervisor, dia, salon
+  
   try {
     if (req.params !== undefined && req.body !== undefined) {
       const { id } = req.params;
@@ -212,5 +231,5 @@ export const methods = {
   registerClase,
   deleteClase,
   updateClase,
-  getIdClase,
+  getIdClase,getClassHorarioId
 };
