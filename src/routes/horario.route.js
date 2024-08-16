@@ -8,7 +8,7 @@ tokensMethods.isAuthorized(router, ["docente", "director"])
 router.get("/:cedula", horarioMethods.getHorariosByDocente)
 
 tokensMethods.isAuthorized(router, ["director"])
-router.get("/:id", horarioMethods.getHorarioById)
+router.get("/detail/:id", horarioMethods.getHorarioById) // ✅
 router.get("/", horarioMethods.getHorarios) // ✅
 router.patch("/update/:id", horarioMethods.updateHorario)
 router.delete("/delete/:id", horarioMethods.deleteHorario) // ✅

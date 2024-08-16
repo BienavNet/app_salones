@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS categoria_salon (
 CREATE TABLE IF NOT EXISTS salon (
 	id INT auto_increment PRIMARY KEY,
     categoria_salon INT ,
+    numero_salon INT ,
     nombre VARCHAR(25) NOT NULL,
     capacidad tinyINT NOT NULL,
     INTernet enum('si', 'no') NOT NULL,
@@ -73,7 +74,7 @@ CREATE TABLE IF NOT EXISTS clase (
     horario INT ,
     salon INT ,
     supervisor INT ,
-    estado enum('completada', 'perdida') NOT NULL,
+    estado enum('completada', 'perdida', 'pendiente') NOT NULL,
     fecha date NOT NULL,
     FOREIGN KEY (horario) references horario(id),
     FOREIGN KEY (salon) references salon(id),
