@@ -158,4 +158,4 @@ export const methods = {
     registerComentario,
     deleteComentarioById,
     deleteComentarioByDocente
-}
+} 
