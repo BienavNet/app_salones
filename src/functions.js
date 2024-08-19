@@ -4,7 +4,9 @@ import config from "./config.js";
 //Registra un nuevo token
 const signToken = (payload) => {
     try {
-        const token = jwt.sign(payload, config.JWT_SECRET_KEY, {
+        const token = jwt.sign(
+            payload, 
+            config.JWT_SECRET_KEY, {
             expiresIn: '1h'
         })
         return token
@@ -23,27 +25,27 @@ const verifyToken = (token) => {
         }
         return "Bad token"
     } catch (error) {
-        
         if (typeof error.message === "string" && error.message === "jwt expired")
             return "token expired"
         throw new Error("Error al obtener el token: " + error.message)
     }
 }
 
+// valida el token y verifica los roles permitidos para acceder a ciertas rutas
 const isAuthorized = (router, roles) =>{
     router.use((req, res, next) => {
         const token = req.get("Authorization")
-        var access_token = undefined
-    
-        if (typeof token !== "undefined"){
-            access_token = token
-        }else{
+        let access_token;
+        if (token && token.startsWith('Bearer ')) {
+            access_token = token.split(' ')[1]  // extrae el token sin el prefijo "Bearer"
+        }
+        else{
             access_token = req.cookies.access_token
         }
     
-        if (typeof access_token !== "undefined"){
+        if (access_token){
             const token_decoded = verifyToken(access_token)
-            if (typeof token_decoded !== "undefined" && access_token !== "token expired"){
+            if (token_decoded !== "token expired" && token_decoded !== "Bad token"){
                 const { user, rol } = token_decoded
                 if (typeof user !== "undefined" && typeof rol !== "undefined"){
                     const getRole = roles.find((item)=> item == rol)
@@ -61,8 +63,22 @@ const isAuthorized = (router, roles) =>{
     })
 }
 
+const checkSession = (req, res) => {
+    const token = req.cookies.access_token;
+    if (!token) {
+        return res.status(401).json({ status: "Unauthorized", message: "No token provided." });
+    }
+    try {
+        const decoded = verifyToken(token);
+        return res.status(200).json({ status: "ok", user: decoded });
+    } catch (error) {
+        return res.status(401).json({ status: "Unauthorized", message: "Invalid token." });
+    }
+};
+
 export const tokensMethods = {
     signToken,
     verifyToken,
-    isAuthorized
+    isAuthorized,
+    checkSession,
 }

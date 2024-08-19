@@ -1,6 +1,27 @@
 import { methods as database } from "./../database/database.js"
 
+const getDetalleHorariosByHorarioId = async (req, res) => {
+    try {
+        if (req.params !== undefined) {
+            const { id } = req.params
+            console.log('id entrando', id)
+            const connection = await database.getConnection()
+            const result = await connection.query("SELECT id, horario FROM detalle_horario WHERE horario = " +id+ "")
 
+            if (result !== undefined) {
+                res.status(200).json(result)
+                return
+            }
+            res.status(200).json({"status": "error", "message": "No se obtuvo ningun dato desde el servidor."})
+            return
+        }
+        res.status(400).json({"status": "error", "message": "Bad Request."})
+        return
+    } catch (error) {
+        res.status(500).send('Internal Server Error: ' + error.message)
+    }
+   
+}
 const getDetalleHorarioById = async (req, res) => {
     try {
         if (req.params !== undefined) {
@@ -29,7 +50,7 @@ const getDetallesHorarioByDocente = async (req, res) => {
 
             const connection = await database.getConnection()
             const result = await connection.query("SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.id as horario, horario.asignatura FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id WHERE persona.cedula = " +cedula+ "")
-
+          
             if ( result !== undefined ){
                 res.status(200).json(result)
                 return
@@ -167,5 +188,7 @@ export const methods = {
     getAllDetallesHorario,
     saveDetalleHorario,
     deleteDetalleHorario,
-    updateDetalleHorario
+    updateDetalleHorario,
+    getDetalleHorariosByHorarioId
+
 }

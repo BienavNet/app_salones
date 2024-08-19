@@ -29,26 +29,26 @@ app.use(morgan("dev"))
 app.use(express.json())
 app.use(cookieParser())
 
-app.use((req, res, next)=>{
-    const token = req.cookies.access_token
-    req.session = { persona : null}
-    try {
-        const data = jwt.verify(token, process.env.JWT_SECRET_KEY)
-        req.session.persona = data
-    } catch{}
-    req.session = { user : null}
-    try {
-        const data = jwt.verify(token, process.env.JWT_SECRET_KEY)
-        req.session.user = data
-    } catch{}
+// app.use((req, res, next)=>{
+//     const token = req.cookies.access_token
+//     req.session = { persona : null}
+//     try {
+//         const data = jwt.verify(token, process.env.JWT_SECRET_KEY)
+//         req.session.persona = data
+//     } catch{}
+//     req.session = { user : null}
+//     try {
+//         const data = jwt.verify(token, process.env.JWT_SECRET_KEY)
+//         req.session.user = data
+//     } catch{}
 
-    next() // -> sigue la siguiente ruta o middleware
-})
+//     next() // -> sigue la siguiente ruta o middleware
+// })
 
 // Routes
-app.use("/api/docentes/", docenteRoute)
-app.use("/api/supervisores/", supervisorRoute)
-app.use("/login", loginRoute)
+app.use("/api/docente", docenteRoute)
+app.use("/api/supervisor", supervisorRoute)
+app.use("/api/login", loginRoute)
 app.use("/api/horarios/", horarioRoute)
 app.use("/api/clase/", claseRoute)
 app.use("/api/comentarios/", comentarioRoute)

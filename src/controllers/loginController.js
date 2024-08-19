@@ -1,74 +1,78 @@
+import { Validaciones } from "../assets/validation.js";
 import { methods as database } from "./../database/database.js";
 import { tokensMethods as tokens } from "./../functions.js";
-
-
-
-
 const checkLogin = async (req, res) => {
+  if (
+    !req.body ||
+    typeof req.body !== "object" ||
+    Object.keys(req.body).length === 0
+  ) {
+    return res.status(400).json({
+      status: "Bad Request.",
+      message: "El cuerpo de la peticion no puede estar vacia.",
+    });
+  }
+  try {
+    const { correo, contrasena, rol } = req.body;
+    console.log("correo: " + correo, "contrasena: " + contrasena, "rol: ", rol);
     try {
-        if (req.body !== undefined && req.body !== "") {
-            const { correo, contrasena, rol } = req.body
-            // const { access_token } = req.cookies
-
-
-            // // se verifica con las cookies que el usuario trata de loggear o al menos de cargar la pagina de login
-            // // si las cookies existen las validan y redireccionan al rol correspondiente
-            // if (typeof access_token !== "undefined"){
-            //     const data_decoded = tokens.verifyToken(access_token)
-            //     if (typeof data_decoded !== "undefined"){
-            //         const { user, rol } = data_decoded
-            //         if (typeof user !== "undefined" && typeof rol !== "undefined"){
-            //             res.set({
-            //                 "Authorization": access_token
-            //             })
-            //             res.status(200).json({ "status": "ok", "message": "Login Correcto.!"})
-            //             return
-            //         }
-            //     }
-                    
-
-            // }
-
-            if (correo !== "" && contrasena !== "" && rol !== "") {
-                const connection = await database.getConnection()
-                var result = await connection.query("SELECT id FROM persona WHERE correo = '" + correo + "' AND contrasena = '" + contrasena + "'")
-                const { id } = result[0]
-
-                if (id !== undefined && id !== "") {
-                    var result = await connection.query("SELECT id AS id_rol FROM " + rol + " WHERE persona = " + id + "")
-                    if (result.length > 0) {
-                        const { id_rol } = result[0]
-                        if (id_rol !== undefined && id_rol !== "") {
-                            const token = tokens.signToken({ user: correo, rol: rol })
-                            res.set({
-                                "Authorization": token
-                            })
-                            res.cookie("access_token", token, {
-                                httpOnly: true, // la cookie solo se puede acceder en el servidor
-                                // secure: process.env.NODE_ENV === 'production', // solo en el entorno de producción, la cookie solo se puede acceder desde https
-                                sameSite: 'strict', // la cookie solo se puede acceder en el mismo dominio
-                                maxAge: 1000 * 60 * 60 // la cookie tiene tiempo de valides de solo 1 hora
-                            })
-                            res.status(200).json({ "status": "ok", "message": "Login Correcto.!", "token": token })
-                            return
-                        }
-                    }
-                    res.status(200).json({ "status": "error", "message": "Error al determinar el rol." })
-                    return
-                }
-                res.status(200).json({ "status": "error", "message": "Credenciales incorrectas." })
-                return
-            } else {
-                res.status(400).json({ "status": "error", "message": "Revisa que los campos no esten vacios." })
-            }
-            res.status(400).json({ "status": "error", "message": "El cuerpo de la peticion no puede estar vacia." })
-            return
-        }
-    } catch (error) {
-        res.status(500).send('Internal Server Error: ' + error.message)
+      Validaciones.correo(correo);
+      Validaciones.contrasena(contrasena);
+      Validaciones.role(rol);
+    } catch (validationError) {
+      return res
+        .status(400)
+        .json({ status: "Bad Request", message: validationError.message });
     }
-}
+    const connection = await database.getConnection();
+    const query =
+      "SELECT id, nombre FROM persona WHERE correo = ? AND contrasena = ?";
+    var result = await connection.query(query, [correo, contrasena]);
+    if (result.length > 0) {
+      const { id, nombre } = result[0];
+      console.log("id :" , id, "nombre :" , nombre)
+      if (id !== undefined && id !== "") {
+        var result = await connection.query(
+          "SELECT id AS id_rol FROM " + rol + " WHERE persona = " + id + ""
+        );
+        if (result.length > 0) {
+          const { id_rol } = result[0];
+          console.log("id_rol :" , id_rol)
+          if (id_rol !== undefined && id_rol !== "") {
+            const token = tokens.signToken({
+              nombre,
+              user: correo,
+              rol,
+            });
+            console.log("token :" , token)
+            res.set({ Authorization: token });
+            res.cookie("access_token", token, {
+              httpOnly: true, // la cookie solo se puede acceder en el servidor
+              sameSite: "strict", // la cookie solo se puede acceder en el mismo dominio
+              maxAge: 1000 * 60 * 60, // la cookie tiene tiempo de valides de solo 1 hora
+            });
+            return res.status(200).json({
+              status: "ok",
+              message: "Login Correcto.!",
+              access_token: token,
+            });
+          }
+        }
+        return res
+          .status(400)
+          .json({ status: "error", message: "Error al determinar el rol." });
+      }
+    } else {
+      return res
+        .status(401)
+        .json({ status: "Bad Request", message: "Credenciales incorrectas." });
+    }
+  } catch (error) {
+    console.log("entro", error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
 
 export const methods = {
-    checkLogin
-}
+  checkLogin,
+};
