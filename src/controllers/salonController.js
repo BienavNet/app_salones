@@ -6,7 +6,14 @@ const getSalonById = async (req, res) => {
             const { id } = req.params
 
             const connection = await database.getConnection()
-            const result = await connection.query("SELECT * FROM salon WHERE id = " +id+ "")
+            const result = await connection.query(
+                `
+            SELECT salon.*,
+            categoria_salon.categoria 
+            FROM salon 
+            JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id
+            WHERE salon.id = ?
+                `, [id])
 
             if ( result !== undefined) {
                 res.status(200).json(result)

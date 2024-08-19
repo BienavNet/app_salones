@@ -141,8 +141,13 @@ const getHorarioById = async (req, res) => {
       const { id } = req.params;
       const connection = await database.getConnection();
       const result = await connection.query(
-`SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre, persona.apellido, persona.cedula, clase.salon, 
-clase.estado, clase.fecha, salon.nombre, salon.numero_salon, salon.capacidad, salon.INTernet, salon.tv, categoria_salon.categoria
+`SELECT 
+horario.id, horario.asignatura, 
+detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, 
+persona.nombre AS nombre_docente, persona.apellido AS apellido_docente, persona.cedula, 
+clase.salon, clase.estado, clase.fecha, 
+salon.nombre, salon.numero_salon, salon.capacidad, salon.INTernet, salon.tv, 
+categoria_salon.categoria
 FROM horario
 JOIN detalle_horario ON horario.id = detalle_horario.horario
 JOIN docente ON horario.docente = docente.id
@@ -153,8 +158,56 @@ JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id
 WHERE horario.id = ?`,
         [id]
       );
-      if (result.length > 0) {
-        return res.status(200).json(result);
+
+      const JOINHORARIODATA = result.reduce((a, row) => {
+        const {
+          id,
+          cedula,
+          nombre_docente,
+          apellido_docente,
+          asignatura,
+          dia,
+          fecha,
+          hora_inicio,
+          hora_fin,
+          numero_salon,
+          estado,
+          capacidad,
+          INTernet,
+          tv,
+          categoria,
+        } = row;
+        if (!a[cedula]) {
+          a[cedula] = {
+            id,
+            cedula,
+            nombre:nombre_docente,
+            apellido:apellido_docente,
+            asignatura,
+            horarios: [],
+          };
+        }
+
+        a[cedula].horarios.push({
+          id,
+          dia,
+          estado,
+          fecha,
+          hora_inicio,
+          hora_fin,
+          numero_salon,
+          capacidad,
+          INTernet,
+          tv,
+          categoria,
+        });
+        return a;
+      }, {});
+
+      const resultArray = Object.values(JOINHORARIODATA);
+      console.log(resultArray, "result array")
+      if (resultArray.length > 0) {
+        return res.status(200).json(resultArray);
       } else {
         return res
           .status(404)

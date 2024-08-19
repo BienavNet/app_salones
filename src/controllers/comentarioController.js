@@ -127,6 +127,8 @@ const deleteComentarioById = async (req, res) => {
     }
 }
 
+
+// 👀
 const deleteComentarioByDocente = async (req, res) => {
     try {
         if ( req.params !== undefined){
