@@ -127,9 +127,7 @@ const deleteComentarioById = async (req, res) => {
     }
 }
 
-
-// 👀
-const deleteComentarioByDocente = async (req, res) => {
+const deleteAllComentariosByDocente = async (req, res) => {
     try {
         if ( req.params !== undefined){
             const { cedula } = req.params
@@ -159,5 +157,5 @@ export const methods = {
     getAllComentarios,
     registerComentario,
     deleteComentarioById,
-    deleteComentarioByDocente
+    deleteAllComentariosByDocente
 } 
