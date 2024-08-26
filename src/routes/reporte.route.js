@@ -13,8 +13,7 @@ tokensMethods.isAuthorized(router, ["director"])
 router.get("/", reporteMethods.getReportes) // ✅
 router.get("/clase/:clase", reporteMethods.getReporteByClase) //👀
 router.get("/salon/:salon", reporteMethods.getReporteBySalon) //👀
-router.delete("/delete/:id", reporteMethods.deleteReporte)
-
+router.delete("/delete/:id", reporteMethods.deleteReporte) 
 
 router.get("/statistics/docente-mas-comentarios", reporteMethods.getDocenteQMasComentariosHaRealizado)  // ✅
 router.get("/statistics/salon-mas-comentarios", reporteMethods.getsalonMasComentarioTiene)  // ✅

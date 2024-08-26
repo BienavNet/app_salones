@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS salon (
 	id INT auto_increment PRIMARY KEY,
     categoria_salon INT ,
     numero_salon INT ,
-    nombre VARCHAR(25) NOT NULL,
+    nombre VARCHAR(50) NOT NULL,
     capacidad tinyINT NOT NULL,
     INTernet enum('si', 'no') NOT NULL,
     tv enum('si', 'no') NOT NULL, 

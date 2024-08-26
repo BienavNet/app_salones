@@ -129,7 +129,6 @@ const saveDocente = async (req, res) => {
     res.setHeader("Content-Type", "application/json");
 
     const { nombre, apellido, cedula, correo, contrasena } = req.body;
-
     try {
       // validaciones simples
       Validaciones.nombre(nombre);

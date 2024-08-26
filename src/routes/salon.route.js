@@ -7,6 +7,8 @@ const router = Router();
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/:id", salonMethods.getSalonById)  // ✅
 router.get("/", salonMethods.getSalones) // ✅
-router.post("/update/:id", salonMethods.updateSalon)
+router.patch("/update/:id", salonMethods.updateSalon)
+router.get("/categoria-salon/salon", salonMethods.categorySalonID)
 
 export default router
+
