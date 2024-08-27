@@ -53,22 +53,21 @@ const updateHorario = async (req, res) => {
     if (req.body !== undefined && req.body !== "") {
       if (req.params !== undefined) {
         const { id } = req.params;
-
+        console.log("id: " + id)
         if (req.body !== undefined) {
           const connection = await database.getConnection();
           const result = await connection.query(
-            "UPDATE horario SET ? WHERE id = " + id + ""
-          );
-
+            "UPDATE horario SET ? WHERE id = " + id + "", req.body);
+        console.log("result: " + result)
           const { affectedRows } = result;
 
-          if (affectedRows > 0) {
-            res.status(200).json({
+          if (affectedRows  == 1) {
+            return res.status(200).json({
               status: "ok",
               message: "Datos actualizados correctamente.",
             });
           }
-          res.status(200).json({
+          return res.status(200).json({
             status: "error",
             message: "Error en los datos enviados al servidor.",
           });

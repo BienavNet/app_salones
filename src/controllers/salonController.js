@@ -62,14 +62,11 @@ const updateSalon = async (req, res) => {
             const result = await connection.query("UPDATE salon SET ? WHERE id = " +id+ "", req.body)
             const { affectedRows } = result
             if ( affectedRows == 1 ){
-                res.status(200).json({"status": "ok", "message": "Datos actualizados correctamente."})
-                return
+                return res.status(200).json({"status": "ok", "message": "Datos actualizados correctamente."})  
             }
-            res.status(400).json({"status": "error", "message": "Bad request."})
-            return
+            return res.status(400).json({"status": "error", "message": "Bad request."})
         }
         res.status(400).json({"status": "error", "message": "Bad request."})
-
     } catch (error) {
         res.status(500).send('Internal Server Error: ' + error.message)
     }
