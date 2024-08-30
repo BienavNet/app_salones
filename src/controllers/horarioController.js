@@ -141,11 +141,7 @@ const getHorarioById = async (req, res) => {
       const connection = await database.getConnection();
       const result = await connection.query(
 `SELECT 
-horario.id, horario.asignatura, 
-detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, 
-persona.nombre AS nombre_docente, persona.apellido AS apellido_docente, persona.cedula, 
-clase.salon, clase.estado, clase.fecha, 
-salon.nombre, salon.numero_salon, salon.capacidad, salon.INTernet, salon.tv, 
+horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre AS nombre_docente, persona.apellido AS apellido_docente, persona.cedula, docente.id AS docente_id, clase.salon, clase.estado, clase.fecha, salon.nombre, salon.numero_salon, salon.capacidad, salon.INTernet, salon.tv, 
 categoria_salon.categoria
 FROM horario
 JOIN detalle_horario ON horario.id = detalle_horario.horario
@@ -161,6 +157,7 @@ WHERE horario.id = ?`,
       const JOINHORARIODATA = result.reduce((a, row) => {
         const {
           id,
+          docente_id,
           cedula,
           nombre_docente,
           apellido_docente,
@@ -180,6 +177,7 @@ WHERE horario.id = ?`,
           a[cedula] = {
             id,
             cedula,
+            docente_id,
             nombre:nombre_docente,
             apellido:apellido_docente,
             asignatura,

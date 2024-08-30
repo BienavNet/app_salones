@@ -10,7 +10,7 @@ router.get("/:cedula", horarioMethods.getHorariosByDocente)
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/detail/:id", horarioMethods.getHorarioById) // ✅
 router.get("/", horarioMethods.getHorarios) // ✅
-router.patch("/update/:id", horarioMethods.updateHorario)
+router.patch("/update/:id", horarioMethods.updateHorario)  // ✅
 router.delete("/delete/:id", horarioMethods.deleteHorario) // ✅
 router.post("/save", horarioMethods.saveHorario) // ✅
 

@@ -1,5 +1,47 @@
+import { Validaciones } from "../assets/validation.js";
+import { SALTROUNDS } from "../config.js";
 import { methods as database } from "./../database/database.js";
+import bcrypt from "bcrypt";
+const getSupervisorByCorreo = async (correo) => {
+  const connection = await database.getConnection();
+  const query = `
+  SELECT persona.*, supervisor.id as docente_id 
+  FROM persona 
+  INNER JOIN supervisor ON persona.id = supervisor.persona 
+  WHERE persona.correo = ?`;
+  try {
+    const result = await connection.query(query, [correo]);
+    return result.length === 0 ? null : result;
+  } catch (error) {
+    throw new Error({
+      status: 500,
+      message: "Internal Server Error:" + error.message,
+    });
+  }
+};
 
+const getPersonaByCorreo = async (correo, cedula) => {
+  const connection = await database.getConnection();
+  const query = `
+    SELECT * 
+    FROM persona 
+    WHERE correo = ? OR cedula = ? 
+    LIMIT 1;
+  `;
+  try {
+    const result = await connection.query(query, [correo, cedula]);
+    if (result.length === 0) {
+      return null; // No se encontró la persona
+    }
+    return result;
+  } catch (error) {
+    console.error("Error en la consulta de persona:", error);
+    throw new Error({
+      status: 500,
+      message: "Internal Server Error:" + error.message,
+    });
+  }
+};
 // ✅
 const getSupervisores = async (req, res) => {
   try {
@@ -54,39 +96,77 @@ const getSupervisorByCedula = async (req, res) => {
 
 // ✅
 const saveSupervisor = async (req, res) => {
+  if (!req.body) {
+    return res.status(400).send("Bad Request.");
+  }
+  const { nombre, apellido, cedula, correo, contrasena } = req.body;
   try {
-    res.setHeader("Content-Type", "application/json");
-    if (req.body !== undefined) {
-      const { nombre, apellido, cedula, correo, contrasena } = req.body;
-      const persona = {
-        nombre,
-        apellido,
-        cedula,
-        correo,
-        contrasena,
-      };
-      const connection = await database.getConnection();
-      var result = await connection.query("INSERT INTO persona SET ?", persona);
-      if (result !== undefined) {
-        const { insertId } = result;
-        result = await connection.query(
-          "INSERT INTO supervisor (persona) VALUES (" + insertId + ")"
-        );
-        res
-          .status(200)
-          .json({
-            status: "ok",
-            message: "Datos almacenados en la base de datos correctamente",
-          });
+    Validaciones.nombre(nombre);
+    Validaciones.apellido(apellido);
+    Validaciones.cedula(cedula);
+    Validaciones.correo(correo);
+    Validaciones.contrasena(contrasena);
+  } catch (validationError) {
+    return res
+      .status(400)
+      .json({ status: "Bad Request.", message: validationError.message });
+  }
+  const connection = await database.getConnection();
+  try {
+    const persona = await getPersonaByCorreo(correo, cedula);
+    if (persona) {
+      const res = await getSupervisorByCorreo(correo);
+      const iscedula = await getSupervisorByCedula(cedula);
+      if (res || iscedula) {
+        return res.status(409).json({
+          message: "El supervisor con esta cédula o correo ya existe.",
+          status: "ok",
+        });
       } else {
-        res.status(400).send("Bad Request.");
+        return res.status(409).json({
+          message:
+            "El correo o cédula ya está registrado pero NO es un SUPERVISOR.",
+          status: "ok",
+        });
       }
-      return;
+    }
+    
+  const hashedPassword = await bcrypt.hash(contrasena, SALTROUNDS);
+
+  await connection.beginTransaction();
+    const formatData = {
+      nombre,
+      apellido,
+      cedula,
+      correo,
+      contrasena:hashedPassword,
+    };
+   
+    let result = await connection.query("INSERT INTO persona SET ?", formatData);
+    if (result.affectedRows > 0) {
+      const { insertId } = result;
+      result = await connection.query(
+        "INSERT INTO supervisor (persona) VALUES (" + insertId + ")"
+      );
+      await connection.commit();
+      return res.status(200).json({
+          status: "ok",
+          message: "Datos almacenados en la base de datos correctamente",
+        });
     } else {
-      res.status(400).send("Bad Request.");
+      return res.status(400).send("Bad Request.");
     }
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error("Error en la transacción:", error.message);
+    if (!res.headersSent) {
+      return res.status(500).json({
+        status: "Internal Server Error",
+        message: "Error en la operación: " + error.message,
+      });
+    }
   }
 };
 

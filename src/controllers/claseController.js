@@ -170,7 +170,7 @@ const deleteClase = async (req, res) => {
       const { id } = req.params;
 
       const connection = await database.getConnection();
-      const result = await connection.query("DELETE clase, reporte FROM clase JOIN reporte ON clase.id = reporte.clase WHERE clase.id = ?", [id]);
+      const result = await connection.query("DELETE clase, reporte FROM clase LEFT JOIN reporte ON clase.id = reporte.clase WHERE clase.id = ?", [id]);
 
       const { affectedRows } = result;
 

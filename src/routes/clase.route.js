@@ -10,7 +10,7 @@ router.get("/horario/:horario", claseMethods.getClaseByHorario)
 router.get("/salon/:salon", claseMethods.getClaseBySalon)
 
 tokensMethods.isAuthorized(router, ["supervisor", "director"])
-router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor)
+router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor) // SUPERVISOR❓❓
 
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/", claseMethods.getClases) 
@@ -18,7 +18,7 @@ router.post("/register", claseMethods.registerClase) // ✅
 router.get("/:id", claseMethods.getIdClase) // pendiente
 router.get("/timetable/:id", claseMethods.getClassHorarioId) // ✅
 router.delete("/delete/:id", claseMethods.deleteClase) // ✅
-router.patch("/update/:id", claseMethods.updateClase)
+router.patch("/update/:id", claseMethods.updateClase) // ⏱️
 
 
 export default router
