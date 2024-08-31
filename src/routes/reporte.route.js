@@ -4,8 +4,8 @@ import { tokensMethods } from "../functions.js";
 
 const router = Router();
 
-tokensMethods.isAuthorized(router, ["supervisor", "director"])
-router.get("/supervisor/:id", reporteMethods.getReporteBySupervisor)
+tokensMethods.isAuthorized(router, ["supervisor", "director"]) 
+router.get("/supervisor/:id", reporteMethods.getReporteBySupervisor) //👀
 router.post("/register", reporteMethods.registrarReporte)
 router.patch("/update/:id", reporteMethods.updateReporte)
 
