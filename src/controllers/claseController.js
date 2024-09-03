@@ -16,25 +16,25 @@ const getClases = async (req, res) => {
 };
 const getClassHorarioId = async (req, res) => {
   try {
-      if (req.params !== undefined) {
-          const { id } = req.params
-          console.log('id entrando', id)
-          const connection = await database.getConnection()
-          const result = await connection.query("SELECT id, horario FROM clase WHERE horario = " +id+ "")
-           console.log("result", result);
-          if (result !== undefined) {
-              res.status(200).json(result)
-              return
-          }
-          res.status(200).json({"status": "error", "message": "No se obtuvo ningun dato desde el servidor."})
-          return
+    if (req.params !== undefined) {
+      const { id } = req.params
+      console.log('id entrando', id)
+      const connection = await database.getConnection()
+      const result = await connection.query("SELECT id, horario FROM clase WHERE horario = " + id + "")
+      console.log("result", result);
+      if (result !== undefined) {
+        res.status(200).json(result)
+        return
       }
-      res.status(400).json({"status": "error", "message": "Bad Request."})
+      res.status(200).json({ "status": "error", "message": "No se obtuvo ningun dato desde el servidor." })
       return
+    }
+    res.status(400).json({ "status": "error", "message": "Bad Request." })
+    return
   } catch (error) {
-      res.status(500).send('Internal Server Error: ' + error.message)
+    res.status(500).send('Internal Server Error: ' + error.message)
   }
- 
+
 }
 const getIdClase = async (req, res) => {
   try {
@@ -106,8 +106,8 @@ const getClaseBySupervisor = async (req, res) => {
       const connection = await database.getConnection();
       const result = await connection.query(
         "SELECT clase.* FROM clase JOIN supervisor ON supervisor.id = clase.supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
-          cedula +
-          " "
+        cedula +
+        " "
       );
 
       if (result !== undefined) {
@@ -194,7 +194,7 @@ const deleteClase = async (req, res) => {
 
 const updateClase = async (req, res) => {
   // fecha, supervisor, dia, salon
-  
+
   try {
     if (req.params !== undefined && req.body !== undefined) {
       const { id } = req.params;
@@ -223,6 +223,55 @@ const updateClase = async (req, res) => {
   }
 };
 
+const filterBySupSalDiaHor = async (req, res) => {
+  try {
+    if (req.params !== undefined) {
+      const { cedula, salon, dia, horario } = req.params
+
+      const connection = await database.getConnection()
+      let query = ""
+
+      if (cedula!=0 && salon !=0 && dia!=0 && horario!=0)
+        query = "SELECT clase.* FROM clase JOIN supervisor ON clase.supervisor = supervisor.id JOIN persona ON persona.id = supervisor.persona JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE persona.cedula = " +cedula+ " AND clase.salon=" +salon+ " AND clase.horario=" +horario+ " AND detalle_horario.dia = " +dia+ ""
+      else if (cedula!=0 && salon !=0 && dia!=0 && horario==0)
+        query = "SELECT clase.* FROM clase JOIN supervisor ON clase.supervisor = supervisor.id JOIN persona ON persona.id = supervisor.persona JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE persona.cedula = " +cedula+ " AND clase.salon=" +salon+ " AND detalle_horario.dia = " +dia+ ""
+      else if (cedula!=0 && salon !=0 && dia==0 && horario==0)
+        query = "SELECT clase.* FROM clase JOIN supervisor ON clase.supervisor = supervisor.id JOIN persona ON persona.id = supervisor.persona JOIN horario ON clase.horario = horario.id WHERE persona.cedula = " +cedula+ " AND clase.salon=" +salon+ ""
+      else if (cedula!=0 && salon==0 && dia==0 && horario==0)
+        query = "SELECT clase.* FROM clase JOIN supervisor ON clase.supervisor = supervisor.id JOIN persona ON persona.id = supervisor.persona JOIN horario ON clase.horario = horario.id WHERE persona.cedula = " +cedula+ ""
+      else if (cedula==0 && salon!=0 && dia!=0 && horario!=0)
+        query = "SELECT clase.* FROM clase JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE clase.salon=" +salon+ " AND clase.horario=" +horario+ " AND detalle_horario.dia = " +dia+ ""
+      else if (cedula==0 && salon!=0 && dia!=0 && horario==0)
+        query = "SELECT clase.* FROM clase JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE clase.salon=" +salon+ " AND detalle_horario.dia = " +dia+ ""
+      else if (cedula==0 && salon!=0 && dia==0 && horario==0)
+        query = "SELECT clase.* FROM clase WHERE clase.salon=" +salon+ ""
+      else if (cedula==0 && salon==0 && dia!=0 && horario!=0)
+        query = "SELECT clase.* FROM clase JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE clase.horario=" +horario+ " AND detalle_horario.dia = " +dia+ ""
+      else if (cedula==0 && salon==0 && dia!=0 && horario==0)
+        query = "SELECT clase.* FROM clase JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE detalle_horario.dia = " +dia+ ""
+      else if(cedula==0 && salon==0 && dia==0 && horario!=0)
+        query = "SELECT clase.* FROM clase WHERE clase.horario=" +horario+ ""
+      else{
+        res.status(400).json({ "status": "error", "message": "Bad request." })
+        return
+    }
+
+      const result = await connection.query(query)
+
+      if (result !== undefined) {
+        res.status(200).json(result)
+        return
+      }
+
+      res.status(400).json({ "status": "error", "message": "Bad request." })
+      return
+    }
+    res.status(400).json({ "status": "error", "message": "Bad request." })
+  } catch (error) {
+    res.status(500).send('Internal Server Error: ' + error.message)
+  }
+}
+
 export const methods = {
   getClases,
   getClaseByHorario,
@@ -231,5 +280,7 @@ export const methods = {
   registerClase,
   deleteClase,
   updateClase,
-  getIdClase,getClassHorarioId
+  getIdClase, 
+  getClassHorarioId,
+  filterBySupSalDiaHor
 };

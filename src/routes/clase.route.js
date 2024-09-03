@@ -8,6 +8,7 @@ const router = Router();
 tokensMethods.isAuthorized(router, ["supervisor", "docente", "director"])
 router.get("/horario/:horario", claseMethods.getClaseByHorario)
 router.get("/salon/:salon", claseMethods.getClaseBySalon)
+router.get("/supervisor/:cedula/salon/:salon/dia/:dia/horario/:horario", claseMethods.filterBySupSalDiaHor)
 
 tokensMethods.isAuthorized(router, ["supervisor", "director"])
 router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor)

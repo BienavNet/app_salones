@@ -9,6 +9,7 @@ router.get("/docente/:cedula", comentarioMethods.getComentarioByDocente)
 router.post("/register", comentarioMethods.registerComentario)
 router.delete("/delete/docente/:cedula", comentarioMethods.deleteAllComentariosByDocente)
 router.delete("/delete/:id", comentarioMethods.deleteComentarioById)
+router.get("/docente/:cedula/salon/:salon", comentarioMethods.filterByDocAndSal)
 
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/:id", comentarioMethods.getComentarioById)

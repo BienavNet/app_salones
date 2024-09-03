@@ -8,6 +8,7 @@ tokensMethods.isAuthorized(router, ["supervisor", "director"])
 router.get("/supervisor/:id", reporteMethods.getReporteBySupervisor)
 router.post("/register", reporteMethods.registrarReporte)
 router.post("/update/:id", reporteMethods.updateReporte)
+router.get("/supervisor/:cedula/salon/:salon", reporteMethods.filterBySupAndSal)
 
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/", reporteMethods.getReportes)
