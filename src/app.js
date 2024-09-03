@@ -14,6 +14,7 @@ import comentarioRoute from "./routes/comentario.route.js"
 import detalle_horarioRoute from "./routes/detalle_horario.route.js"
 import reporteRoute from "./routes/reporte.route.js"
 import salonRoute from "./routes/salon.route.js"
+import notificacionRoute from "./routes/notificacion.route.js"
 
 //Crypto port file gen 
 import { PORT } from "./config.js";
@@ -55,6 +56,7 @@ app.use("/api/comentarios/", comentarioRoute)
 app.use("/api/horarios/detalles/", detalle_horarioRoute)
 app.use("/api/reporte/", reporteRoute)
 app.use("/api/salon/", salonRoute)
+app.use("/api/notificaciones/", notificacionRoute)
 
 export default app;
 

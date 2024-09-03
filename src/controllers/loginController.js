@@ -30,21 +30,21 @@ const checkLogin = async (req, res) => {
     var result = await connection.query(query, [correo, contrasena]);
     if (result.length > 0) {
       const { id, nombre } = result[0];
-      console.log("id :" , id, "nombre :" , nombre)
+      console.log("id :", id, "nombre :", nombre)
       if (id !== undefined && id !== "") {
         var result = await connection.query(
           "SELECT id AS id_rol FROM " + rol + " WHERE persona = " + id + ""
         );
         if (result.length > 0) {
           const { id_rol } = result[0];
-          console.log("id_rol :" , id_rol)
+          console.log("id_rol :", id_rol)
           if (id_rol !== undefined && id_rol !== "") {
             const token = tokens.signToken({
               nombre,
               user: correo,
               rol,
             });
-            console.log("token :" , token)
+            console.log("token :", token)
             res.set({ Authorization: token });
             res.cookie("access_token", token, {
               httpOnly: true, // la cookie solo se puede acceder en el servidor
