@@ -7,12 +7,9 @@ const router = Router();
 tokensMethods.isAuthorized(router, ["supervisor", "director"]) 
 router.get("/supervisor/:id", reporteMethods.getReporteBySupervisor) //👀
 router.post("/register", reporteMethods.registrarReporte)
-<<<<<<< HEAD
 router.post("/update/:id", reporteMethods.updateReporte)
 router.get("/supervisor/:cedula/salon/:salon", reporteMethods.filterBySupAndSal)
-=======
 router.patch("/update/:id", reporteMethods.updateReporte)
->>>>>>> b05d0487503b6f332c9d6b4d87ee60a955302477
 
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/", reporteMethods.getReportes) // ✅
