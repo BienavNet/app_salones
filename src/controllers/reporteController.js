@@ -529,5 +529,6 @@ export const methods = {
   getReporteBySupervisor,
   registrarReporte,
   updateReporte,
-  deleteReporte
+  deleteReporte,
+  filterBySupAndSal
 };
