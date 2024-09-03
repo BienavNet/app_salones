@@ -53,22 +53,21 @@ const updateHorario = async (req, res) => {
     if (req.body !== undefined && req.body !== "") {
       if (req.params !== undefined) {
         const { id } = req.params;
-
+        console.log("id: " + id)
         if (req.body !== undefined) {
           const connection = await database.getConnection();
           const result = await connection.query(
-            "UPDATE horario SET ? WHERE id = " + id + ""
-          );
-
+            "UPDATE horario SET ? WHERE id = " + id + "", req.body);
+        console.log("result: " + result)
           const { affectedRows } = result;
 
-          if (affectedRows > 0) {
-            res.status(200).json({
+          if (affectedRows  == 1) {
+            return res.status(200).json({
               status: "ok",
               message: "Datos actualizados correctamente.",
             });
           }
-          res.status(200).json({
+          return res.status(200).json({
             status: "error",
             message: "Error en los datos enviados al servidor.",
           });
@@ -142,11 +141,7 @@ const getHorarioById = async (req, res) => {
       const connection = await database.getConnection();
       const result = await connection.query(
 `SELECT 
-horario.id, horario.asignatura, 
-detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, 
-persona.nombre AS nombre_docente, persona.apellido AS apellido_docente, persona.cedula, 
-clase.salon, clase.estado, clase.fecha, 
-salon.nombre, salon.numero_salon, salon.capacidad, salon.INTernet, salon.tv, 
+horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre AS nombre_docente, persona.apellido AS apellido_docente, persona.cedula, docente.id AS docente_id, clase.salon, clase.estado, clase.fecha, salon.nombre, salon.numero_salon, salon.capacidad, salon.INTernet, salon.tv, 
 categoria_salon.categoria
 FROM horario
 JOIN detalle_horario ON horario.id = detalle_horario.horario
@@ -162,6 +157,7 @@ WHERE horario.id = ?`,
       const JOINHORARIODATA = result.reduce((a, row) => {
         const {
           id,
+          docente_id,
           cedula,
           nombre_docente,
           apellido_docente,
@@ -181,6 +177,7 @@ WHERE horario.id = ?`,
           a[cedula] = {
             id,
             cedula,
+            docente_id,
             nombre:nombre_docente,
             apellido:apellido_docente,
             asignatura,

@@ -10,7 +10,7 @@ const getDocentes = async (req, res, next) => {
     const result = await connection.query(
       "SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona"
     );
-    console.log(result, "results: " );
+    console.log(result, "results: ");
     res.status(200).json(result);
     next();
   } catch (error) {
@@ -124,24 +124,24 @@ const getDocenteByCorreo = async (correo) => {
 
 // ✅
 const saveDocente = async (req, res) => {
-  if (!req.body) res.status(400).send("Bad Request.");
+  if (!req.body) {
+    return res.status(400).send("Bad Request.");
+  }
+  const { nombre, apellido, cedula, correo, contrasena } = req.body;
   try {
-    res.setHeader("Content-Type", "application/json");
-
-    const { nombre, apellido, cedula, correo, contrasena } = req.body;
-
-    try {
-      // validaciones simples
-      Validaciones.nombre(nombre);
-      Validaciones.apellido(apellido);
-      Validaciones.cedula(cedula);
-      Validaciones.correo(correo);
-      Validaciones.contrasena(contrasena);
-    } catch (validationError) {
-      return res
-        .status(400)
-        .json({ status: "Bad Request.", message: validationError.message });
-    }
+    // validaciones simples
+    Validaciones.nombre(nombre);
+    Validaciones.apellido(apellido);
+    Validaciones.cedula(cedula);
+    Validaciones.correo(correo);
+    Validaciones.contrasena(contrasena);
+  } catch (validationError) {
+    return res
+      .status(400)
+      .json({ status: "Bad Request.", message: validationError.message });
+  }
+  const connection = await database.getConnection();
+  try {
     const persona = await getPersonaByCorreo(correo, cedula);
     if (persona) {
       const isDocentecorreo = await getDocenteByCorreo(correo);
@@ -162,48 +162,49 @@ const saveDocente = async (req, res) => {
 
     //antes de crear el user haseamos la password
     const hashedPassword = await bcrypt.hash(contrasena, SALTROUNDS);
-    const connection = await database.getConnection();
-    try {
-      await connection.beginTransaction();
-      const formatData = {
-        nombre,
-        apellido,
-        correo,
-        cedula,
-        contrasena: hashedPassword,
-      };
 
-      let result = await connection.query(
-        "INSERT INTO persona SET ?",
-        formatData
+    await connection.beginTransaction();
+    const formatData = {
+      nombre,
+      apellido,
+      correo,
+      cedula,
+      contrasena: hashedPassword,
+    };
+
+    let result = await connection.query(
+      "INSERT INTO persona SET ?",
+      formatData
+    );
+
+    if (result.affectedRows > 0) {
+      const { insertId } = result;
+      result = await connection.query(
+        "INSERT INTO docente (persona) VALUES (" + insertId + ")"
       );
+      await connection.commit();
 
-      if (result !== undefined) {
-        const { insertId } = result;
-        result = await connection.query(
-          "INSERT INTO docente (persona) VALUES (" + insertId + ")"
-        );
-        await connection.commit();
-        return res.status(200).json({
-          status: "ok",
-          message: "Datos almacenados en la base de datos correctamente",
-        });
-      } else {
-        throw new Error({
-          status: 400,
-          message: "Bad Request.",
-        });
-      }
-    } catch (error) {
-      await connection.rollback();
-      console.log("error en la rollback");
-      res.status(500).send("Internal Server Error: " + error.message);
-      throw error;
+      return res.status(200).json({
+        status: "ok",
+        message: "Datos almacenados en la base de datos correctamente",
+      });
+    } else {
+      throw new Error("No se pudo insertar el registro.");
     }
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    if (connection) {
+      await connection.rollback();
+    }
+    console.error("Error en la transacción:", error.message);
+    if (!res.headersSent) {
+      return res.status(500).json({
+        status: "Internal Server Error",
+        message: "Error en la operación: " + error.message,
+      });
+    }
   }
 };
+
 // ✅
 const updateDocente = async (req, res) => {
   try {

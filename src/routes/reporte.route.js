@@ -4,16 +4,27 @@ import { tokensMethods } from "../functions.js";
 
 const router = Router();
 
-tokensMethods.isAuthorized(router, ["supervisor", "director"])
-router.get("/supervisor/:id", reporteMethods.getReporteBySupervisor)
+tokensMethods.isAuthorized(router, ["supervisor", "director"]) 
+router.get("/supervisor/:id", reporteMethods.getReporteBySupervisor) //👀
 router.post("/register", reporteMethods.registrarReporte)
+<<<<<<< HEAD
 router.post("/update/:id", reporteMethods.updateReporte)
 router.get("/supervisor/:cedula/salon/:salon", reporteMethods.filterBySupAndSal)
+=======
+router.patch("/update/:id", reporteMethods.updateReporte)
+>>>>>>> b05d0487503b6f332c9d6b4d87ee60a955302477
 
 tokensMethods.isAuthorized(router, ["director"])
-router.get("/", reporteMethods.getReportes)
-router.get("/clase/:clase", reporteMethods.getReporteByClase)
-router.get("/salon/:salon", reporteMethods.getReporteBySalon)
-router.delete("/delete/:id", reporteMethods.deleteReporte)
+router.get("/", reporteMethods.getReportes) // ✅
+router.get("/clase/:clase", reporteMethods.getReporteByClase) //👀
+router.get("/salon/:salon", reporteMethods.getReporteBySalon) //👀
+router.delete("/delete/:id", reporteMethods.deleteReporte) 
+
+router.get("/statistics/docente-mas-comentarios", reporteMethods.getDocenteQMasComentariosHaRealizado)  // ✅
+router.get("/statistics/salon-mas-comentarios", reporteMethods.getsalonMasComentarioTiene)  // ✅
+router.get("/statistics/salon-mas-utilizado", reporteMethods.getSalonMasUtilizado)  // ✅
+router.get("/statistics/salon-menos-utilizado", reporteMethods.getSalonMenosUtilizado)  // ✅
+router.get("/statistics/cantidad-dias-asignado", reporteMethods.getCantidadDiaMasAsignado) // ✅
+router.get("/statistics/hours-mas-frecuente", reporteMethods.getRangeHoursMasFrecuente) // ✅
 
 export default router
