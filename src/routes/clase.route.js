@@ -6,25 +6,17 @@ import { tokensMethods } from "../functions.js";
 const router = Router();
 
 tokensMethods.isAuthorized(router, ["supervisor", "docente", "director"])
-<<<<<<< HEAD
-<<<<<<< HEAD
 router.get("/horario/:horario", claseMethods.getClaseByHorario)
 router.get("/salon/:salon", claseMethods.getClaseBySalon)
 router.get("/supervisor/:cedula/salon/:salon/dia/:dia/horario/:horario", claseMethods.filterBySupSalDiaHor)
+router.get("/horario/:horario", claseMethods.getClaseByHorario) //👀  // DIRECTOR OPCIONAL
+router.get("/salon/:salon", claseMethods.getClaseBySalon) //👀      // DIRECTOR OPCIONAL
 
-=======
 router.get("/horario/:horario", claseMethods.getClaseByHorario) //👀  // DIRECTOR OPCIONAL
 router.get("/salon/:salon", claseMethods.getClaseBySalon) //👀      // DIRECTOR OPCIONAL
- 
->>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
-=======
-router.get("/horario/:horario", claseMethods.getClaseByHorario) //👀  // DIRECTOR OPCIONAL
-router.get("/salon/:salon", claseMethods.getClaseBySalon) //👀      // DIRECTOR OPCIONAL
- 
->>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
+
 tokensMethods.isAuthorized(router, ["supervisor", "director"])
 router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor) // SUPERVISOR ID LOGIN
-
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/", claseMethods.getClases) 
 router.post("/register", claseMethods.registerClase) // ✅
