@@ -39,9 +39,7 @@ const isAuthorized = (router, roles) =>{
         if (token && token.startsWith('Bearer ')) {
             access_token = token.split(' ')[1]  // extrae el token sin el prefijo "Bearer"
         }
-        else{
-            access_token = req.cookies.access_token
-        }
+        else{ access_token = req.cookies.access_token}
     
         if (access_token){
             const token_decoded = verifyToken(access_token)
@@ -55,11 +53,10 @@ const isAuthorized = (router, roles) =>{
                     }
                 }
             }else{
-                res.status(401).send("Your token has expired. Please just re-log in and try again.")
-                return 
+                return  res.status(401).send("Your token has expired. Please just re-log in and try again.")
             }
         } 
-        res.status(403).send("You are not allowed to do this.")
+        return res.status(403).send("You are not allowed to do this.")
     })
 }
 

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS persona (
 	id INT auto_increment PRIMARY KEY,
     nombre VARCHAR(30) NOT NULL,
     apellido VARCHAR(30) NOT NULL,
-    cedula INT(10) UNSIGNED NOT NULL,
+    cedula INT(10) UNSIGNED NOT NULL UNIQUE,
     correo VARCHAR(40) unique NOT NULL,
     contrasena VARCHAR(100) NOT NULL
 );
@@ -52,9 +52,9 @@ CREATE TABLE IF NOT EXISTS categoria_salon (
 CREATE TABLE IF NOT EXISTS salon (
 	id INT auto_increment PRIMARY KEY,
     categoria_salon INT ,
-    numero_salon INT ,
-    nombre VARCHAR(25) NOT NULL,
-    capacidad tinyINT NOT NULL,
+    numero_salon INT UNSIGNED NOT NULL UNIQUE,
+    nombre VARCHAR(50) NOT NULL,
+    capacidad tinyINT UNSIGNED NOT NULL,
     INTernet enum('si', 'no') NOT NULL,
     tv enum('si', 'no') NOT NULL, 
     FOREIGN KEY (categoria_salon) references categoria_salon(id)
