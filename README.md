@@ -15,3 +15,6 @@ instalamo la libreria de bcrypt
 
 //añadimos las cookies
  > npm install cookie-parser // otro tipo de middleware
+
+
+arreglando conflict cambios
