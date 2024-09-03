@@ -2,6 +2,7 @@ import { getMostCommon, getThreeMostCommon } from "../assets/function.js";
 import { methods as database } from "./../database/database.js";
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 const getReportes = async (req, res) => {
     try {
@@ -16,6 +17,8 @@ const getReportes = async (req, res) => {
     } catch (error) {
         res.status(500).send('Internal Server Error: ' + error.message)
 =======
+=======
+>>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
 // estadistica de reportes
 const getDocenteQMasComentariosHaRealizado = async (req, res) => {
   try {
@@ -33,6 +36,9 @@ LIMIT 3`);
     console.log("getDocenteQMasComentariosHaRealizado", result);
     if (result !== undefined) {
       return res.status(200).json(result);
+<<<<<<< HEAD
+>>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
+=======
 >>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -311,6 +317,7 @@ const getReportes = async (req, res) => {
 
 const getReporteBySupervisor = async (req, res) => {
 <<<<<<< HEAD
+<<<<<<< HEAD
     try {
         if (req.params !== undefined) {
             const { id } = req.params
@@ -436,12 +443,84 @@ const getReporteBySalon = async (req, res) => {
        JOIN  clase ON clase.id = reporte.clase 
        WHERE clase.salon =`,[salon]);
 
+=======
+  try {
+    if (req.params !== undefined) {
+      const { id } = req.params;
+
+      const connection = await database.getConnection();
+      const result = await connection.query(
+        `
+SELECT reporte.*, clase.fecha, clase.estado, horario.asignatura, horario.id, persona.nombre, persona.apellido, persona.cedula, salon.nombre AS nombre_salon, salon.numero_salon,salon.INTernet, salon.tv
+FROM reporte 
+JOIN clase ON reporte.clase = reporte.clase 
+JOIN horario ON clase.horario = clase.horario
+JOIN docente ON horario.docente = docente.id
+JOIN persona ON docente.persona = persona.id 
+JOIN salon ON clase.salon = clase.salon
+WHERE clase.supervisor = ?`,
+        [id]
+      );
+      console.log("result report backend", result);
+      if (result !== undefined) {
+        return res.status(200).json(result);
+      }
+      res.status(400).json({ status: "error", message: "Bad request." });
+      return;
+    }
+    res.status(400).json({ status: "error", message: "Bad request." });
+  } catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
+
+//👀
+const getReporteByClase = async (req, res) => {
+  try {
+    if (req.params !== undefined) {
+      const { clase } = req.params;
+
+      const connection = await database.getConnection();
+      const result = await connection.query(`
+        SELECT reporte.* 
+        FROM  reporte 
+        WHERE reporte.clase =`,[clase]);
       if (result !== undefined) {
         res.status(200).json(result);
         return;
       }
       res.status(400).json({ status: "error", message: "Bad request." });
       return;
+    }
+    res.status(400).json({ status: "error", message: "Bad request." });
+  } catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
+
+//👀
+const getReporteBySalon = async (req, res) => {
+  try {
+    if (req.params !== undefined) {
+      const { salon } = req.params;
+
+      const connection = await database.getConnection();
+      const result = await connection.query(`
+       SELECT reporte.* 
+       FROM  reporte 
+       JOIN  clase ON clase.id = reporte.clase 
+       WHERE clase.salon =`,[salon]);
+
+>>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
+      if (result !== undefined) {
+        res.status(200).json(result);
+        return;
+      }
+      res.status(400).json({ status: "error", message: "Bad request." });
+      return;
+<<<<<<< HEAD
+>>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
+=======
 >>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -452,8 +531,14 @@ const getReporteBySalon = async (req, res) => {
 
 const registrarReporte = async (req, res) => {
 <<<<<<< HEAD
+<<<<<<< HEAD
     try {
         if (req.body !== undefined) {
+=======
+  try {
+    if (req.body !== undefined) {
+      const { clase, comentario } = req.body;
+>>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
 =======
   try {
     if (req.body !== undefined) {
@@ -467,6 +552,7 @@ const registrarReporte = async (req, res) => {
           req.body
         );
 
+<<<<<<< HEAD
 <<<<<<< HEAD
             if (clase !== undefined && comentario !== undefined) {
                 const connection = await database.getConnection()
@@ -497,11 +583,25 @@ const registrarReporte = async (req, res) => {
           });
           return;
         }
+=======
+        const { affectedRows } = result;
+
+        if (affectedRows == 1) {
+          res.status(200).json({
+            status: "ok",
+            message: "Datos almacenados correctamente en el servidor.",
+          });
+          return;
+        }
+>>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
         res.status(400).json({ status: "error", message: "Bad request." });
         return;
       }
       res.status(400).json({ status: "error", message: "Bad request." });
       return;
+<<<<<<< HEAD
+>>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
+=======
 >>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -511,6 +611,7 @@ const registrarReporte = async (req, res) => {
 };
 
 const deleteReporte = async (req, res) => {
+<<<<<<< HEAD
 <<<<<<< HEAD
     try {
         if (req.params !== undefined) {
@@ -543,6 +644,19 @@ const deleteReporte = async (req, res) => {
     } catch (error) {
         res.status(500).send('Internal Server Error: ' + error.message)
 =======
+=======
+  try {
+    if (req.params !== undefined) {
+      const { id } = req.params;
+
+      const connection = await database.getConnection();
+      const result = await connection.query(
+        "DELETE reporte WHERE reporte.id = " + id + ""
+      );
+
+      const { affectedRows } = result;
+
+>>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
       if (affectedRows == 1) {
         res.status(200).json({
           status: "ok",
@@ -552,6 +666,9 @@ const deleteReporte = async (req, res) => {
       }
       res.status(400).json({ status: "error", message: "Bad request." });
       return;
+<<<<<<< HEAD
+>>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
+=======
 >>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -561,6 +678,7 @@ const deleteReporte = async (req, res) => {
 };
 
 const updateReporte = async (req, res) => {
+<<<<<<< HEAD
 <<<<<<< HEAD
     try {
         if (req.params !== undefined && req.body !== undefined) {
@@ -580,8 +698,33 @@ const updateReporte = async (req, res) => {
         res.status(400).json({ "status": "error", "message": "Bad request." })
     } catch (error) {
         res.status(500).send('Internal Server Error: ' + error.message)
+=======
+  try {
+    if (req.params !== undefined && req.body !== undefined) {
+      const { id } = req.params;
+
+      const connection = await database.getConnection();
+      const result = await connection.query(
+        "UPDATE reporte SET ? WHERE reporte.id = " + id + ""
+      );
+      const { affectedRows } = result;
+
+      if (affectedRows == 1) {
+        res.status(200).json({
+          status: "ok",
+          message: "Datos actualizados correctamente en el servidor.",
+        });
+        return;
+      }
+      res.status(400).json({ status: "error", message: "Bad request." });
+      return;
+>>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
     }
-}
+    res.status(400).json({ status: "error", message: "Bad request." });
+  } catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
 
 // README 
 
@@ -654,6 +797,7 @@ const filterBySupAndSal = async (req, res) => {
 
 export const methods = {
 <<<<<<< HEAD
+<<<<<<< HEAD
     getReportes,
     getReporteByClase,
     getReporteBySalon,
@@ -664,6 +808,8 @@ export const methods = {
     filterBySupAndSal
 }
 =======
+=======
+>>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
   getSalonMenosUtilizado,
   getSalonMasUtilizado,
   getsalonMasComentarioTiene,
@@ -676,4 +822,7 @@ export const methods = {
   updateReporte,
   deleteReporte,
 };
+<<<<<<< HEAD
+>>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
+=======
 >>>>>>> 6b863967c5b45a1b07ac330db4700d4a42ad0ac2
