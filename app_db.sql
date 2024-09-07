@@ -469,12 +469,13 @@ INSERT INTO `horario` (`id`, `docente`, `asignatura`) VALUES
 --
 
 CREATE TABLE `notificacion` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `mensaje` varchar(100) NOT NULL,
   `de` int(11) DEFAULT NULL,
   `para` int(11) DEFAULT NULL,
   `estado` enum('leida','no leida') NOT NULL,
   `fecha` date NOT NULL
+   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

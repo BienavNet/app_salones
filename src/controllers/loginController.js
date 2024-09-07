@@ -14,7 +14,6 @@ const checkLogin = async (req, res) => {
   }
   try {
     const { correo, contrasena, rol } = req.body;
-    console.log("correo: " + correo, "contrasena: " + contrasena, "rol: ", rol);
     try {
       Validaciones.correo(correo);
       Validaciones.contrasena(contrasena);
@@ -26,25 +25,24 @@ const checkLogin = async (req, res) => {
     }
     const connection = await database.getConnection();
     const query =
-      "SELECT id, nombre FROM persona WHERE correo = ? AND contrasena = ?";
+      "SELECT id, nombre, cedula FROM persona WHERE correo = ? AND contrasena = ?";
     var result = await connection.query(query, [correo, contrasena]);
     if (result.length > 0) {
-      const { id, nombre } = result[0];
-      console.log("id :", id, "nombre :", nombre)
+      const { id, nombre, cedula } = result[0];
+      console.log("id :", id, "nombre :", nombre, "cedula :", cedula);
       if (id !== undefined && id !== "") {
         var result = await connection.query(
           "SELECT id AS id_rol FROM " + rol + " WHERE persona = " + id + ""
         );
         if (result.length > 0) {
           const { id_rol } = result[0];
-          console.log("id_rol :", id_rol)
           if (id_rol !== undefined && id_rol !== "") {
             const token = tokens.signToken({
+              cedula,
               nombre,
               user: correo,
               rol,
             });
-            console.log("token :", token)
             res.set({ Authorization: token });
             res.cookie("access_token", token, {
               httpOnly: true, // la cookie solo se puede acceder en el servidor
@@ -68,7 +66,6 @@ const checkLogin = async (req, res) => {
         .json({ status: "Bad Request", message: "Credenciales incorrectas." });
     }
   } catch (error) {
-    console.log("entro", error);
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };

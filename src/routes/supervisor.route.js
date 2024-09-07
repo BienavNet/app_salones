@@ -5,8 +5,9 @@ import { tokensMethods } from "../functions.js";
 
 const router = Router();
 
+// filtrado, x {supervisor/cedula/:cedula}
 tokensMethods.isAuthorized(router, ["director", "supervisor"])
-router.get('/cedula/:cedula', supervisorMethods.getSupervisorByCedula)
+router.get('/cedula/:cedula', supervisorMethods.getSupervisorByCedula)  //👀
 
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/", supervisorMethods.getSupervisores) // ✅

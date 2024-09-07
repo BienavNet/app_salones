@@ -3,7 +3,7 @@ import { methods as docenteMethods } from "./../controllers/docenteController.js
 import { tokensMethods } from "../functions.js";
 
 const router = Router();
-
+// filtrado, x {Docente/cedula/:cedula}
 try {
   tokensMethods.isAuthorized(router, ["docente", "director"]);
   router.get("/cedula/:cedula", docenteMethods.getDocenteIdByCedula); //👀
