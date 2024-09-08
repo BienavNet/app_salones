@@ -2,8 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors"
 import cookieParser from "cookie-parser";
-import jwt from "jsonwebtoken";
-
+import http from "http";
 // Import Routes
 import docenteRoute from "./routes/docente.route.js"
 import supervisorRoute from "./routes/supervisor.route.js"
@@ -18,8 +17,10 @@ import notificacionRoute from "./routes/notificacion.route.js"
 
 //Crypto port file gen 
 import { PORT } from "./config.js";
-
+import { initSocketServer } from "./utils/WebsocketServer.js";
 const app = express();
+const server = http.createServer(app);
+initSocketServer(server);
 
 // Settings app
 app.set("port", PORT)
@@ -29,22 +30,6 @@ app.use(cors())
 app.use(morgan("dev"))
 app.use(express.json())
 app.use(cookieParser())
-
-// app.use((req, res, next)=>{
-//     const token = req.cookies.access_token
-//     req.session = { persona : null}
-//     try {
-//         const data = jwt.verify(token, process.env.JWT_SECRET_KEY)
-//         req.session.persona = data
-//     } catch{}
-//     req.session = { user : null}
-//     try {
-//         const data = jwt.verify(token, process.env.JWT_SECRET_KEY)
-//         req.session.user = data
-//     } catch{}
-
-//     next() // -> sigue la siguiente ruta o middleware
-// })
 
 // Routes
 app.use("/api/docente", docenteRoute)
@@ -58,6 +43,4 @@ app.use("/api/reporte/", reporteRoute)
 app.use("/api/salon/", salonRoute)
 app.use("/api/notificaciones/", notificacionRoute)
 
-export default app;
-
-
+export { server, app};

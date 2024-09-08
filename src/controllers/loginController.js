@@ -29,7 +29,6 @@ const checkLogin = async (req, res) => {
     var result = await connection.query(query, [correo, contrasena]);
     if (result.length > 0) {
       const { id, nombre, cedula } = result[0];
-      console.log("id :", id, "nombre :", nombre, "cedula :", cedula);
       if (id !== undefined && id !== "") {
         var result = await connection.query(
           "SELECT id AS id_rol FROM " + rol + " WHERE persona = " + id + ""
@@ -38,6 +37,7 @@ const checkLogin = async (req, res) => {
           const { id_rol } = result[0];
           if (id_rol !== undefined && id_rol !== "") {
             const token = tokens.signToken({
+              id,
               cedula,
               nombre,
               user: correo,

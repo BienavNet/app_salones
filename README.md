@@ -18,3 +18,6 @@ instalamo la libreria de bcrypt
 
 
 arreglando conflict cambios
+
+instalamos uso de websocket en express para notificationes
+> npm install socket.io
