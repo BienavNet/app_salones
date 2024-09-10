@@ -2,6 +2,18 @@ import { methods as database } from "../database/database.js";
 import { NotificationMessages as messages } from "../assets/notificationsMessages.js";
 import { io } from "../utils/WebsocketServer.js";
 
+export const getUnreadCount = async (userId) => {
+  const NOLEIDA = "no leida";
+  const connection = await database.getConnection();
+  const unreadResult = await connection.query(
+    `SELECT COUNT(*) AS no_leida 
+     FROM notificacion 
+     WHERE para = ? AND estado = ?`,
+    [userId, NOLEIDA]
+  );
+  return unreadResult[0].no_leida;
+};
+
 const getNotifications = async (req, res) => {
   try {
     const { cedula, estado } = req.params;
@@ -88,17 +100,17 @@ const sendNotification = async (req, res) => {
         console.log(result, "result notificacion");
         const { insertId, affectedRows } = result;
         if (affectedRows == 1 && insertId !== undefined) {
-
-          const NOLEIDA = "no leida";
-          const unreadResult = await connection.query(
-            `SELECT COUNT(*) AS no_leida 
-             FROM notificacion 
-             WHERE para = ? AND estado = ?`,
-            [para, NOLEIDA]
-          );
-          const unreadCount = unreadResult[0].no_leida;
-          console.log("unreadCount:", unreadCount);
-          // Emitir la notificación a la sala del usuario "para"
+          const unreadCount = await getUnreadCount(para);
+          // const NOLEIDA = "no leida";
+          // const unreadResult = await connection.query(
+          //   `SELECT COUNT(*) AS no_leida 
+          //    FROM notificacion 
+          //    WHERE para = ? AND estado = ?`,
+          //   [para, NOLEIDA]
+          // );
+          // const unreadCount = unreadResult[0].no_leida;
+          // console.log("unreadCount:", unreadCount);
+          // // Emitir la notificación a la sala del usuario "para"
           io.to(para).emit("notification", unreadCount);
 
           return res.status(200).json({
@@ -147,22 +159,13 @@ const editNotificacion = async (req, res) => {
     const result = await connection.query(query, [estado, id]);
 
     if (result.affectedRows > 0) {
-      const NOLEIDA = "no leida";
-      const paraQuery = `SELECT para FROM notificacion WHERE id = ?`;
-      const paraResult = await connection.query(paraQuery, [id]);
-      const para = paraResult[0]?.para;
-
-      if (para) {
-        const unreadResult = await connection.query(
-          `SELECT COUNT(*) AS no_leida 
-           FROM notificacion 
-           WHERE para = ? AND estado = ?`,
-          [para, NOLEIDA]
-        );
-        const unreadCount = unreadResult[0].no_leida;
-        io.to(para).emit("notification", unreadCount);
-      }
-      
+    const paraQuery = `SELECT para FROM notificacion WHERE id = ?`;
+    const paraResult = await connection.query(paraQuery, [id]);
+    const para = paraResult[0]?.para;
+    if (para) {
+      const unreadCount = await getUnreadCount(para);
+      io.to(para).emit("notification", unreadCount); 
+    }
       return res.status(200).json({
         status: "success",
         message: "Notification updated successfully.",
@@ -177,32 +180,6 @@ const editNotificacion = async (req, res) => {
   }
 };
 
-// const countunreadNotifications = async (req, res) => {
-//   try {
-//     console.log("req.params", req.params);
-//     const { id } = req.params;
-//     console.log("id", id);
-//     if (id === undefined) {
-//       res.status(400).json({ status: "error", message: "Missing parameters." });
-//       return;
-//     }
-//     const NOLEIDA = "no leida";
-//     const connection = await database.getConnection();
-//     const result = await connection.query(
-//       `SELECT COUNT(*) AS no_leida
-//       FROM notificacion
-//       WHERE para = ? AND estado = ?`,
-//       [id, NOLEIDA]
-//     );
-//     if (result !== undefined) {
-//       io.sockets.emit('notification', result);
-//       return res.status(200).json(result);
-//     }
-//     return res.status(400).json({ status: "error", message: "Bad request." });
-//   } catch (error) {
-//     return res.status(500).send("Internal Server Error: " + error.message);
-//   }
-// };
 export const methods = {
   getAll,
   getNotifications,

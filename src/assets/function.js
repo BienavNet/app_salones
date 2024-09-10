@@ -7,7 +7,6 @@ export const getMostCommon = (items) => {
 };
 
 export const getThreeMostCommon = (data) => {
-  console.log("data de getThreeMostCommon", data)
  // Crea un objeto para contar las ocurrencias de cada día
  const count = data.reduce((acc, item) => {
   const dia = item.dia;
@@ -80,3 +79,4 @@ return sortedDias.map(([dia, cantidad]) => ({ dia, cantidad }));
 //   return "Error";
 // }
 // };
+
