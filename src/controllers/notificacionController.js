@@ -2,66 +2,6 @@ import { methods as database } from "../database/database.js";
 import { NotificationMessages as messages } from "../assets/notificationsMessages.js";
 import { io } from "../utils/WebsocketServer.js";
 
-const sendNotification = async (req, res) => {
-  console.log("req.body;",req.body);
-  try {
-    if (req.body !== undefined) {
-      const { mensaje, de, para } = req.body;
-
-      if (mensaje !== undefined && de !== undefined && para !== undefined) {
-        const connection = await database.getConnection();
-        const result = await connection.query(
-          `INSERT INTO notificacion (mensaje, de, para, estado, fecha) 
-           VALUES (?, ?, ?, 'no leida', NOW())`,
-          [mensaje, de, para]
-        );
-        console.log(result, "result notificacion");
-        const { insertId, affectedRows } = result;
-        if (affectedRows == 1 && insertId !== undefined) {
-
-          const NOLEIDA = "no leida";
-          const unreadResult = await connection.query(
-            `SELECT COUNT(*) AS no_leida 
-             FROM notificacion 
-             WHERE para = ? AND estado = ?`,
-            [para, NOLEIDA]
-          );
-          const unreadCount = unreadResult[0].no_leida;
-          console.log("unreadCount:", unreadCount);
-          // Emitir la notificación a la sala del usuario "para"
-          io.to(para).emit("notification", unreadCount);
-
-          return res.status(200).json({
-            status: "ok",
-            id: insertId,
-            message: "Notificación almacenada y enviada correctamente",
-          });
-        }
-        res
-          .status(400)
-          .json({
-            status: "error",
-            message: "Error en la inserción de datos.",
-          });
-        return;
-      }
-      res
-        .status(400)
-        .json({ status: "error", message: "Bad request: faltan campos." });
-      return;
-    }
-
-    res
-      .status(400)
-      .json({
-        status: "error",
-        message: "Bad request: datos no proporcionados.",
-      });
-  } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
-  }
-};
-
 const getNotifications = async (req, res) => {
   try {
     const { cedula, estado } = req.params;
@@ -132,6 +72,66 @@ const getAll = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+const sendNotification = async (req, res) => {
+  console.log("req.body;",req.body);
+  try {
+    if (req.body !== undefined) {
+      const { mensaje, de, para } = req.body;
+
+      if (mensaje !== undefined && de !== undefined && para !== undefined) {
+        const connection = await database.getConnection();
+        const result = await connection.query(
+          `INSERT INTO notificacion (mensaje, de, para, estado, fecha) 
+           VALUES (?, ?, ?, 'no leida', NOW())`,
+          [mensaje, de, para]
+        );
+        console.log(result, "result notificacion");
+        const { insertId, affectedRows } = result;
+        if (affectedRows == 1 && insertId !== undefined) {
+
+          const NOLEIDA = "no leida";
+          const unreadResult = await connection.query(
+            `SELECT COUNT(*) AS no_leida 
+             FROM notificacion 
+             WHERE para = ? AND estado = ?`,
+            [para, NOLEIDA]
+          );
+          const unreadCount = unreadResult[0].no_leida;
+          console.log("unreadCount:", unreadCount);
+          // Emitir la notificación a la sala del usuario "para"
+          io.to(para).emit("notification", unreadCount);
+
+          return res.status(200).json({
+            status: "ok",
+            id: insertId,
+            message: "Notificación almacenada y enviada correctamente",
+          });
+        }
+        res
+          .status(400)
+          .json({
+            status: "error",
+            message: "Error en la inserción de datos.",
+          });
+        return;
+      }
+      res
+        .status(400)
+        .json({ status: "error", message: "Bad request: faltan campos." });
+      return;
+    }
+
+    res
+      .status(400)
+      .json({
+        status: "error",
+        message: "Bad request: datos no proporcionados.",
+      });
+  } catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
+
 
 const editNotificacion = async (req, res) => {
   try {
@@ -147,6 +147,22 @@ const editNotificacion = async (req, res) => {
     const result = await connection.query(query, [estado, id]);
 
     if (result.affectedRows > 0) {
+      const NOLEIDA = "no leida";
+      const paraQuery = `SELECT para FROM notificacion WHERE id = ?`;
+      const paraResult = await connection.query(paraQuery, [id]);
+      const para = paraResult[0]?.para;
+
+      if (para) {
+        const unreadResult = await connection.query(
+          `SELECT COUNT(*) AS no_leida 
+           FROM notificacion 
+           WHERE para = ? AND estado = ?`,
+          [para, NOLEIDA]
+        );
+        const unreadCount = unreadResult[0].no_leida;
+        io.to(para).emit("notification", unreadCount);
+      }
+      
       return res.status(200).json({
         status: "success",
         message: "Notification updated successfully.",
