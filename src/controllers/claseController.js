@@ -122,8 +122,8 @@ const getClaseBySupervisor = async (req, res) => {
       const connection = await database.getConnection();
       const result = await connection.query(
         "SELECT clase.* FROM clase JOIN supervisor ON supervisor.id = clase.supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
-          cedula +
-          " "
+        cedula +
+        " "
       );
 
       if (result !== undefined) {
@@ -328,6 +328,27 @@ const filterBySupSalDiaHor = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+const filterByDoc = async (req, res) => {
+  try {
+    if (req.params !== undefined) {
+
+      const { cedula } = req.params
+      const connection = await database.getConnection()
+      const result = await connection.query("SELECT clase.* FROM clase JOIN horario ON clase.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = " + cedula + "")
+
+      if (result !== undefined) {
+        res.status(200).json(result);
+        return;
+      }
+      res.status(400).json({ status: "error", message: "Bad request." });
+      return;
+    }
+    res.status(400).json({ status: "error", message: "Bad request." });
+  } catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+}
 
 export const methods = {
   getClases,
