@@ -5,13 +5,10 @@ import { tokensMethods } from "../functions.js";
 const router = Router();
 
 // filtrado, x {reporte/supervisor/id} x {supervisor/cedula || supervisor/salon}
-// filtrado, x {clase/clase} x {salon/salon}
-
-
 tokensMethods.isAuthorized(router, ["supervisor", "director"]) 
-router.get("/supervisor/:id", reporteMethods.getReporteBySupervisor) //👀
+router.get("/supervisor/:id", reporteMethods.getReporteBySupervisor) // ✅
 router.post("/register", reporteMethods.registrarReporte)
-router.get("/supervisor/:cedula/salon/:salon", reporteMethods.filterBySupAndSal)  //👀
+router.get("/supervisor/:cedula/salon/:salon", reporteMethods.filterBySupAndSal) // ✅ por default la cedula del supervisor, filtra por el salon seleccionado
 router.patch("/update/:id", reporteMethods.updateReporte)
 
 tokensMethods.isAuthorized(router, ["director"])

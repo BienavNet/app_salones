@@ -188,17 +188,32 @@ const getReporteBySupervisor = async (req, res) => {
       const connection = await database.getConnection();
       const result = await connection.query(
         `
-SELECT reporte.*, clase.fecha, clase.estado, horario.asignatura, horario.id, persona.nombre, persona.apellido, persona.cedula, salon.nombre AS nombre_salon, salon.numero_salon,salon.INTernet, salon.tv
+SELECT 
+reporte.comentario,
+  reporte.id AS reporte_id,          
+  clase.id AS clase_id,           
+  clase.fecha, 
+  clase.estado, 
+  horario.asignatura, 
+  horario.id AS horario_id, 
+  persona.nombre, 
+  persona.apellido, 
+  persona.cedula, 
+  salon.nombre AS nombre_salon, 
+  salon.numero_salon, 
+  salon.internet, 
+  salon.tv,
+  supervisor.id AS supervisor_id   
 FROM reporte 
-JOIN clase ON reporte.clase = reporte.clase 
-JOIN horario ON clase.horario = clase.horario
-JOIN docente ON horario.docente = docente.id
-JOIN persona ON docente.persona = persona.id 
-JOIN salon ON clase.salon = clase.salon
+JOIN clase ON reporte.clase = clase.id
+JOIN horario ON clase.horario = horario.id
+JOIN docente ON horario.docente = docente.id 
+JOIN persona ON docente.persona = persona.id
+JOIN salon ON clase.salon = salon.id
+JOIN supervisor ON clase.supervisor = supervisor.id
 WHERE clase.supervisor = ?`,
         [id]
       );
-      console.log("result report backend", result);
       if (result !== undefined) {
         return res.status(200).json(result);
       }
@@ -382,11 +397,8 @@ const filterBySupAndSal = async (req, res) => {
 
       if (cedula != 0 && salon != 0) {
         query =
-          "SELECT reporte.*, clase.fecha FROM reporte JOIN clase ON clase.id = reporte.clase JOIN supervisor ON supervisor.id = clase.supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
-          cedula +
-          " AND clase.salon= " +
-          salon +
-          "";
+          "SELECT reporte.id AS reporte_id, reporte.clase, reporte.comentario, clase.estado, clase.fecha, salon.nombre AS nombre_salon, salon.numero_salon, salon.capacidad, horario.asignatura, persona_docente.nombre AS nombre_docente, persona_docente.apellido AS apellido_docente, docente.id AS docente_id FROM reporte JOIN clase ON clase.id = reporte.clase JOIN salon ON clase.salon = salon.id JOIN horario ON clase.horario = horario.id JOIN docente ON docente.id = horario.docente JOIN persona AS persona_docente ON persona_docente.id = docente.persona JOIN supervisor ON supervisor.id = clase.supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
+          cedula + " AND clase.salon = " + salon + "";
       } else if (cedula != 0 && salon == 0) {
         query =
           "SELECT reporte.*, clase.fecha FROM reporte JOIN clase ON clase.id = reporte.clase JOIN supervisor ON supervisor.id = clase.supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +

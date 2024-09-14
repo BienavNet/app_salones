@@ -85,7 +85,7 @@ const getAll = async (req, res) => {
   }
 };
 const sendNotification = async (req, res) => {
-  console.log("req.body;",req.body);
+  console.log("req.body;", req.body);
   try {
     if (req.body !== undefined) {
       const { mensaje, de, para } = req.body;
@@ -101,17 +101,7 @@ const sendNotification = async (req, res) => {
         const { insertId, affectedRows } = result;
         if (affectedRows == 1 && insertId !== undefined) {
           const unreadCount = await getUnreadCount(para);
-          // const NOLEIDA = "no leida";
-          // const unreadResult = await connection.query(
-          //   `SELECT COUNT(*) AS no_leida 
-          //    FROM notificacion 
-          //    WHERE para = ? AND estado = ?`,
-          //   [para, NOLEIDA]
-          // );
-          // const unreadCount = unreadResult[0].no_leida;
-          // console.log("unreadCount:", unreadCount);
-          // // Emitir la notificación a la sala del usuario "para"
-          io.to(para).emit("notification", unreadCount);
+          io.to(para).emit("send-notification-to-user", unreadCount);
 
           return res.status(200).json({
             status: "ok",
@@ -119,12 +109,10 @@ const sendNotification = async (req, res) => {
             message: "Notificación almacenada y enviada correctamente",
           });
         }
-        res
-          .status(400)
-          .json({
-            status: "error",
-            message: "Error en la inserción de datos.",
-          });
+        res.status(400).json({
+          status: "error",
+          message: "Error en la inserción de datos.",
+        });
         return;
       }
       res
@@ -133,17 +121,14 @@ const sendNotification = async (req, res) => {
       return;
     }
 
-    res
-      .status(400)
-      .json({
-        status: "error",
-        message: "Bad request: datos no proporcionados.",
-      });
+    res.status(400).json({
+      status: "error",
+      message: "Bad request: datos no proporcionados.",
+    });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
-
 
 const editNotificacion = async (req, res) => {
   try {
@@ -159,13 +144,13 @@ const editNotificacion = async (req, res) => {
     const result = await connection.query(query, [estado, id]);
 
     if (result.affectedRows > 0) {
-    const paraQuery = `SELECT para FROM notificacion WHERE id = ?`;
-    const paraResult = await connection.query(paraQuery, [id]);
-    const para = paraResult[0]?.para;
-    if (para) {
-      const unreadCount = await getUnreadCount(para);
-      io.to(para).emit("notification", unreadCount); 
-    }
+      const paraQuery = `SELECT para FROM notificacion WHERE id = ?`;
+      const paraResult = await connection.query(paraQuery, [id]);
+      const para = paraResult[0]?.para;
+      if (para) {
+        const unreadCount = await getUnreadCount(para);
+        io.to(para).emit("send-notification-to-user", unreadCount);
+      }
       return res.status(200).json({
         status: "success",
         message: "Notification updated successfully.",

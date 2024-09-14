@@ -4,11 +4,12 @@ import { tokensMethods } from "../functions.js";
 const router = Router();
 //agg filtro por docente
 tokensMethods.isAuthorized(router, ["supervisor", "docente", "director"])
-router.get("/horario/:horario", claseMethods.getClaseByHorario)  //👀
-router.get("/salon/:salon", claseMethods.getClaseBySalon)  //👀
+router.get("/horario/:horario", claseMethods.getClaseByHorario)  //👀 //docente o director
+router.get("/salon/:salon", claseMethods.getClaseBySalon)  //👀 /docente o director
 router.get("/supervisor/:cedula/salon/:salon/dia/:dia/horario/:horario", claseMethods.filterBySupSalDiaHor)  //👀
+
 tokensMethods.isAuthorized(router, ["supervisor", "director"])
-router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor) // SUPERVISOR ID LOGIN  //👀
+router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor) // SUPERVISOR ID LOGIN   // ✅
 
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/", claseMethods.getClases)  // ✅

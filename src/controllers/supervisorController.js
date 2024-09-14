@@ -79,7 +79,6 @@ const getSupervisorByCedula = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
       const connection = await database.getConnection();
-      //const result = await connection.query("SELECT p.*, d.* FROM persona as p, supervisor as d WHERE p.cedula = " +cedula+ " and d.persona = p.id")
       const result = await connection.query(
         "SELECT persona.*, supervisor.id as supervisor_id FROM persona INNER JOIN supervisor ON persona.id = supervisor.persona WHERE persona.cedula = " +
           cedula +
