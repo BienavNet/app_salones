@@ -52,6 +52,7 @@ const checkLogin = async (req, res) => {
             return res.status(200).json({
               status: "ok",
               message: "Login Correcto.!",
+              cedula: cedula,
               access_token: token,
             });
           }
