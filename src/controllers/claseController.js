@@ -118,14 +118,15 @@ const getClaseBySupervisor = async (req, res) => {
       const { cedula } = req.params;
       const connection = await database.getConnection();
       const result = await connection.query(
-        `SELECT clase.*, salon.numero_salon, categoria_salon.categoria, docente_persona.nombre AS nombre_docente, docente_persona.apellido AS apellido_docente, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura
+        `SELECT clase.*, salon.nombre AS nombre_salon, salon.numero_salon, categoria_salon.categoria, docente_persona.nombre AS nombre_docente, docente_persona.apellido AS apellido_docente, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura, reporte.comentario
   FROM clase
   JOIN supervisor ON supervisor.id = clase.supervisor
   JOIN persona AS supervisor_persona ON supervisor_persona.id = supervisor.persona
   JOIN salon ON salon.id = clase.salon
-  JOIN categoria_salon ON categoria_salon.id = salon.categoria_salon
+  JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id
   JOIN horario ON horario.id = clase.horario
   JOIN detalle_horario ON detalle_horario.horario = horario.id
+  LEFT JOIN reporte ON reporte.clase = clase.id 
   JOIN docente ON docente.id = horario.docente
   JOIN persona AS docente_persona ON docente_persona.id = docente.persona
   WHERE supervisor_persona.cedula  = ?`,[cedula]);

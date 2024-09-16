@@ -53,15 +53,17 @@ const updateHorario = async (req, res) => {
     if (req.body !== undefined && req.body !== "") {
       if (req.params !== undefined) {
         const { id } = req.params;
-        console.log("id: " + id)
+        console.log("id: " + id);
         if (req.body !== undefined) {
           const connection = await database.getConnection();
           const result = await connection.query(
-            "UPDATE horario SET ? WHERE id = " + id + "", req.body);
-        console.log("result: " + result)
+            "UPDATE horario SET ? WHERE id = " + id + "",
+            req.body
+          );
+          console.log("result: " + result);
           const { affectedRows } = result;
 
-          if (affectedRows  == 1) {
+          if (affectedRows == 1) {
             return res.status(200).json({
               status: "ok",
               message: "Datos actualizados correctamente.",
@@ -140,7 +142,7 @@ const getHorarioById = async (req, res) => {
       const { id } = req.params;
       const connection = await database.getConnection();
       const result = await connection.query(
-`SELECT 
+        `SELECT 
 horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre AS nombre_docente, persona.apellido AS apellido_docente, persona.cedula, docente.id AS docente_id, clase.salon, clase.estado, clase.fecha, salon.nombre, salon.numero_salon, salon.capacidad, salon.INTernet, salon.tv, 
 categoria_salon.categoria
 FROM horario
@@ -178,8 +180,8 @@ WHERE horario.id = ?`,
             id,
             cedula,
             docente_id,
-            nombre:nombre_docente,
-            apellido:apellido_docente,
+            nombre: nombre_docente,
+            apellido: apellido_docente,
             asignatura,
             horarios: [],
           };
@@ -202,7 +204,7 @@ WHERE horario.id = ?`,
       }, {});
 
       const resultArray = Object.values(JOINHORARIODATA);
-      console.log(resultArray, "result array")
+      console.log(resultArray, "result array");
       if (resultArray.length > 0) {
         return res.status(200).json(resultArray);
       } else {
@@ -224,13 +226,17 @@ const getHorariosByDocente = async (req, res) => {
 
       const connection = await database.getConnection();
       const result = await connection.query(
-        "SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin FROM horario JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id JOIN detalle_horario ON horario.id = detalle_horario.horario WHERE persona.cedula = " +
-          cedula +
-          ""
-      );
-
-      res.status(200).json(result);
-      return;
+        `
+       SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin ,clase.id AS id_class, clase.estado, clase.fecha, salon.numero_salon, salon.nombre, categoria_salon.categoria
+       FROM horario 
+       JOIN clase ON clase.horario = horario.id
+       JOIN salon ON clase.salon = salon.id
+       JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id 
+       JOIN docente ON horario.docente = docente.id 
+       JOIN persona ON docente.persona = persona.id 
+       JOIN detalle_horario ON horario.id = detalle_horario.horario 
+       WHERE persona.cedula = ?`,[cedula]);
+      return res.status(200).json(result); 
     }
     res.status(400).json({ status: "error", message: "Bad request." });
   } catch (error) {
