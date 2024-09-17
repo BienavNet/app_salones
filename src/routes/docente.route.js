@@ -6,6 +6,7 @@ const router = Router();
 // filtrado, x {Docente/cedula/:cedula}
   tokensMethods.isAuthorized(router, ["docente", "director"]);
   router.get("/cedula/:cedula", docenteMethods.getDocenteIdByCedula); //👀
+  
   tokensMethods.isAuthorized(router, ["director"]);
   router.get("/", docenteMethods.getDocentes); // ✅
   router.get("/:cedula", docenteMethods.getDocenteIdByCedula); // ✅

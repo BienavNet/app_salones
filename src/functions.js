@@ -15,7 +15,6 @@ const signToken = (payload) => {
     }
 }
 
-
 //desencripta el token pasado
 const verifyToken = (token) => {
     try {

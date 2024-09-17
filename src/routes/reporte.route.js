@@ -3,8 +3,6 @@ import { methods as reporteMethods} from "./../controllers/reporteController.js"
 import { tokensMethods } from "../functions.js";
 
 const router = Router();
-
-// filtrado, x {reporte/supervisor/id} x {supervisor/cedula || supervisor/salon}
 tokensMethods.isAuthorized(router, ["supervisor", "director"]) 
 router.get("/supervisor/:id", reporteMethods.getReporteBySupervisor) // ✅
 router.post("/register", reporteMethods.registrarReporte) // ✅

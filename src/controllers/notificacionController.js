@@ -2,6 +2,7 @@ import { methods as database } from "../database/database.js";
 import { NotificationMessages as messages } from "../assets/notificationsMessages.js";
 import { io } from "../utils/WebsocketServer.js";
 
+//cuenta las notifaciones no leidas
 export const getUnreadCount = async (userId) => {
   const NOLEIDA = "no leida";
   const connection = await database.getConnection();
@@ -84,6 +85,7 @@ const getAll = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
 const sendNotification = async (req, res) => {
   console.log("req.body;", req.body);
   try {
@@ -101,8 +103,8 @@ const sendNotification = async (req, res) => {
         const { insertId, affectedRows } = result;
         if (affectedRows == 1 && insertId !== undefined) {
           const unreadCount = await getUnreadCount(para);
-          io.to(para).emit("send-notification-to-user", unreadCount);
 
+          io.to(para).emit("send-notification-to-user", unreadCount);
           return res.status(200).json({
             status: "ok",
             id: insertId,
