@@ -18,13 +18,17 @@ const main = () => {
       socket.on("authenticate", async ({ userId, rol }) => {
         socket.join(userId); // sala personal
         socket.join(rol); // sala grupal
+
         try {
           const unreadCount = await getUnreadCount(userId);
-          return socket.emit("count-notification", unreadCount); // Emite el conteo de no leídas a la sala del usuario logeado cuando ingresa,
+          console.log(`cantidad de no leidad: ${unreadCount} del usuario: ${userId} con el rol  ${rol}`);
+          socket.emit("count-notification", unreadCount); // Emite el conteo de no leídas a la sala del usuario logeado cuando ingresa,
         } catch (error) {
           throw Error("Error fetching notifications:", error.message);
         }
       });
+
+
       // cuando el usuario se desconecta
       socket.on("disconnect", () => {
         console.log("USUARIO DESCONECTADO");

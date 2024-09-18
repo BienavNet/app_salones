@@ -7,7 +7,7 @@ tokensMethods.isAuthorized(router, ["supervisor", "director"])
 router.get("/supervisor/:id", reporteMethods.getReporteBySupervisor) // ✅
 router.post("/register", reporteMethods.registrarReporte) // ✅
 router.get("/supervisor/:cedula/salon/:salon", reporteMethods.filterBySupAndSal) // ✅ por default la cedula del supervisor, filtra por el salon seleccionado
-router.patch("/update/:id", reporteMethods.updateReporte)
+router.patch("/update/:id", reporteMethods.updateReporte) // XX NO
 
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/", reporteMethods.getReportes) // ✅

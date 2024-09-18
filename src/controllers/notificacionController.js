@@ -104,7 +104,14 @@ const sendNotification = async (req, res) => {
         if (affectedRows == 1 && insertId !== undefined) {
           const unreadCount = await getUnreadCount(para);
 
-          io.to(para).emit("send-notification-to-user", unreadCount);
+          // io.to(para).emit("send-notification-to-user", {
+         // message: message
+          // de,
+          // para,
+          // unreadCount,
+          // messages.NEW_MESSAGE,
+          // new Date()
+        // });
           return res.status(200).json({
             status: "ok",
             id: insertId,
@@ -151,7 +158,7 @@ const editNotificacion = async (req, res) => {
       const para = paraResult[0]?.para;
       if (para) {
         const unreadCount = await getUnreadCount(para);
-        io.to(para).emit("send-notification-to-user", unreadCount);
+        // io.to(para).emit("send-notification-to-user", unreadCount);
       }
       return res.status(200).json({
         status: "success",

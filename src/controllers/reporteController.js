@@ -16,7 +16,6 @@ const getDocenteQMasComentariosHaRealizado = async (req, res) => {
             GROUP BY persona.cedula
             ORDER BY cantidad_comentarios DESC
             LIMIT 3`);
-    console.log("getDocenteQMasComentariosHaRealizado", result);
     if (result !== undefined) {
       return res.status(200).json(result);
     }
@@ -37,7 +36,6 @@ JOIN salon ON clase.salon = salon.id
 GROUP BY salon.numero_salon
 ORDER BY cantidad_comentarios DESC
 LIMIT 3;`);
-    console.log("getsalonMasComentarioTiene", result);
     if (result !== undefined) {
       return res.status(200).json(result);
     }
@@ -56,7 +54,6 @@ JOIN salon ON clase.salon = salon.id
 GROUP BY salon.numero_salon
 ORDER BY cantidad_usos DESC
 LIMIT 3;`);
-    console.log("getSalonMasUtilizado", result);
     if (result !== undefined) {
       return res.status(200).json(result);
     }
@@ -75,7 +72,6 @@ JOIN salon ON clase.salon = salon.id
 GROUP BY salon.numero_salon
 ORDER BY cantidad_usos ASC
 LIMIT 3;`);
-    console.log("getSalonMenosUtilizado", result);
     if (result !== undefined) {
       return res.status(200).json(result);
     }
@@ -94,7 +90,6 @@ FROM detalle_horario
 GROUP BY dia
 ORDER BY cantidad_repeticiones DESC
 LIMIT 3;`);
-    console.log("getCantidadDiaMasAsignado", result);
     if (result !== undefined) {
       return res.status(200).json(result);
     }
@@ -150,7 +145,6 @@ GROUP BY hora_inicio, hora_fin
 ORDER BY cantidad_repeticiones DESC
 LIMIT 3;
 `);
-    console.log("getRangeHoursMasFrecuente", result);
     if (result !== undefined) {
       return res.status(200).json(result);
     }

@@ -6,7 +6,10 @@ const router = Router();
 tokensMethods.isAuthorized(router, ["supervisor", "docente", "director"])
 router.get("/horario/:horario", claseMethods.getClaseByHorario)  //👀 //docente, opcional  director
 router.get("/salon/:salon", claseMethods.getClaseBySalon)  //👀 /docente , opcional  director
-router.get("/supervisor/:cedula/salon/:salon/dia/:dia/horario/:horario", claseMethods.filterBySupSalDiaHor)  //👀 //supervisor
+
+
+ 
+router.get("/supervisor/:cedula/salon/:salon/dia/:dia/horario/:horario", claseMethods.filterBySupSalDiaHor)  //👀 //supervisor, clases por supervisor en director
 
 tokensMethods.isAuthorized(router, ["supervisor", "director"])
 router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor) // ✅  // SUPERVISOR ID LOGIN
