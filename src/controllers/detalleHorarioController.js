@@ -225,6 +225,24 @@ const updateDetalleHorario = async (req, res) => {
   }
 };
 
+const filterByDay = async (req, res) => {
+  try {
+    if (req.params!== undefined){
+      const {dia, cedula} = req.params
+      const connection = await database.getConnection()
+      const result = await connection.query("SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura FROM detalle horario JOIN horario ON horario.id = detalle_horario.horario JOIN persona ON docente.persona = persona.id WHERE detalle_horario.dia = " +dia+ " AND persona.cedula = " +cedula+ " ")
+      
+      if (result !== undefined) {
+        res.status(200).json(result);
+        return;
+      }
+      res.status(400).json({ status: "error", message: "Bad request." });
+    }
+  } catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+}
+
 export const methods = {
   getDetalleHorarioById,
   getDetallesHorarioByDocente,
@@ -234,4 +252,5 @@ export const methods = {
   deleteDetalleHorario,
   updateDetalleHorario,
   getDetalleHorariosByHorarioId,
+  filterByDay
 };

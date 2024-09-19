@@ -1,6 +1,7 @@
 import { methods as database } from "../database/database.js";
 import { NotificationMessages as messages } from "../assets/notificationsMessages.js";
 import { io } from "../utils/WebsocketServer.js";
+import { response } from "express";
 
 //cuenta las notifaciones no leidas
 export const getUnreadCount = async (userId) => {
@@ -86,13 +87,34 @@ const getAll = async (req, res) => {
   }
 };
 
+const getMessage = (id, params) => {
+  try {
+    const messages = {
+      "clase revisada": {
+        "message": "El supervisor $de ha revisado la clase de $para"
+      },
+      "reporte enviado": {
+        "message": "El supervisor $de ha reportado una observacion a la clase de $para"
+      },
+      "comentario": {
+        "message": "El docente $de ha realizado un comentario"
+      }
+    }
+
+    return messages[id].message.replace('$de', params.de).replace('$para', params.para)
+  } catch (error) {
+    return undefined
+  }
+}
+
 const sendNotification = async (req, res) => {
   console.log("req.body;", req.body);
   try {
     if (req.body !== undefined) {
-      const { mensaje, de, para } = req.body;
+      const { action, de, para } = req.body;
 
-      if (mensaje !== undefined && de !== undefined && para !== undefined) {
+      if (action !== undefined && de !== undefined && para !== undefined) {
+        const mensaje = getMessage(action, { "de": de, "para": para }) //modificacion para que filtre el id del mensaje en el archivo json y adicional reemplace los valores de y para en el mensaje
         const connection = await database.getConnection();
         const result = await connection.query(
           `INSERT INTO notificacion (mensaje, de, para, estado, fecha) 
@@ -105,13 +127,13 @@ const sendNotification = async (req, res) => {
           const unreadCount = await getUnreadCount(para);
 
           // io.to(para).emit("send-notification-to-user", {
-         // message: message
+          // message: message
           // de,
           // para,
           // unreadCount,
           // messages.NEW_MESSAGE,
           // new Date()
-        // });
+          // });
           return res.status(200).json({
             status: "ok",
             id: insertId,

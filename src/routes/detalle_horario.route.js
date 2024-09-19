@@ -15,5 +15,6 @@ router.get("/", detalle_horarioMethods.getAllDetallesHorario)  // ✅
 router.post("/save", detalle_horarioMethods.saveDetalleHorario) // ✅
 router.delete("/delete/:id", detalle_horarioMethods.deleteDetalleHorario) // ✅
 router.patch("/update/:id", detalle_horarioMethods.updateDetalleHorario)
+router.get("/docente/:cedula/dia/:dia", detalle_horarioMethods.filterByDay)
 
 export default router

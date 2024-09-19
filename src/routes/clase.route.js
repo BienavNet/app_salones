@@ -21,6 +21,8 @@ router.get("/:id", claseMethods.getIdClase) // pendiente
 router.get("/timetable/:id", claseMethods.getClassHorarioId) // ✅
 router.delete("/delete/:id", claseMethods.deleteClase) // ✅
 router.patch("/update/:id", claseMethods.updateClase) // ⏱️
+router.get("/docente/:cedula", claseMethods.filterByDoc)
+router.get("/docente/:cedula/fecha/:fecha", claseMethods.filterByDate)
 
 
 export default router

@@ -517,6 +517,8 @@ CREATE TABLE `reporte` (
   `comentario` varchar(250) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+ALTER TABLE `reporte` ADD fecha datetime, not null;
+
 --
 -- Volcado de datos para la tabla `reporte`
 --

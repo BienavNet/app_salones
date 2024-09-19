@@ -365,6 +365,29 @@ const filterByDoc = async (req, res) => {
   }
 }
 
+
+const filterByDate = async (req, res) => {
+  try {
+    if (req.params !== undefined) {
+
+      const { fecha, cedula } = req.params
+      const connection = await database.getConnection()
+      const result = await connection.query("SELECT clase.* FROM clase JOIN horario ON horario.id = clase.horario JOIN docente ON docente.id = horario.docente JOIN persona ON persona.id = docente.persona WHERE clase.fecha = " +fecha+ " AND persona.cedula = " +cedula+ "")
+
+      if (result !== undefined) {
+        res.status(200).json(result);
+        return;
+      }
+      res.status(400).json({ status: "error", message: "Bad request." });
+      return;
+    }
+    res.status(400).json({ status: "error", message: "Bad request." });
+  } catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+}
+
+
 export const methods = {
   getClases,
   getClaseByHorario,
@@ -376,4 +399,6 @@ export const methods = {
   getIdClase,
   getClassHorarioId,
   filterBySupSalDiaHor,
+  filterByDoc,
+  filterByDate
 };
