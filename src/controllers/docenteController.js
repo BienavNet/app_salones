@@ -8,7 +8,7 @@ const getDocentes = async (req, res, next) => {
   try {
     const connection = await database.getConnection();
     const result = await connection.query(
-      "SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona"
+      "SELECT persona.apellido, persona.nombre, persona.correo, persona.cedula , docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona"
     );
     console.log(result, "results: ");
     res.status(200).json(result);
