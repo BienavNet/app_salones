@@ -6,13 +6,12 @@ const router = Router();
 tokensMethods.isAuthorized(router, ["supervisor", "docente", "director"])
 router.get("/horario/:horario", claseMethods.getClaseByHorario)  //👀 //docente, opcional  director
 router.get("/salon/:salon", claseMethods.getClaseBySalon)  //👀 /docente , opcional  director
-
-
- 
 router.get("/supervisor/:cedula/salon/:salon/dia/:dia/horario/:horario", claseMethods.filterBySupSalDiaHor)  //👀 //supervisor, clases por supervisor en director
 
 tokensMethods.isAuthorized(router, ["supervisor", "director"])
 router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor) // ✅  // SUPERVISOR ID LOGIN
+router.get("/docente/:cedula", claseMethods.filterByDoc)
+router.get("/docente/:cedula/fecha/:fecha", claseMethods.filterByDate)
 
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/", claseMethods.getClases)  // ✅
@@ -21,8 +20,7 @@ router.get("/:id", claseMethods.getIdClase) // pendiente
 router.get("/timetable/:id", claseMethods.getClassHorarioId) // ✅
 router.delete("/delete/:id", claseMethods.deleteClase) // ✅
 router.patch("/update/:id", claseMethods.updateClase) // ⏱️
-router.get("/docente/:cedula", claseMethods.filterByDoc)
-router.get("/docente/:cedula/fecha/:fecha", claseMethods.filterByDate)
+
 
 
 export default router

@@ -14,8 +14,5 @@ router.get("/docente/:cedula/salon/:salon", comentarioMethods.filterByDocAndSal)
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/:id", comentarioMethods.getComentarioById) // ✅
 router.get("/", comentarioMethods.getAllComentarios) // ✅
-
 router.get("/salon/:salon", comentarioMethods.getComentarioBySalon)// ✅
-
-
 export default router
