@@ -13,5 +13,5 @@ export default {
   JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
   JWT_REFRESH_SECRET_KEY: process.env.JWT_REFRESH_SECRET_KEY,
 };
-
-export const { PORT = 5000, SALTROUNDS = 10 } = process.env;
+export const PORT = process.env.PORT || 5000
+export const { SALTROUNDS = 10 } = process.env;

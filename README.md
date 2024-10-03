@@ -26,7 +26,7 @@ Se utilizaba mysql promise-mysql pero dado que a la hora del deploy la libreria 
 
 ahora se considera usar mysql2 que soporta el plugin de autenticación **caching_sha2_password**
 # Installation
-> npm install --save mysql2
+> npm install --save mysql2 https://sidorares.github.io/node-mysql2/docs
 
 ## En comparacion de peso
 promise-mysql actualmente tiene un peso de **355.7K (gzipped :112.5k)** 
