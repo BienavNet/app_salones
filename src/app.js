@@ -45,6 +45,9 @@ app.use("/api/reporte/", reporteRoute)
 app.use("/api/salon/", salonRoute)
 app.use("/api/notificaciones/", notificacionRoute)
 
+app.use("/",(req, res, next) => {
+  res.status(200).json({ message: "Bienvenido a la API de mi aplicacion movil de gestion y control UPC Aguachica" });
+})
 // si la rutas no coinciden 
 app.use((req, res, next) => {
     res.status(404).json({ message: "API route not found" });
