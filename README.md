@@ -16,8 +16,21 @@ instalamo la libreria de bcryptjs
 //añadimos las cookies
  > npm install cookie-parser // otro tipo de middleware
 
-
 arreglando conflict cambios
 
 instalamos uso de websocket en express para notificationes
 > npm install socket.io
+
+Se utilizaba mysql promise-mysql pero dado que a la hora del deploy la libreria de promise-mysql no soporta el plugin de autenticación **caching_sha2_password** que es el predeterminado en MySQL 8.0
+> npm uninstall promise-mysql
+
+ahora se considera usar mysql2 que soporta el plugin de autenticación **caching_sha2_password**
+# Installation
+> npm install --save mysql2
+
+## En comparacion de peso
+promise-mysql actualmente tiene un peso de **355.7K (gzipped :112.5k)** 
+mysql2/promise actualmente tiene un peso de **781.4K (gzipped :345.5k)**
+
+ahora si les procupa el peso que contiene cada libreria otra opcion seria
+donde haran el deploy de la base de datos mirar si no exigen el soporte de **caching_sha2_password** o en defecto utilizar la bases de datos que ya viene configuradas por defecto con el sistema donde hagan el deployment
