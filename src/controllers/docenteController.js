@@ -1,6 +1,6 @@
 import { methods as database } from "./../database/database.js";
 import { Validaciones } from "../assets/validation.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { SALTROUNDS } from "../config.js";
 
 // ✅

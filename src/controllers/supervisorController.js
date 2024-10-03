@@ -1,7 +1,7 @@
 import { Validaciones } from "../assets/validation.js";
 import { SALTROUNDS } from "../config.js";
 import { methods as database } from "./../database/database.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 const getSupervisorByCorreo = async (correo) => {
   const connection = await database.getConnection();
   const query = `

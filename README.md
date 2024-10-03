@@ -7,8 +7,8 @@ add libreria de cors
 
 Utilizamos la funciones de crypto 
 
-instalamo la libreria de bcrypt
-> npm install bcrypt [link:] (https://www.npmjs.com/package/bcrypt)
+instalamo la libreria de bcryptjs
+> npm i bcryptjs [link:] (https://www.npmjs.com/package/bcryptjs)
 
 //añadimos json web token JWT
 > npm install jsonwebtoken [link:] ()
