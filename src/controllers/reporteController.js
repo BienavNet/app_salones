@@ -225,8 +225,6 @@ const getReporteByClase = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { clase } = req.params;
-
-      
       const [result] = await connection.query(
         `
         SELECT reporte.*, horario.asignatura, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido, clase.estado, clase.fecha
@@ -240,9 +238,9 @@ const getReporteByClase = async (req, res) => {
         `,
         [clase]
       );
-      if (result.length > 0) {
-        res.status(200).json(result);
-        return;
+      console.log("result de reposte by clase", result);
+      if (result) {
+        return res.status(200).json(result);
       }
       res.status(400).json({ status: "error", message: "Bad request." });
       return;

@@ -10,9 +10,7 @@ const getDocentes = async (req, res, next) => {
     const [result] = await connection.query(
       "SELECT persona.apellido, persona.nombre, persona.correo, persona.cedula , docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona"
     );
-    console.log(result, "results: ");
-    res.status(200).json(result);
-    next();
+    return res.status(200).json(result);
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -29,11 +27,10 @@ const getDocenteIdByCedula = async (req, res) => {
     
     try {
       const [result] = await connection.query(
-        "SELECT persona.*, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
-          "cedula" +
-          ""
+       `
+       SELECT persona.*, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = ?`,[cedula]
       );
-      return res.status(200).json(result);
+      return res.status(200).json(result[0]);
     } catch (error) {
       res.status(500).send("Internal Server Error: " + error.message);
     }

@@ -118,14 +118,11 @@ const deleteHorario = async (req, res) => {
 
 const getHorarios = async (req, res) => {
   try {
-    
     const [result] = await connection.query(
       "SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre, persona.apellido, persona.cedula FROM horario JOIN docente ON horario.docente = docente.id JOIN detalle_horario ON horario.id = detalle_horario.horario JOIN persona ON docente.persona = persona.id"
     );
-
-    if (result.lenght >0) {
-      res.status(200).json(result);
-      return;
+    if (result) {
+      return res.status(200).json(result);
     }
     res.status(500).json({
       status: "error",
@@ -137,10 +134,10 @@ const getHorarios = async (req, res) => {
 };
 
 const getHorarioById = async (req, res) => {
+  console.log("rsponse ", req.params.id)
   try {
     if (req.params !== undefined) {
       const { id } = req.params;
-      
       const [result] = await connection.query(
         `SELECT 
 horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre AS nombre_docente, persona.apellido AS apellido_docente, persona.cedula, docente.id AS docente_id, clase.salon, clase.estado, clase.fecha, salon.nombre, salon.numero_salon, salon.capacidad, salon.INTernet, salon.tv, 
@@ -156,6 +153,8 @@ WHERE horario.id = ?`,
         [id]
       );
 
+      console.log(" horario by id: 1" , result[0])
+      console.log(" horario by id: " , result)
       const JOINHORARIODATA = result.reduce((a, row) => {
         const {
           id,
@@ -175,6 +174,7 @@ WHERE horario.id = ?`,
           tv,
           categoria,
         } = row;
+
         if (!a[cedula]) {
           a[cedula] = {
             id,
@@ -186,7 +186,6 @@ WHERE horario.id = ?`,
             horarios: [],
           };
         }
-
         a[cedula].horarios.push({
           id,
           dia,
@@ -204,8 +203,9 @@ WHERE horario.id = ?`,
       }, {});
 
       const resultArray = Object.values(JOINHORARIODATA);
-      console.log(resultArray, "result array");
+      console.log("resultArray", resultArray);
       if (resultArray.length > 0) {
+        console.log("entro  resultArray", resultArray);
         return res.status(200).json(resultArray);
       } else {
         return res
