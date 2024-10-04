@@ -10,7 +10,7 @@ const getSupervisorByCorreo = async (correo) => {
   INNER JOIN supervisor ON persona.id = supervisor.persona 
   WHERE persona.correo = ?`;
   try {
-    const result = await connection.query(query, [correo]);
+    const [result] = await connection.query(query, [correo]);
     return result.length === 0 ? null : result;
   } catch (error) {
     throw new Error({
@@ -28,7 +28,7 @@ const getPersonaByCorreo = async (correo, cedula) => {
     LIMIT 1;
   `;
   try {
-    const result = await connection.query(query, [correo, cedula]);
+    const [result] = await connection.query(query, [correo, cedula]);
     if (result.length === 0) {
       return null; // No se encontró la persona
     }
@@ -44,7 +44,7 @@ const getPersonaByCorreo = async (correo, cedula) => {
 // ✅
 const getSupervisores = async (req, res) => {
   try {
-    const result = await connection.query(
+    const [result] = await connection.query(
       "SELECT persona.*, supervisor.id as supervisor_id FROM persona INNER JOIN supervisor ON persona.id = supervisor.persona"
     );
     res.status(200).json(result);
@@ -57,7 +57,7 @@ const getSupervisorIdByCedula = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      const result = await connection.query(
+      const [result] = await connection.query(
         "SELECT persona.*, supervisor.id as supervisor_id, supervisor.persona as persona_id FROM supervisor INNER JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
           cedula +
           ""
@@ -75,7 +75,7 @@ const getSupervisorByCedula = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      const result = await connection.query(
+      const [result] = await connection.query(
         "SELECT persona.*, supervisor.id as supervisor_id FROM persona INNER JOIN supervisor ON persona.id = supervisor.persona WHERE persona.cedula = " +
           cedula +
           ";"
@@ -170,7 +170,7 @@ const updateSupervisor = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
       if (req.body !== undefined) {
-        const result = await connection.query(
+        const [result] = await connection.query(
           "UPDATE persona SET ? WHERE cedula = ?",
           [req.body, cedula]
         );
@@ -207,7 +207,7 @@ const deleteSupervisor = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      const result = await connection.query(
+      const [result] = await connection.query(
         "DELETE supervisor, persona FROM supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
           cedula +
           ""

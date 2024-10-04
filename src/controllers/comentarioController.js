@@ -6,7 +6,7 @@ const getComentarioById = async (req, res) => {
       const { id } = req.params;
 
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         `SELECT comentario.*, 
 salon.nombre AS salon_nombre, 
 salon.numero_salon, 
@@ -19,7 +19,7 @@ JOIN salon ON salon.id = comentario.salon
 WHERE comentario.id = ?`,
         [id]
       );
-      if (result !== undefined) {
+      if (result.length > 0) {
         res.status(200).json(result);
         return;
       }
@@ -38,7 +38,7 @@ const getComentarioByDocente = async (req, res) => {
       const { cedula } = req.params;
 
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         `
         SELECT comentario.*, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido
         FROM comentario 
@@ -50,7 +50,7 @@ const getComentarioByDocente = async (req, res) => {
         [cedula]
       );
 
-      if (result !== undefined) {
+      if (result.length>0) {
         res.status(200).json(result);
         return;
       }
@@ -69,7 +69,7 @@ const getComentarioBySalon = async (req, res) => {
       const { salon } = req.params;
 
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         `
 SELECT comentario.*, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido
 FROM comentario 
@@ -80,7 +80,7 @@ WHERE salon.id = ?`,
         [salon]
       );
 
-      if (result !== undefined) {
+      if (result.length > 0) {
         res.status(200).json(result);
         return;
       }
@@ -96,7 +96,7 @@ WHERE salon.id = ?`,
 const getAllComentarios = async (req, res) => {
   try {
     
-    const result = await connection.query(`
+    const [result] = await connection.query(`
 SELECT comentario.*, 
     salon.nombre AS salon_nombre, 
     salon.numero_salon, 
@@ -111,7 +111,7 @@ JOIN
 JOIN 
     salon ON salon.id = comentario.salon;`);
 
-    if (result !== undefined) {
+    if (result.length > 0) {
       res.status(200).json(result);
       return;
     }
@@ -132,7 +132,7 @@ const registerComentario = async (req, res) => {
         salon !== undefined
       ) {
         
-        const result = await connection.query(
+        const [result] = await connection.query(
           "INSERT INTO comentario SET ?",
           req.body
         );
@@ -164,7 +164,7 @@ const deleteComentarioById = async (req, res) => {
       const { id } = req.params;
 
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         `
         DELETE FROM comentario WHERE id = ?`,
         [id]
@@ -193,7 +193,7 @@ const deleteAllComentariosByDocente = async (req, res) => {
       const { cedula } = req.params;
 
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         "DELETE comentario FROM comentario JOIN docente ON docente.id = comentario.docente JOIN persona ON docente.persona = persona.id WHERE persona.cedula = " +
           cedula +
           ""
@@ -246,9 +246,9 @@ const filterByDocAndSal = async (req, res) => {
         return;
       }
 
-      const result = await connection.query(query);
+      const [result] = await connection.query(query);
 
-      if (result !== undefined) {
+      if (result.length > 0) {
         res.status(200).json(result);
         return;
       }

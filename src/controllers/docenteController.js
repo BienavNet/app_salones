@@ -7,7 +7,7 @@ import { SALTROUNDS } from "../config.js";
 const getDocentes = async (req, res, next) => {
   try {
     
-    const result = await connection.query(
+    const [result] = await connection.query(
       "SELECT persona.apellido, persona.nombre, persona.correo, persona.cedula , docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona"
     );
     console.log(result, "results: ");
@@ -28,7 +28,7 @@ const getDocenteIdByCedula = async (req, res) => {
     }
     
     try {
-      const result = await connection.query(
+      const [result] = await connection.query(
         "SELECT persona.*, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
           "cedula" +
           ""
@@ -47,8 +47,8 @@ const getDocenteByCedula = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
       
-      //const result = await connection.query("SELECT p.*, d.* FROM persona as p, docente as d WHERE p.cedula = " +cedula+ " and d.persona = p.id")
-      const result = await connection.query(
+      //const [result] = await connection.query("SELECT p.*, d.* FROM persona as p, docente as d WHERE p.cedula = " +cedula+ " and d.persona = p.id")
+      const [result] = await connection.query(
         "SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona WHERE persona.cedula = " +
           "cedula" +
           ";"
@@ -70,7 +70,7 @@ const getPersonaByCorreo = async (correo, cedula) => {
     LIMIT 1;
   `;
   try {
-    const result = await connection.query(query, [correo, cedula]);
+    const [result] = await connection.query(query, [correo, cedula]);
     if (result.length === 0) {
       return null; // No se encontró la persona
     }
@@ -93,7 +93,7 @@ const getCedulaDocente = async (cedula) => {
   INNER JOIN docente ON persona.id = docente.persona
   WHERE persona.cedula = ?`;
   try {
-    const result = await connection.query(query, [cedula]);
+    const [result] = await connection.query(query, [cedula]);
     return result.length === 0 ? null : result;
   } catch (error) {
     throw new Error({
@@ -112,7 +112,7 @@ const getDocenteByCorreo = async (correo) => {
   INNER JOIN docente ON persona.id = docente.persona 
   WHERE persona.correo = ?`;
   try {
-    const result = await connection.query(query, [correo]);
+    const [result] = await connection.query(query, [correo]);
     return result.length === 0 ? null : result;
   } catch (error) {
     throw new Error({
@@ -214,7 +214,7 @@ const updateDocente = async (req, res) => {
       const { cedula } = req.params;
       if (req.body !== undefined) {
         
-        const result = await connection.query(
+        const [result] = await connection.query(
           "UPDATE persona SET ? WHERE cedula = ?",
           [req.body, cedula]
         );
@@ -248,7 +248,7 @@ const deleteDocente = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
           cedula +
           ""

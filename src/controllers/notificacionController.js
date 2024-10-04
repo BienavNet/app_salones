@@ -62,7 +62,7 @@ const getNotifications = async (req, res) => {
             `;
       params.push(estado);
     }
-    const result = await connection.query(query, params);
+    const [result] = await connection.query(query, params);
     if (result.length > 0) {
       return res.status(200).json(result);
     }
@@ -75,8 +75,8 @@ const getNotifications = async (req, res) => {
 const getAll = async (req, res) => {
   try {
     
-    const result = await connection.query("SELECT * FROM notificacion");
-    if (result !== undefined) {
+    const [result] = await connection.query("SELECT * FROM notificacion");
+    if (result.length > 0) {
       res.status(200).json(result);
       return;
     }
@@ -115,7 +115,7 @@ const sendNotification = async (req, res) => {
       if (action !== undefined && de !== undefined && para !== undefined) {
         const mensaje = getMessage(action, { "de": de, "para": para }) //modificacion para que filtre el id del mensaje en el archivo json y adicional reemplace los valores de y para en el mensaje
         
-        const result = await connection.query(
+        const [result] = await connection.query(
           `INSERT INTO notificacion (mensaje, de, para, estado, fecha) 
            VALUES (?, ?, ?, 'no leida', NOW())`,
           [mensaje, de, para]
@@ -123,7 +123,7 @@ const sendNotification = async (req, res) => {
         console.log(result, "result notificacion");
         const { insertId, affectedRows } = result;
         if (affectedRows == 1 && insertId !== undefined) {
-          const unreadCount = await getUnreadCount(para);
+          // const unreadCount = await getUnreadCount(para);
 
           // io.to(para).emit("send-notification-to-user", {
           // message: message
@@ -171,7 +171,7 @@ const editNotificacion = async (req, res) => {
     }
     
     const query = "UPDATE notificacion SET estado = ? WHERE id = ?";
-    const result = await connection.query(query, [estado, id]);
+    const [result] = await connection.query(query, [estado, id]);
 
     if (result.affectedRows > 0) {
       const paraQuery = `SELECT para FROM notificacion WHERE id = ?`;

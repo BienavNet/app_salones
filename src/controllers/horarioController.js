@@ -10,7 +10,7 @@ const saveHorario = async (req, res) => {
 
     if (typeof docente === "number" && typeof asignatura === "string") {
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         "INSERT INTO horario SET ?",
         req.body
       );
@@ -56,7 +56,7 @@ const updateHorario = async (req, res) => {
         console.log("id: " + id);
         if (req.body !== undefined) {
           
-          const result = await connection.query(
+          const [result] = await connection.query(
             "UPDATE horario SET ? WHERE id = " + id + "",
             req.body
           );
@@ -91,7 +91,7 @@ const deleteHorario = async (req, res) => {
       console.log(`deleting  ${id}`);
       
       // DELETE horario, detalle_horario, clase FROM horario JOIN detalle_horario ON horario.id = detalle_horario.horario JOIN clase ON horario.id = clase.horario WHERE horario.id = " +id+ ""
-      const result = await connection.query(
+      const [result] = await connection.query(
         "DELETE FROM horario WHERE id = " + id + ""
       );
       console.log("result the id horario deleted", result);
@@ -119,11 +119,11 @@ const deleteHorario = async (req, res) => {
 const getHorarios = async (req, res) => {
   try {
     
-    const result = await connection.query(
+    const [result] = await connection.query(
       "SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre, persona.apellido, persona.cedula FROM horario JOIN docente ON horario.docente = docente.id JOIN detalle_horario ON horario.id = detalle_horario.horario JOIN persona ON docente.persona = persona.id"
     );
 
-    if (result !== undefined) {
+    if (result.lenght >0) {
       res.status(200).json(result);
       return;
     }
@@ -141,7 +141,7 @@ const getHorarioById = async (req, res) => {
     if (req.params !== undefined) {
       const { id } = req.params;
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         `SELECT 
 horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre AS nombre_docente, persona.apellido AS apellido_docente, persona.cedula, docente.id AS docente_id, clase.salon, clase.estado, clase.fecha, salon.nombre, salon.numero_salon, salon.capacidad, salon.INTernet, salon.tv, 
 categoria_salon.categoria
@@ -225,7 +225,7 @@ const getHorariosByDocente = async (req, res) => {
       const { cedula } = req.params;
 
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         `
        SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin ,clase.id AS id_class, clase.estado, clase.fecha, salon.numero_salon, salon.nombre, categoria_salon.categoria
        FROM horario 

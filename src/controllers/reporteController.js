@@ -6,7 +6,7 @@ import { connection } from "./../database/database.js";
 const getDocenteQMasComentariosHaRealizado = async (req, res) => {
   try {
     
-    const result = await connection.query(`
+    const [result] = await connection.query(`
               SELECT persona.cedula, COUNT(reporte.id) AS cantidad_comentarios
             FROM reporte
             JOIN clase ON reporte.clase = clase.id
@@ -16,7 +16,7 @@ const getDocenteQMasComentariosHaRealizado = async (req, res) => {
             GROUP BY persona.cedula
             ORDER BY cantidad_comentarios DESC
             LIMIT 3`);
-    if (result !== undefined) {
+    if (result.length > 0) {
       return res.status(200).json(result);
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -28,7 +28,7 @@ const getDocenteQMasComentariosHaRealizado = async (req, res) => {
 const getsalonMasComentarioTiene = async (req, res) => {
   try {
     
-    const result = await connection.query(`
+    const [result] = await connection.query(`
 SELECT salon.numero_salon, COUNT(reporte.id) AS cantidad_comentarios
 FROM reporte
 JOIN clase ON reporte.clase = clase.id
@@ -36,7 +36,7 @@ JOIN salon ON clase.salon = salon.id
 GROUP BY salon.numero_salon
 ORDER BY cantidad_comentarios DESC
 LIMIT 3;`);
-    if (result !== undefined) {
+    if (result.length > 0) {
       return res.status(200).json(result);
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -47,14 +47,14 @@ LIMIT 3;`);
 const getSalonMasUtilizado = async (req, res) => {
   try {
     
-    const result = await connection.query(`
+    const [result] = await connection.query(`
 SELECT salon.numero_salon, COUNT(clase.id) AS cantidad_usos
 FROM clase
 JOIN salon ON clase.salon = salon.id
 GROUP BY salon.numero_salon
 ORDER BY cantidad_usos DESC
 LIMIT 3;`);
-    if (result !== undefined) {
+    if (result.length > 0) {
       return res.status(200).json(result);
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -65,14 +65,14 @@ LIMIT 3;`);
 const getSalonMenosUtilizado = async (req, res) => {
   try {
     
-    const result = await connection.query(`
+    const [result] = await connection.query(`
 SELECT salon.numero_salon, COUNT(clase.id) AS cantidad_usos
 FROM clase
 JOIN salon ON clase.salon = salon.id
 GROUP BY salon.numero_salon
 ORDER BY cantidad_usos ASC
 LIMIT 3;`);
-    if (result !== undefined) {
+    if (result.length > 0) {
       return res.status(200).json(result);
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -84,13 +84,13 @@ LIMIT 3;`);
 const getCantidadDiaMasAsignado = async (req, res) => {
   try {
     
-    const result = await connection.query(`
+    const [result] = await connection.query(`
 SELECT dia AS dia, COUNT(dia) AS cantidad_repeticiones
 FROM detalle_horario
 GROUP BY dia
 ORDER BY cantidad_repeticiones DESC
 LIMIT 3;`);
-    if (result !== undefined) {
+    if (result.length > 0) {
       return res.status(200).json(result);
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -102,7 +102,7 @@ LIMIT 3;`);
 const getRangeHoursMasFrecuente = async (req, res) => {
   try {
     
-    const result = await connection.query(`
+    const [result] = await connection.query(`
 WITH RECURSIVE Horas AS (
     SELECT
         id,
@@ -145,7 +145,7 @@ GROUP BY hora_inicio, hora_fin
 ORDER BY cantidad_repeticiones DESC
 LIMIT 3;
 `);
-    if (result !== undefined) {
+    if (result.length > 0) {
       return res.status(200).json(result);
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -157,7 +157,7 @@ LIMIT 3;
 const getReportes = async (req, res) => {
   try {
     
-    const result = await connection.query(`
+    const [result] = await connection.query(`
           SELECT reporte.id AS reporte_id, reporte.*, clase.fecha, clase.estado, horario.asignatura, horario.id, persona.nombre, persona.apellido, persona.cedula, salon.nombre AS nombre_salon, salon.numero_salon, salon.INTernet, salon.tv
           FROM reporte 
           JOIN clase ON reporte.clase = clase.id 
@@ -165,7 +165,7 @@ const getReportes = async (req, res) => {
           JOIN docente ON horario.docente = docente.id
           JOIN persona ON docente.persona = persona.id 
           JOIN salon ON clase.salon = salon.id`);
-    if (result !== undefined) {
+    if (result.length > 0) {
       return res.status(200).json(result);
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -180,7 +180,7 @@ const getReporteBySupervisor = async (req, res) => {
       const { id } = req.params;
 
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         `
 SELECT 
 reporte.comentario,
@@ -208,7 +208,7 @@ JOIN supervisor ON clase.supervisor = supervisor.id
 WHERE clase.supervisor = ?`,
         [id]
       );
-      if (result !== undefined) {
+      if (result.length > 0) {
         return res.status(200).json(result);
       }
       res.status(400).json({ status: "error", message: "Bad request." });
@@ -227,7 +227,7 @@ const getReporteByClase = async (req, res) => {
       const { clase } = req.params;
 
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         `
         SELECT reporte.*, horario.asignatura, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido, clase.estado, clase.fecha
         FROM  reporte 
@@ -240,7 +240,7 @@ const getReporteByClase = async (req, res) => {
         `,
         [clase]
       );
-      if (result !== undefined) {
+      if (result.length > 0) {
         res.status(200).json(result);
         return;
       }
@@ -260,7 +260,7 @@ const getReporteBySalon = async (req, res) => {
       const { salon } = req.params;
 
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         `
       SELECT reporte.*, clase.estado,salon.numero_salon, clase.fecha, horario.asignatura, persona.nombre, persona.apellido
 FROM reporte
@@ -273,7 +273,7 @@ WHERE clase.salon = ?`,
         [salon]
       );
 
-      if (result !== undefined) {
+      if (result.length > 0) {
         res.status(200).json(result);
         return;
       }
@@ -293,7 +293,7 @@ const registrarReporte = async (req, res) => {
 
       if (clase !== undefined && comentario !== undefined) {
         
-        const result = await connection.query(
+        const [result] = await connection.query(
           "INSERT INTO reporte SET ?",
           req.body
         );
@@ -325,7 +325,7 @@ const deleteReporte = async (req, res) => {
       const { id } = req.params;
 
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         "DELETE reporte WHERE reporte.id = " + id + ""
       );
 
@@ -353,7 +353,7 @@ const updateReporte = async (req, res) => {
       const { id } = req.params;
 
       
-      const result = await connection.query(
+      const [result] = await connection.query(
         "UPDATE reporte SET ? WHERE reporte.id = " + id + ""
       );
       const { affectedRows } = result;
@@ -408,9 +408,9 @@ const filterBySupAndSal = async (req, res) => {
         return;
       }
 
-      const result = await connection.query(query);
+      const [result] = await connection.query(query);
 
-      if (result !== undefined) {
+      if (result.length > 0) {
         res.status(200).json(result);
         return;
       }

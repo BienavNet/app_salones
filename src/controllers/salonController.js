@@ -3,9 +3,9 @@ import { connection } from "./../database/database.js"
 const categorySalonID = async (req, res) => {
     console.log("entro update salon")
     try {    
-        const result = await connection.query("SELECT * FROM categoria_salon")
+        const [result] = await connection.query("SELECT * FROM categoria_salon")
         console.log("result the categoria_salon", result)
-        if (result !== undefined){
+        if (result.length > 0){
             return res.status(200).json(result)
         }
         res.status(400).json({"status": "error", "message": "Bad request."})
@@ -18,7 +18,7 @@ const getSalonById = async (req, res) => {
         if (req.params !== undefined){
             const { id } = req.params
             
-            const result = await connection.query(
+            const [result] = await connection.query(
                 `
             SELECT salon.*,
             categoria_salon.categoria 
@@ -26,7 +26,7 @@ const getSalonById = async (req, res) => {
             JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id
             WHERE salon.id = ?
                 `, [id])
-            if ( result !== undefined) {
+            if ( result.length > 0) {
                 res.status(200).json(result)
                 return
             }
@@ -42,8 +42,8 @@ const getSalonById = async (req, res) => {
 const getSalones = async (req, res) => {
     try {
         
-        const result = await connection.query("SELECT * FROM salon")
-        if (result !== undefined){
+        const [result] = await connection.query("SELECT * FROM salon")
+        if (result.length > 0){
             res.status(200).json(result)
             return
         }
@@ -58,7 +58,7 @@ const updateSalon = async (req, res) => {
         if ( req.params !== undefined && req.body !== undefined){
             const { id } = req.params
             
-            const result = await connection.query("UPDATE salon SET ? WHERE id = " +id+ "", req.body)
+            const [result] = await connection.query("UPDATE salon SET ? WHERE id = " +id+ "", req.body)
             const { affectedRows } = result
             if ( affectedRows == 1 ){
                 return res.status(200).json({"status": "ok", "message": "Datos actualizados correctamente."})  
