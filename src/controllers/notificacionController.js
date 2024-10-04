@@ -1,12 +1,11 @@
 import { connection} from "../database/database.js";
 import { NotificationMessages as messages } from "../assets/notificationsMessages.js";
 import { io } from "../utils/WebsocketServer.js";
-import { response } from "express";
 
 //cuenta las notifaciones no leidas
 export const getUnreadCount = async (userId) => {
   const NOLEIDA = "no leida";
-  // const connection = await database.getConnection();
+  // 
   const unreadResult = await connection.query(
     `SELECT COUNT(*) AS no_leida 
      FROM notificacion 
@@ -23,7 +22,7 @@ const getNotifications = async (req, res) => {
       res.status(400).json({ status: "error", message: "Missing parameters." });
       return;
     }
-    // const connection = await database.getConnection();
+    // 
     let query = "";
     const params = [cedula];
 
@@ -75,7 +74,7 @@ const getNotifications = async (req, res) => {
 
 const getAll = async (req, res) => {
   try {
-    const connection = await database.getConnection();
+    
     const result = await connection.query("SELECT * FROM notificacion");
     if (result !== undefined) {
       res.status(200).json(result);
@@ -115,7 +114,7 @@ const sendNotification = async (req, res) => {
 
       if (action !== undefined && de !== undefined && para !== undefined) {
         const mensaje = getMessage(action, { "de": de, "para": para }) //modificacion para que filtre el id del mensaje en el archivo json y adicional reemplace los valores de y para en el mensaje
-        const connection = await database.getConnection();
+        
         const result = await connection.query(
           `INSERT INTO notificacion (mensaje, de, para, estado, fecha) 
            VALUES (?, ?, ?, 'no leida', NOW())`,
@@ -170,7 +169,7 @@ const editNotificacion = async (req, res) => {
         .status(400)
         .json({ status: "error", message: "Missing parameters." });
     }
-    const connection = await database.getConnection();
+    
     const query = "UPDATE notificacion SET estado = ? WHERE id = ?";
     const result = await connection.query(query, [estado, id]);
 

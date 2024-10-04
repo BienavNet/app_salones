@@ -1,11 +1,11 @@
-import { methods as database } from "./../database/database.js";
+import { connection } from "./../database/database.js";
 
 const getComentarioById = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { id } = req.params;
 
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         `SELECT comentario.*, 
 salon.nombre AS salon_nombre, 
@@ -37,7 +37,7 @@ const getComentarioByDocente = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
 
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         `
         SELECT comentario.*, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido
@@ -68,7 +68,7 @@ const getComentarioBySalon = async (req, res) => {
     if (req.params !== undefined) {
       const { salon } = req.params;
 
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         `
 SELECT comentario.*, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido
@@ -95,7 +95,7 @@ WHERE salon.id = ?`,
 
 const getAllComentarios = async (req, res) => {
   try {
-    const connection = await database.getConnection();
+    
     const result = await connection.query(`
 SELECT comentario.*, 
     salon.nombre AS salon_nombre, 
@@ -131,7 +131,7 @@ const registerComentario = async (req, res) => {
         docente !== undefined &&
         salon !== undefined
       ) {
-        const connection = await database.getConnection();
+        
         const result = await connection.query(
           "INSERT INTO comentario SET ?",
           req.body
@@ -163,7 +163,7 @@ const deleteComentarioById = async (req, res) => {
     if (req.params !== undefined) {
       const { id } = req.params;
 
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         `
         DELETE FROM comentario WHERE id = ?`,
@@ -192,7 +192,7 @@ const deleteAllComentariosByDocente = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
 
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         "DELETE comentario FROM comentario JOIN docente ON docente.id = comentario.docente JOIN persona ON docente.persona = persona.id WHERE persona.cedula = " +
           cedula +
@@ -221,7 +221,7 @@ const filterByDocAndSal = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula, salon } = req.params;
 
-      const connection = await database.getConnection();
+      
       let query = "";
 
       if (cedula != 0 && salon != 0)

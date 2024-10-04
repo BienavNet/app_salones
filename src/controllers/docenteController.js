@@ -1,4 +1,4 @@
-import { methods as database } from "./../database/database.js";
+import { connection } from "./../database/database.js";
 import { Validaciones } from "../assets/validation.js";
 import bcrypt from "bcryptjs";
 import { SALTROUNDS } from "../config.js";
@@ -6,7 +6,7 @@ import { SALTROUNDS } from "../config.js";
 // ✅
 const getDocentes = async (req, res, next) => {
   try {
-    const connection = await database.getConnection();
+    
     const result = await connection.query(
       "SELECT persona.apellido, persona.nombre, persona.correo, persona.cedula , docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona"
     );
@@ -26,7 +26,7 @@ const getDocenteIdByCedula = async (req, res) => {
     if (!cedula) {
       return res.status(400).send("Bad Request: Missing cedula");
     }
-    const connection = await database.getConnection();
+    
     try {
       const result = await connection.query(
         "SELECT persona.*, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
@@ -46,7 +46,7 @@ const getDocenteByCedula = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      const connection = await database.getConnection();
+      
       //const result = await connection.query("SELECT p.*, d.* FROM persona as p, docente as d WHERE p.cedula = " +cedula+ " and d.persona = p.id")
       const result = await connection.query(
         "SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona WHERE persona.cedula = " +
@@ -62,7 +62,7 @@ const getDocenteByCedula = async (req, res) => {
 };
 
 const getPersonaByCorreo = async (correo, cedula) => {
-  const connection = await database.getConnection();
+  
   const query = `
     SELECT * 
     FROM persona 
@@ -86,7 +86,7 @@ const getPersonaByCorreo = async (correo, cedula) => {
 
 // ✅
 const getCedulaDocente = async (cedula) => {
-  const connection = await database.getConnection();
+  
   const query = `
   SELECT persona.*, docente.id as docente_id 
   FROM persona
@@ -105,7 +105,7 @@ const getCedulaDocente = async (cedula) => {
 
 // ✅
 const getDocenteByCorreo = async (correo) => {
-  const connection = await database.getConnection();
+  
   const query = `
   SELECT persona.*, docente.id as docente_id 
   FROM persona 
@@ -140,7 +140,7 @@ const saveDocente = async (req, res) => {
       .status(400)
       .json({ status: "Bad Request.", message: validationError.message });
   }
-  const connection = await database.getConnection();
+  
   try {
     const persona = await getPersonaByCorreo(correo, cedula);
     if (persona) {
@@ -213,7 +213,7 @@ const updateDocente = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
       if (req.body !== undefined) {
-        const connection = await database.getConnection();
+        
         const result = await connection.query(
           "UPDATE persona SET ? WHERE cedula = ?",
           [req.body, cedula]
@@ -247,7 +247,7 @@ const deleteDocente = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
           cedula +
@@ -275,7 +275,7 @@ const deleteDocente = async (req, res) => {
 };
 
 const countDocente = async (req, res) => {
-  const connection = await database.getConnection();
+  
   const [result] = await connection.query("SELECT COUNT(*) FROM docente");
   res.json(result[0]("COUNT(*)"));
 };

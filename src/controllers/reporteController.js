@@ -1,11 +1,11 @@
 import { getMostCommon, getThreeMostCommon } from "../assets/function.js";
-import { methods as database } from "./../database/database.js";
+import { connection } from "./../database/database.js";
 
 
 // estadistica de reportes
 const getDocenteQMasComentariosHaRealizado = async (req, res) => {
   try {
-    const connection = await database.getConnection();
+    
     const result = await connection.query(`
               SELECT persona.cedula, COUNT(reporte.id) AS cantidad_comentarios
             FROM reporte
@@ -27,7 +27,7 @@ const getDocenteQMasComentariosHaRealizado = async (req, res) => {
 
 const getsalonMasComentarioTiene = async (req, res) => {
   try {
-    const connection = await database.getConnection();
+    
     const result = await connection.query(`
 SELECT salon.numero_salon, COUNT(reporte.id) AS cantidad_comentarios
 FROM reporte
@@ -46,7 +46,7 @@ LIMIT 3;`);
 };
 const getSalonMasUtilizado = async (req, res) => {
   try {
-    const connection = await database.getConnection();
+    
     const result = await connection.query(`
 SELECT salon.numero_salon, COUNT(clase.id) AS cantidad_usos
 FROM clase
@@ -64,7 +64,7 @@ LIMIT 3;`);
 };
 const getSalonMenosUtilizado = async (req, res) => {
   try {
-    const connection = await database.getConnection();
+    
     const result = await connection.query(`
 SELECT salon.numero_salon, COUNT(clase.id) AS cantidad_usos
 FROM clase
@@ -83,7 +83,7 @@ LIMIT 3;`);
 
 const getCantidadDiaMasAsignado = async (req, res) => {
   try {
-    const connection = await database.getConnection();
+    
     const result = await connection.query(`
 SELECT dia AS dia, COUNT(dia) AS cantidad_repeticiones
 FROM detalle_horario
@@ -101,7 +101,7 @@ LIMIT 3;`);
 
 const getRangeHoursMasFrecuente = async (req, res) => {
   try {
-    const connection = await database.getConnection();
+    
     const result = await connection.query(`
 WITH RECURSIVE Horas AS (
     SELECT
@@ -156,7 +156,7 @@ LIMIT 3;
 
 const getReportes = async (req, res) => {
   try {
-    const connection = await database.getConnection();
+    
     const result = await connection.query(`
           SELECT reporte.id AS reporte_id, reporte.*, clase.fecha, clase.estado, horario.asignatura, horario.id, persona.nombre, persona.apellido, persona.cedula, salon.nombre AS nombre_salon, salon.numero_salon, salon.INTernet, salon.tv
           FROM reporte 
@@ -179,7 +179,7 @@ const getReporteBySupervisor = async (req, res) => {
     if (req.params !== undefined) {
       const { id } = req.params;
 
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         `
 SELECT 
@@ -226,7 +226,7 @@ const getReporteByClase = async (req, res) => {
     if (req.params !== undefined) {
       const { clase } = req.params;
 
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         `
         SELECT reporte.*, horario.asignatura, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido, clase.estado, clase.fecha
@@ -259,7 +259,7 @@ const getReporteBySalon = async (req, res) => {
     if (req.params !== undefined) {
       const { salon } = req.params;
 
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         `
       SELECT reporte.*, clase.estado,salon.numero_salon, clase.fecha, horario.asignatura, persona.nombre, persona.apellido
@@ -292,7 +292,7 @@ const registrarReporte = async (req, res) => {
       const { clase, comentario } = req.body;
 
       if (clase !== undefined && comentario !== undefined) {
-        const connection = await database.getConnection();
+        
         const result = await connection.query(
           "INSERT INTO reporte SET ?",
           req.body
@@ -324,7 +324,7 @@ const deleteReporte = async (req, res) => {
     if (req.params !== undefined) {
       const { id } = req.params;
 
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         "DELETE reporte WHERE reporte.id = " + id + ""
       );
@@ -352,7 +352,7 @@ const updateReporte = async (req, res) => {
     if (req.params !== undefined && req.body !== undefined) {
       const { id } = req.params;
 
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         "UPDATE reporte SET ? WHERE reporte.id = " + id + ""
       );
@@ -385,7 +385,7 @@ const filterBySupAndSal = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula, salon } = req.params;
-      const connection = await database.getConnection();
+      
 
       let query = "";
 

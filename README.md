@@ -36,5 +36,5 @@ ahora si les procupa el peso que contiene cada libreria otra opcion seria
 donde haran el deploy de la base de datos mirar si no exigen el soporte de **caching_sha2_password** o en defecto utilizar la bases de datos que ya viene configuradas por defecto con el sistema donde hagan el deployment
 
 dado que mysql2/promise devuelve en una promesa un array de objetos utilizar
-$ const [result] = conecction.query('sql')
-$ res.json(result[0])
+> const [result] = conecction.query('sql')
+> res.json(result[0])

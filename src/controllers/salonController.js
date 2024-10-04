@@ -1,9 +1,8 @@
-import { methods as database } from "./../database/database.js"
+import { connection } from "./../database/database.js"
 
 const categorySalonID = async (req, res) => {
     console.log("entro update salon")
-    try {
-        const connection = await database.getConnection()
+    try {    
         const result = await connection.query("SELECT * FROM categoria_salon")
         console.log("result the categoria_salon", result)
         if (result !== undefined){
@@ -18,7 +17,7 @@ const getSalonById = async (req, res) => {
     try {
         if (req.params !== undefined){
             const { id } = req.params
-            const connection = await database.getConnection()
+            
             const result = await connection.query(
                 `
             SELECT salon.*,
@@ -42,7 +41,7 @@ const getSalonById = async (req, res) => {
 
 const getSalones = async (req, res) => {
     try {
-        const connection = await database.getConnection()
+        
         const result = await connection.query("SELECT * FROM salon")
         if (result !== undefined){
             res.status(200).json(result)
@@ -58,7 +57,7 @@ const updateSalon = async (req, res) => {
     try {
         if ( req.params !== undefined && req.body !== undefined){
             const { id } = req.params
-            const connection = await database.getConnection()
+            
             const result = await connection.query("UPDATE salon SET ? WHERE id = " +id+ "", req.body)
             const { affectedRows } = result
             if ( affectedRows == 1 ){

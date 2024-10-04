@@ -1,11 +1,11 @@
-import { methods as database } from "./../database/database.js";
+import { connection } from "./../database/database.js";
 
 const getDetalleHorariosByHorarioId = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { id } = req.params;
       console.log("id entrando", id);
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         "SELECT id, horario FROM detalle_horario WHERE horario = " + id + ""
       );
@@ -31,7 +31,7 @@ const getDetalleHorarioById = async (req, res) => {
     if (req.params !== undefined) {
       const { id } = req.params;
       console.log("id detalle_horario", id);
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         `SELECT detalle_horario.*, clase.salon, salon.numero_salon
          FROM detalle_horario 
@@ -59,7 +59,7 @@ const getDetallesHorarioByDocente = async (req, res) => {
     if (req.params != undefined) {
       const { cedula } = req.params;
 
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         "SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.id as horario, horario.asignatura FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id WHERE persona.cedula = " +
           cedula +
@@ -87,7 +87,7 @@ const getDetallesHorariosByHorario = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { asignatura } = req.params;
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         "SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario WHERE horario.id = " +
           asignatura +
@@ -111,7 +111,7 @@ const getDetallesHorariosByHorario = async (req, res) => {
 
 const getAllDetallesHorario = async (req, res) => {
   try {
-    const connection = await database.getConnection();
+    
     const result = await connection.query("SELECT * FROM detalle_horario");
 
     if (result !== undefined) {
@@ -135,7 +135,7 @@ const saveDetalleHorario = async (req, res) => {
         hora_inicio !== undefined &&
         hora_fin !== undefined
       ) {
-        const connection = await database.getConnection();
+        
         const result = await connection.query(
           "INSERT INTO detalle_horario SET ?",
           req.body
@@ -166,7 +166,7 @@ const deleteDetalleHorario = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { id } = req.params;
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         "DELETE FROM detalle_horario WHERE id = " + id + ""
       );
@@ -195,7 +195,7 @@ const updateDetalleHorario = async (req, res) => {
       const { id } = req.params;
 
       if (id !== undefined) {
-        const connection = await database.getConnection();
+        
         const result = await connection.query(
           "UPDATE detalle_horario SET ? WHERE id = " + id + "",
           req.body

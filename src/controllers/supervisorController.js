@@ -1,9 +1,9 @@
 import { Validaciones } from "../assets/validation.js";
 import { SALTROUNDS } from "../config.js";
-import { methods as database } from "./../database/database.js";
+import { connection } from "./../database/database.js";
 import bcrypt from "bcryptjs";
+
 const getSupervisorByCorreo = async (correo) => {
-  const connection = await database.getConnection();
   const query = `
   SELECT persona.*, supervisor.id as docente_id 
   FROM persona 
@@ -21,7 +21,6 @@ const getSupervisorByCorreo = async (correo) => {
 };
 
 const getPersonaByCorreo = async (correo, cedula) => {
-  const connection = await database.getConnection();
   const query = `
     SELECT * 
     FROM persona 
@@ -45,7 +44,6 @@ const getPersonaByCorreo = async (correo, cedula) => {
 // ✅
 const getSupervisores = async (req, res) => {
   try {
-    const connection = await database.getConnection();
     const result = await connection.query(
       "SELECT persona.*, supervisor.id as supervisor_id FROM persona INNER JOIN supervisor ON persona.id = supervisor.persona"
     );
@@ -59,7 +57,6 @@ const getSupervisorIdByCedula = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      const connection = await database.getConnection();
       const result = await connection.query(
         "SELECT persona.*, supervisor.id as supervisor_id, supervisor.persona as persona_id FROM supervisor INNER JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
           cedula +
@@ -78,7 +75,6 @@ const getSupervisorByCedula = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      const connection = await database.getConnection();
       const result = await connection.query(
         "SELECT persona.*, supervisor.id as supervisor_id FROM persona INNER JOIN supervisor ON persona.id = supervisor.persona WHERE persona.cedula = " +
           cedula +
@@ -110,7 +106,6 @@ const saveSupervisor = async (req, res) => {
       .status(400)
       .json({ status: "Bad Request.", message: validationError.message });
   }
-  const connection = await database.getConnection();
   try {
     const persona = await getPersonaByCorreo(correo, cedula);
     if (persona) {
@@ -172,11 +167,9 @@ const saveSupervisor = async (req, res) => {
 const updateSupervisor = async (req, res) => {
   try {
     res.setHeader("Content-Type", "application/json");
-
     if (req.params !== undefined) {
       const { cedula } = req.params;
       if (req.body !== undefined) {
-        const connection = await database.getConnection();
         const result = await connection.query(
           "UPDATE persona SET ? WHERE cedula = ?",
           [req.body, cedula]
@@ -214,7 +207,6 @@ const deleteSupervisor = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      const connection = await database.getConnection();
       const result = await connection.query(
         "DELETE supervisor, persona FROM supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
           cedula +

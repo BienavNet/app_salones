@@ -1,4 +1,4 @@
-import { methods as database } from "./../database/database.js";
+import { connection } from "./../database/database.js";
 
 // ✅
 const saveHorario = async (req, res) => {
@@ -9,7 +9,7 @@ const saveHorario = async (req, res) => {
     const { docente, asignatura } = req.body;
 
     if (typeof docente === "number" && typeof asignatura === "string") {
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         "INSERT INTO horario SET ?",
         req.body
@@ -55,7 +55,7 @@ const updateHorario = async (req, res) => {
         const { id } = req.params;
         console.log("id: " + id);
         if (req.body !== undefined) {
-          const connection = await database.getConnection();
+          
           const result = await connection.query(
             "UPDATE horario SET ? WHERE id = " + id + "",
             req.body
@@ -89,7 +89,7 @@ const deleteHorario = async (req, res) => {
     if (req.params !== undefined) {
       const { id } = req.params;
       console.log(`deleting  ${id}`);
-      const connection = await database.getConnection();
+      
       // DELETE horario, detalle_horario, clase FROM horario JOIN detalle_horario ON horario.id = detalle_horario.horario JOIN clase ON horario.id = clase.horario WHERE horario.id = " +id+ ""
       const result = await connection.query(
         "DELETE FROM horario WHERE id = " + id + ""
@@ -118,7 +118,7 @@ const deleteHorario = async (req, res) => {
 
 const getHorarios = async (req, res) => {
   try {
-    const connection = await database.getConnection();
+    
     const result = await connection.query(
       "SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre, persona.apellido, persona.cedula FROM horario JOIN docente ON horario.docente = docente.id JOIN detalle_horario ON horario.id = detalle_horario.horario JOIN persona ON docente.persona = persona.id"
     );
@@ -140,7 +140,7 @@ const getHorarioById = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { id } = req.params;
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         `SELECT 
 horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre AS nombre_docente, persona.apellido AS apellido_docente, persona.cedula, docente.id AS docente_id, clase.salon, clase.estado, clase.fecha, salon.nombre, salon.numero_salon, salon.capacidad, salon.INTernet, salon.tv, 
@@ -224,7 +224,7 @@ const getHorariosByDocente = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
 
-      const connection = await database.getConnection();
+      
       const result = await connection.query(
         `
        SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin ,clase.id AS id_class, clase.estado, clase.fecha, salon.numero_salon, salon.nombre, categoria_salon.categoria
