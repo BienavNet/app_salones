@@ -10,8 +10,8 @@ import config from "../config.js";
 // })
 
 const connection = ()=> {
-    return new Promise((resolve, reject) => {
-        let connection = mysql.createConnection({
+    return new Promise(async (resolve, reject) => {
+        let connection = await mysql.createConnection({
             host: config.host,
             database: config.database,
             user: config.username,
