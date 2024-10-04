@@ -1,4 +1,4 @@
-import { methods as database } from "../database/database.js";
+import { connection} from "../database/database.js";
 import { NotificationMessages as messages } from "../assets/notificationsMessages.js";
 import { io } from "../utils/WebsocketServer.js";
 import { response } from "express";
@@ -6,7 +6,7 @@ import { response } from "express";
 //cuenta las notifaciones no leidas
 export const getUnreadCount = async (userId) => {
   const NOLEIDA = "no leida";
-  const connection = await database.getConnection();
+  // const connection = await database.getConnection();
   const unreadResult = await connection.query(
     `SELECT COUNT(*) AS no_leida 
      FROM notificacion 
@@ -23,7 +23,7 @@ const getNotifications = async (req, res) => {
       res.status(400).json({ status: "error", message: "Missing parameters." });
       return;
     }
-    const connection = await database.getConnection();
+    // const connection = await database.getConnection();
     let query = "";
     const params = [cedula];
 

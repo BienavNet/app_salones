@@ -1,24 +1,10 @@
-import mysql from "mysql2/promise";
-import config from "../config.js";
+import { createPool } from "mysql2/promise";
+import { DATABASE, HOST, MYSQLPORT, PASSWORD, USER } from "../config.js";
 
-const connection = await mysql.createConnection({
-    // host: config.host,
-    // database: config.database,
-    // user: config.username,
-    // password: config.password,
-    // port: config.port
-
-    host: 'junction.proxy.rlwy.net',
-    database: 'app',
-    user: 'root',
-    password: 'uCvrZtWWgWPXSXxezuoOoDDZFtcUBPmM',
-    port: '19664'
-})
-
-const getConnection = ()=> {
-   return connection
-}
-
-export const methods = {
-    getConnection
-} 
+export const connection = createPool({
+  host: HOST,
+  database:DATABASE,
+  user:USER,
+  password: PASSWORD,
+  port:MYSQLPORT,
+});

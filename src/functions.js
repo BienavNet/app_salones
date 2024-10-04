@@ -1,14 +1,13 @@
 import jwt from "jsonwebtoken"
-import config from "./config.js";
-
-const token_prueba = 'jwt_secret_key-nunncaperonuncaponerestacñave-2024-07-22'
+import { JWT_SECRET_KEY } from "./config.js"
 
 //Registra un nuevo token
 const signToken = (payload) => {
     try {
         const token = jwt.sign(
             payload, 
-            token_prueba, {
+            JWT_SECRET_KEY, 
+            {
             expiresIn: '1h'
         })
         return token
