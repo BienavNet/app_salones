@@ -19,7 +19,7 @@ const signToken = (payload) => {
 //desencripta el token pasado
 const verifyToken = (token) => {
     try {
-        const token_decoded = jwt.verify(token, token_prueba)
+        const token_decoded = jwt.verify(token, JWT_SECRET_KEY)
         if (token_decoded) {
             return token_decoded
         }
