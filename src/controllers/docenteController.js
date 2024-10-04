@@ -20,7 +20,6 @@ const getDocentes = async (req, res, next) => {
 const getDocenteIdByCedula = async (req, res) => {
   try {
     const { cedula } = req.params;
-
     if (!cedula) {
       return res.status(400).send("Bad Request: Missing cedula");
     }
@@ -30,7 +29,7 @@ const getDocenteIdByCedula = async (req, res) => {
        `
        SELECT persona.*, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = ?`,[cedula]
       );
-      return res.status(200).json(result[0]);
+      return res.status(200).json(result);
     } catch (error) {
       res.status(500).send("Internal Server Error: " + error.message);
     }
