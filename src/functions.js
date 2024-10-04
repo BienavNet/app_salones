@@ -1,12 +1,14 @@
 import jwt from "jsonwebtoken"
 import config from "./config.js";
 
+const token_prueba = 'jwt_secret_key-nunncaperonuncaponerestacñave-2024-07-22'
+
 //Registra un nuevo token
 const signToken = (payload) => {
     try {
         const token = jwt.sign(
             payload, 
-            config.JWT_SECRET_KEY, {
+            token_prueba, {
             expiresIn: '1h'
         })
         return token
@@ -18,7 +20,7 @@ const signToken = (payload) => {
 //desencripta el token pasado
 const verifyToken = (token) => {
     try {
-        const token_decoded = jwt.verify(token, config.JWT_SECRET_KEY)
+        const token_decoded = jwt.verify(token, token_prueba)
         if (token_decoded) {
             return token_decoded
         }
