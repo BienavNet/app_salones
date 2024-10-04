@@ -1,8 +1,6 @@
 import { config } from "dotenv";
 
-if (process.env.NODE_ENV !== "production") {
-  config();
-}
+config()
 
 export default {
   // host: process.env.NODE_ENV === "production" ? process.env.MYSQLHOST : process.env.HOST,
