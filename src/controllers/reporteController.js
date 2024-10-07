@@ -256,8 +256,6 @@ const getReporteBySalon = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { salon } = req.params;
-
-      
       const [result] = await connection.query(
         `
       SELECT reporte.*, clase.estado,salon.numero_salon, clase.fecha, horario.asignatura, persona.nombre, persona.apellido
@@ -275,7 +273,7 @@ WHERE clase.salon = ?`,
         res.status(200).json(result);
         return;
       }
-      res.status(400).json({ status: "error", message: "Bad request." });
+      res.status(404).json({ status: "error", message: "report classroom not found." });
       return;
     }
     res.status(400).json({ status: "error", message: "Bad request." });

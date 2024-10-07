@@ -15,7 +15,6 @@ const checkLogin = async (req, res) => {
 
   try {
     const { correo, contrasena, rol } = req.body;
-
     // Validaciones
     try {
       Validaciones.correo(correo);
