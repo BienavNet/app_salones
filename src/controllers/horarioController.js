@@ -14,8 +14,6 @@ const saveHorario = async (req, res) => {
         "INSERT INTO horario SET ?",
         req.body
       );
-      console.log(result);
-
       const { insertId, affectedRows } = result;
 
       if (affectedRows === 1) {
@@ -53,14 +51,12 @@ const updateHorario = async (req, res) => {
     if (req.body !== undefined && req.body !== "") {
       if (req.params !== undefined) {
         const { id } = req.params;
-        console.log("id: " + id);
         if (req.body !== undefined) {
           
           const [result] = await connection.query(
             "UPDATE horario SET ? WHERE id = " + id + "",
             req.body
           );
-          console.log("result: " + result);
           const { affectedRows } = result;
 
           if (affectedRows == 1) {
@@ -88,31 +84,26 @@ const deleteHorario = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { id } = req.params;
-      console.log(`deleting  ${id}`);
-      
-      // DELETE horario, detalle_horario, clase FROM horario JOIN detalle_horario ON horario.id = detalle_horario.horario JOIN clase ON horario.id = clase.horario WHERE horario.id = " +id+ ""
       const [result] = await connection.query(
         "DELETE FROM horario WHERE id = " + id + ""
       );
-      console.log("result the id horario deleted", result);
       const { affectedRows } = result;
 
       if (affectedRows > 0) {
-        res.status(200).json({
+        return res.status(200).json({
           status: "ok",
           message: "Datos eliminados de la base de datos.",
         });
       } else {
-        res.status(400).json({
+        return res.status(400).json({
           status: "bad request",
           message: "No se encontro el horario en los registros.",
         });
       }
-      return;
     }
-    res.status(400).send("Bad Request.");
+    return res.status(400).send("Bad Request.");
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
 
@@ -121,20 +112,19 @@ const getHorarios = async (req, res) => {
     const [result] = await connection.query(
       "SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre, persona.apellido, persona.cedula FROM horario JOIN docente ON horario.docente = docente.id JOIN detalle_horario ON horario.id = detalle_horario.horario JOIN persona ON docente.persona = persona.id"
     );
-    if (result) {
+    if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(500).json({
+    res.status(400).json({
       status: "error",
       message: "No se pudo obtener la informacion de la base de datos.",
     });
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
 
 const getHorarioById = async (req, res) => {
-  console.log("rsponse ", req.params.id)
   try {
     if (req.params !== undefined) {
       const { id } = req.params;
@@ -152,9 +142,6 @@ JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id
 WHERE horario.id = ?`,
         [id]
       );
-
-      console.log(" horario by id: 1" , result[0])
-      console.log(" horario by id: " , result)
       const JOINHORARIODATA = result.reduce((a, row) => {
         const {
           id,
@@ -203,9 +190,7 @@ WHERE horario.id = ?`,
       }, {});
 
       const resultArray = Object.values(JOINHORARIODATA);
-      console.log("resultArray", resultArray);
       if (resultArray.length > 0) {
-        console.log("entro  resultArray", resultArray);
         return res.status(200).json(resultArray);
       } else {
         return res
@@ -213,9 +198,9 @@ WHERE horario.id = ?`,
           .json({ status: "error", message: "No records found." });
       }
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    return res.status(400).json({ status: "error", message: "Bad request." });
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
 
@@ -223,8 +208,6 @@ const getHorariosByDocente = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-
-      
       const [result] = await connection.query(
         `
        SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin ,clase.id AS id_class, clase.estado, clase.fecha, salon.numero_salon, salon.nombre, categoria_salon.categoria
@@ -238,9 +221,9 @@ const getHorariosByDocente = async (req, res) => {
        WHERE persona.cedula = ?`,[cedula]);
       return res.status(200).json(result); 
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    return res.status(400).json({ status: "error", message: "Bad request." });
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
 

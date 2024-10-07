@@ -4,8 +4,6 @@ import { tokensMethods } from "../functions.js";
 
 const router = Router()
 
-// filtrado, x {horario/cedula}
-
 tokensMethods.isAuthorized(router, ["docente", "director", "supervisor"])
 router.get("/", horarioMethods.getHorarios) // ✅
 router.get("/:cedula", horarioMethods.getHorariosByDocente) // ✅

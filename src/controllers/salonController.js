@@ -1,10 +1,8 @@
 import { connection } from "./../database/database.js"
 
 const categorySalonID = async (req, res) => {
-    console.log("entro update salon")
     try {    
         const [result] = await connection.query("SELECT * FROM categoria_salon")
-        console.log("result the categoria_salon", result)
         if (result.length > 0){
             return res.status(200).json(result)
         }
@@ -17,7 +15,6 @@ const getSalonById = async (req, res) => {
     try {
         if (req.params !== undefined){
             const { id } = req.params
-            
             const [result] = await connection.query(
                 `
             SELECT salon.*,
@@ -27,11 +24,9 @@ const getSalonById = async (req, res) => {
             WHERE salon.id = ?
                 `, [id])
             if ( result.length > 0) {
-                res.status(200).json(result)
-                return
+                return res.status(200).json(result)
             }
-            res.status(400).json({"status": "error", "message": "Bad request."})
-            return
+            return res.status(404).json({"status": "error", "message": "Classroom is missing ID."})
         }
         res.status(400).json({"status": "error", "message": "Bad request."})
     } catch (error) {
@@ -41,11 +36,9 @@ const getSalonById = async (req, res) => {
 
 const getSalones = async (req, res) => {
     try {
-        
         const [result] = await connection.query("SELECT * FROM salon")
         if (result.length > 0){
-            res.status(200).json(result)
-            return
+            return res.status(200).json(result);
         }
         res.status(400).json({"status": "error", "message": "Bad request."})
     } catch (error) {
@@ -56,21 +49,19 @@ const getSalones = async (req, res) => {
 const updateSalon = async (req, res) => {
     try {
         if ( req.params !== undefined && req.body !== undefined){
-            const { id } = req.params
-            
+            const { id } = req.params      
             const [result] = await connection.query("UPDATE salon SET ? WHERE id = " +id+ "", req.body)
             const { affectedRows } = result
             if ( affectedRows == 1 ){
                 return res.status(200).json({"status": "ok", "message": "Datos actualizados correctamente."})  
             }
-            return res.status(400).json({"status": "error", "message": "Bad request."})
+            return res.status(404).json({"status": "error", "message": "Bad request."})
         }
         res.status(400).json({"status": "error", "message": "Bad request."})
     } catch (error) {
         res.status(500).send('Internal Server Error: ' + error.message)
     }
 }
-
 
 export const methods = {
     getSalonById,
