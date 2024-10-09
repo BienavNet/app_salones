@@ -5,7 +5,7 @@ const getDetalleHorariosByHorarioId = async (req, res) => {
     if (req.params !== undefined) {
       const { id } = req.params;
       console.log("id entrando", id);
-      
+
       const [result] = await connection.query(
         "SELECT id, horario FROM detalle_horario WHERE horario = " + id + ""
       );
@@ -30,20 +30,20 @@ const getDetalleHorarioById = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { id } = req.params;
-      console.log("id detalle_horario", id);
-      
       const [result] = await connection.query(
         `SELECT detalle_horario.*, clase.salon, salon.numero_salon
          FROM detalle_horario 
          jOIN horario ON detalle_horario.horario = horario.id
          JOIN clase ON horario.id = clase.horario
          JOIN salon ON clase.salon = salon.id
-         WHERE detalle_horario.horario = ?`,[id]);
-         console.log("result de detalle_horario", result);
+         WHERE detalle_horario.horario = ?`,
+        [id]
+      );
+      console.log("result de detalle_horario", result);
       if (result.length > 0) {
         return res.status(200).json(result);
       }
-      return res.status(200).json({
+      return res.status(404).json({
         status: "error",
         message: "No se obtuvo ningun dato desde el servidor.",
       });
@@ -58,46 +58,34 @@ const getDetallesHorarioByDocente = async (req, res) => {
   try {
     if (req.params != undefined) {
       const { cedula } = req.params;
-
-      
       const [result] = await connection.query(
-        "SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.id as horario, horario.asignatura FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id WHERE persona.cedula = " +
-          cedula +
-          ""
+       `SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.id as horario, horario.asignatura FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?`,[cedula]
       );
 
       if (result.length > 0) {
-        res.status(200).json(result);
-        return;
+        return res.status(200).json(result);
       }
-      res.status(200).json({
+      return res.status(404).json({
         status: "error",
         message: "No se obtuvo ningun dato desde el servidor.",
       });
-      return;
     }
-
-    res.status(400).json({ status: "error", message: "Bad request." });
+    return res.status(400).json({ status: "error", message: "Bad request." });
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
 
 const getDetallesHorariosByHorario = async (req, res) => {
   try {
     if (req.params !== undefined) {
-      const { asignatura } = req.params;
-      
-      const [result] = await connection.query(
-        "SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario WHERE horario.id = " +
-          asignatura +
-          ""
-      );
+      const { horario } = req.params;
+      console.log()
+      const [result] = await connection.query(`SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario WHERE horario.id = ?`,[horario]);
       if (result.length > 0) {
-        res.status(200).json(result);
-        return;
+        return res.status(200).json(result);
       }
-      res.status(200).json({
+      res.status(404).json({
         status: "error",
         message: "No se obtuvo ningun dato desde el servidor.",
       });
@@ -111,7 +99,6 @@ const getDetallesHorariosByHorario = async (req, res) => {
 
 const getAllDetallesHorario = async (req, res) => {
   try {
-    
     const [result] = await connection.query("SELECT * FROM detalle_horario");
 
     if (result.length > 0) {
@@ -135,7 +122,6 @@ const saveDetalleHorario = async (req, res) => {
         hora_inicio !== undefined &&
         hora_fin !== undefined
       ) {
-        
         const [result] = await connection.query(
           "INSERT INTO detalle_horario SET ?",
           req.body
@@ -166,7 +152,7 @@ const deleteDetalleHorario = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { id } = req.params;
-      
+
       const [result] = await connection.query(
         "DELETE FROM detalle_horario WHERE id = " + id + ""
       );
@@ -191,47 +177,52 @@ const deleteDetalleHorario = async (req, res) => {
 
 const updateDetalleHorario = async (req, res) => {
   try {
-    if (req.params !== undefined && req.body !== undefined) {
-      const { id } = req.params;
-
-      if (id !== undefined) {
-        
-        const [result] = await connection.query(
-          "UPDATE detalle_horario SET ? WHERE id = " + id + "",
-          req.body
-        );
-
-        const { affectedRows } = result;
-
-        if (affectedRows == 1) {
-          res.status(200).json({
-            status: "ok",
-            message: "Datos actualizados correctamente.",
-          });
-          return;
-        }
-        res.status(400).json({
+    const { id } = req.params;
+    const data = req.body;
+    if (!id || !data || Object.keys(data).length === 0) {
+      return res
+        .status(400)
+        .json({
           status: "error",
-          message: "No se pudieron actualizar los datos.",
+          message: "Bad request: ID o datos faltantes.",
         });
-        return;
-      }
-      res.status(400).json({ status: "error", message: "Bad request." });
-      return;
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    const [result] = await connection.query(
+      `UPDATE detalle_horario SET ? WHERE id = ?`,
+      [id, data]
+    );
+    if (result.affectedRows === 1) {
+      return res.status(200).json({
+        status: "ok",
+        message: "Datos actualizados correctamente.",
+      });
+    }
+    return res.status(404).json({
+      status: "error",
+      message:
+        "No se encontraron datos para actualizar con el ID proporcionado.",
+    });
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    return res.status(500).json({
+      status: "error",
+      message: "Error interno del servidor: " + error.message,
+    });
   }
 };
 
 const filterByDay = async (req, res) => {
   try {
-    if (req.params!== undefined){
-      const {dia, cedula} = req.params
-      const connection = await database.getConnection()
-      const [result] = await connection.query("SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura FROM detalle horario JOIN horario ON horario.id = detalle_horario.horario JOIN persona ON docente.persona = persona.id WHERE detalle_horario.dia = " +dia+ " AND persona.cedula = " +cedula+ " ")
-      
+    if (req.params !== undefined) {
+      const { dia, cedula } = req.params;
+      const connection = await database.getConnection();
+      const [result] = await connection.query(
+        "SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura FROM detalle horario JOIN horario ON horario.id = detalle_horario.horario JOIN persona ON docente.persona = persona.id WHERE detalle_horario.dia = " +
+          dia +
+          " AND persona.cedula = " +
+          cedula +
+          " "
+      );
+
       if (result.length > 0) {
         res.status(200).json(result);
         return;
@@ -241,7 +232,7 @@ const filterByDay = async (req, res) => {
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
-}
+};
 
 export const methods = {
   getDetalleHorarioById,
@@ -252,5 +243,5 @@ export const methods = {
   deleteDetalleHorario,
   updateDetalleHorario,
   getDetalleHorariosByHorarioId,
-  filterByDay
+  filterByDay,
 };

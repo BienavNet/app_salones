@@ -5,8 +5,8 @@ import { tokensMethods } from "../functions.js";
 const router = Router();
 
 tokensMethods.isAuthorized(router, ["director", "docente"])
-router.get("/docente/:cedula", detalle_horarioMethods.getDetallesHorarioByDocente) //👀
-router.get("/horario/:horario", detalle_horarioMethods.getDetallesHorariosByHorario) //👀
+router.get("/docente/:cedula", detalle_horarioMethods.getDetallesHorarioByDocente) // ✅
+router.get("/horario/:horario", detalle_horarioMethods.getDetallesHorariosByHorario) // ✅
 
 tokensMethods.isAuthorized(router, ["director"])
 router.get("/:id", detalle_horarioMethods.getDetalleHorarioById) // ✅
