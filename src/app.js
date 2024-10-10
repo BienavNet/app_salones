@@ -21,14 +21,13 @@ import { initSocketServer } from "./utils/WebsocketServer.js";
 const app = express();
 const server = http.createServer(app);
 initSocketServer(server);
+console.log("server started", initSocketServer)
 
 // Settings app
 app.set("port", PORT)
 
 // Middlewares
-app.use(cors({
-    origin: '*', // mientras le ponemos el dominio del frontend
-  }))
+app.use(cors())
 app.use(morgan("dev"))
 app.use(express.json())
 app.use(cookieParser())

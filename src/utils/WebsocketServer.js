@@ -4,6 +4,8 @@ export function initSocketServer(server) {
   io = new SocketServer(server, {
     cors: {
       origin: "*",
+     methods: "*",
+      
     },
   });
 }

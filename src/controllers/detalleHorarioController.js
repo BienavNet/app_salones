@@ -59,7 +59,11 @@ const getDetallesHorarioByDocente = async (req, res) => {
     if (req.params != undefined) {
       const { cedula } = req.params;
       const [result] = await connection.query(
-       `SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.id as horario, horario.asignatura FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?`,[cedula]
+       `SELECT detalle_horario.dia, horario.id as horario, horario.asignatura, persona.nombre, persona.apellido
+       FROM detalle_horario 
+       JOIN horario ON horario.id = detalle_horario.horario 
+       JOIN docente ON docente.id = horario.docente 
+       JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?`,[cedula]
       );
 
       if (result.length > 0) {
@@ -80,8 +84,8 @@ const getDetallesHorariosByHorario = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { horario } = req.params;
-      console.log()
-      const [result] = await connection.query(`SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario WHERE horario.id = ?`,[horario]);
+      const [result] = await connection.query(`
+      SELECT detalle_horario.dia, horario.asignatura, persona.nombre, persona.apellido FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id WHERE horario.id = ?`,[horario]);
       if (result.length > 0) {
         return res.status(200).json(result);
       }

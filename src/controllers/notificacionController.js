@@ -4,9 +4,10 @@ import { io } from "../utils/WebsocketServer.js";
 
 //cuenta las notifaciones no leidas
 export const getUnreadCount = async (userId) => {
+  console.log("getUnreadCount", userId);
   const NOLEIDA = "no leida";
   // 
-  const unreadResult = await connection.query(
+  const [unreadResult] = await connection.query(
     `SELECT COUNT(*) AS no_leida 
      FROM notificacion 
      WHERE para = ? AND estado = ?`,
@@ -123,16 +124,13 @@ const sendNotification = async (req, res) => {
         console.log(result, "result notificacion");
         const { insertId, affectedRows } = result;
         if (affectedRows == 1 && insertId !== undefined) {
-          // const unreadCount = await getUnreadCount(para);
+          const unreadCount = await getUnreadCount(para);
 
-          // io.to(para).emit("send-notification-to-user", {
-          // message: message
-          // de,
-          // para,
-          // unreadCount,
-          // messages.NEW_MESSAGE,
-          // new Date()
-          // });
+          io.to(para).emit("send-notification-to-user", {
+          de,
+          para,
+          unreadCount,
+          });
           return res.status(200).json({
             status: "ok",
             id: insertId,
@@ -179,7 +177,7 @@ const editNotificacion = async (req, res) => {
       const para = paraResult[0]?.para;
       if (para) {
         const unreadCount = await getUnreadCount(para);
-        // io.to(para).emit("send-notification-to-user", unreadCount);
+        io.to(para).emit("send-notification-to-user", unreadCount);
       }
       return res.status(200).json({
         status: "success",
