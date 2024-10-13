@@ -4,7 +4,6 @@ import { io } from "../utils/WebsocketServer.js";
 
 //cuenta las notifaciones no leidas
 export const getUnreadCount = async (userId) => {
-  console.log("getUnreadCount", userId);
   const NOLEIDA = "no leida";
   // 
   const [unreadResult] = await connection.query(
@@ -88,6 +87,7 @@ const getAll = async (req, res) => {
 };
 
 const getMessage = (id, params) => {
+  
   try {
     const messages = {
       "clase revisada": {
@@ -100,7 +100,6 @@ const getMessage = (id, params) => {
         "message": "El docente $de ha realizado un comentario"
       }
     }
-
     return messages[id].message.replace('$de', params.de).replace('$para', params.para)
   } catch (error) {
     return undefined
@@ -108,34 +107,25 @@ const getMessage = (id, params) => {
 }
 
 const sendNotification = async (req, res) => {
-  console.log("req.body;", req.body);
   try {
     if (req.body !== undefined) {
       const { action, de, para } = req.body;
-
       if (action !== undefined && de !== undefined && para !== undefined) {
         const mensaje = getMessage(action, { "de": de, "para": para }) //modificacion para que filtre el id del mensaje en el archivo json y adicional reemplace los valores de y para en el mensaje
         
         const [result] = await connection.query(
-          `INSERT INTO notificacion (mensaje, de, para, estado, fecha) 
-           VALUES (?, ?, ?, 'no leida', NOW())`,
-          [mensaje, de, para]
-        );
-        console.log(result, "result notificacion");
+          `INSERT INTO notificacion (mensaje, de, para, estado, fecha) VALUES (?, ?, ?, 'no leida', NOW())`, [mensaje, de, para]);
         const { insertId, affectedRows } = result;
         if (affectedRows == 1 && insertId !== undefined) {
-          const unreadCount = await getUnreadCount(para);
-
-          io.to(para).emit("send-notification-to-user", {
-          de,
-          para,
-          unreadCount,
-          });
-          return res.status(200).json({
+          const data = await getUnreadCount(para);
+          res.status(200).json({
             status: "ok",
             id: insertId,
             message: "Notificación almacenada y enviada correctamente",
           });
+          console.log(" unreadCount data para", data, para);
+          io.to(para).emit("count-notification", data);
+          return;
         }
         res.status(400).json({
           status: "error",
@@ -173,16 +163,16 @@ const editNotificacion = async (req, res) => {
 
     if (result.affectedRows > 0) {
       const paraQuery = `SELECT para FROM notificacion WHERE id = ?`;
-      const paraResult = await connection.query(paraQuery, [id]);
+      const [paraResult] = await connection.query(paraQuery, [id]);
       const para = paraResult[0]?.para;
       if (para) {
         const unreadCount = await getUnreadCount(para);
-        io.to(para).emit("send-notification-to-user", unreadCount);
+        io.to(para.toString()).emit("count-notification", unreadCount);
+        return res.status(200).json({
+          status: "success",
+          message: "Notification updated successfully.",
+        });
       }
-      return res.status(200).json({
-        status: "success",
-        message: "Notification updated successfully.",
-      });
     } else {
       return res
         .status(404)

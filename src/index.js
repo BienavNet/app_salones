@@ -8,28 +8,41 @@ const main = () => {
   console.log("######################");
 
   server.listen(PORT, () => {
-    console.log("######################");
-    console.log("###### WEBSOCKET ######");
-
-    // cuando el usuario se conecta
     io.sockets.on("connection", (socket) => {
-      console.log("NUEVO USUARIO CONECTADO");
+      console.log("CONEXION CON WEBSOCKET");
+
       // cuando el usuario es logeado
       socket.on("authenticate", async ({ userId, rol }) => {
-        console.log("authenticate" , userId, rol);
-        socket.join(userId); // sala personal
-        socket.join(rol); // sala grupal
+        if (!userId || !rol) {
+          console.log("Autenticación fallida: falta userId o rol");
+          return;
+        }
+        if (!io.sockets.adapter.rooms.get(userId)?.has(socket.id)) {
+          socket.join(userId.toString()); // sala personal
+        }
+
+        if (!io.sockets.adapter.rooms.get(rol)?.has(socket.id)) {
+          socket.join(rol); // sala grupal
+        }
 
         try {
           const unreadCount = await getUnreadCount(userId);
-          console.log(`cantidad de no leidad: ${unreadCount} del usuario: ${userId} con el rol  ${rol}`);
-          socket.emit("count-notification", unreadCount); // Emite el conteo de no leídas a la sala del usuario logeado cuando ingresa,
+          socket.emit("count-notification", unreadCount); // Emitir el conteo de notificaciones no leídas al usuario autenticado
         } catch (error) {
-          throw Error("Error fetching notifications:", error.message);
+          console.error(
+            "Error al obtener las notificaciones no leídas:",
+            error
+          );
+          return;
         }
       });
 
       // cuando el usuario se desconecta
+      socket.on("disauthenticate", (id) => {
+        socket.leave(id);
+        console.log("USUARIO DESCONECTADO", id);
+      });
+
       socket.on("disconnect", () => {
         console.log("USUARIO DESCONECTADO");
       });

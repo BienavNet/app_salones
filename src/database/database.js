@@ -8,3 +8,5 @@ export const connection = createPool({
   password: PASSWORD,
   port:MYSQLPORT,
 });
+
+if (!connection){ throw Error("Errror al conectarse con la base de datos")}
