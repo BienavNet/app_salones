@@ -4,12 +4,24 @@ import { tokensMethods } from "../functions.js";
 
 const router = Router();
 
-tokensMethods.isAuthorized(router, ["director", "supervisor"])
-router.get("/", salonMethods.getSalones) // ✅
 
+// Consultamos si el token que realizo la peticion esta autorizado como cualquiera de los 2 roles
+tokensMethods.isAuthorized(router, ["director", "supervisor"])
+
+// Se consulta el cotrolador salon, el metodo getSalones 
+router.get("/", salonMethods.getSalones)
+
+
+// Consultamos si el token que realizo la peticion esta autorizado como director
 tokensMethods.isAuthorized(router, ["director"])
-router.get("/:id", salonMethods.getSalonById)  // ✅
-router.patch("/update/:id", salonMethods.updateSalon) // ✅
-router.get("/categoria-salon/salon", salonMethods.categorySalonID)// ✅
+
+// Se consulta el cotrolador salon, el metodo getSalonById 
+router.get("/:id", salonMethods.getSalonById)
+
+// Se consulta el cotrolador salon, el metodo updateSalon 
+router.patch("/update/:id", salonMethods.updateSalon)
+
+// Se consulta el cotrolador salon, el metodo categorySalonID 
+router.get("/categoria-salon/salon", salonMethods.categorySalonID)
 export default router
 

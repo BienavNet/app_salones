@@ -2,7 +2,7 @@ import { getMostCommon, getThreeMostCommon } from "../assets/function.js";
 import { connection } from "./../database/database.js";
 
 
-// estadistica de reportes
+// Hace una consulta y genera un reporte, en este caso envia los docentes que mas comentarios han hecho, en orden descendente
 const getDocenteQMasComentariosHaRealizado = async (req, res) => {
   try {
     
@@ -25,6 +25,7 @@ const getDocenteQMasComentariosHaRealizado = async (req, res) => {
   }
 };
 
+// Hace una consulta y genera un reporte, en este caso envia los salones que mas comentarios han recibido en orden descendente
 const getsalonMasComentarioTiene = async (req, res) => {
   try {
     
@@ -44,6 +45,8 @@ LIMIT 3;`);
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+// Hace una consulta y genera un reporte, en este caso envia los salones que mas se han utilizado en orden descendente
 const getSalonMasUtilizado = async (req, res) => {
   try {
     
@@ -62,6 +65,8 @@ LIMIT 3;`);
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+// Hace una consulta y genera un reporte, en este caso envia los salones que mas se han utilizado en orden ascendente
 const getSalonMenosUtilizado = async (req, res) => {
   try {
     
@@ -81,6 +86,7 @@ LIMIT 3;`);
   }
 };
 
+// Hace una consulta y genera un reporte, en este caso envia los dias de la semana que mas se han utilizado en orden descendente
 const getCantidadDiaMasAsignado = async (req, res) => {
   try {
     
@@ -99,6 +105,7 @@ LIMIT 3;`);
   }
 };
 
+// Hace una consulta y genera un reporte, en este caso envia las horas que mas frecuentes
 const getRangeHoursMasFrecuente = async (req, res) => {
   try {
     
@@ -154,6 +161,8 @@ LIMIT 3;
   }
 };
 
+
+// Obtiene los reportes realizados por los supervisores
 const getReportes = async (req, res) => {
   try {
     
@@ -174,6 +183,8 @@ const getReportes = async (req, res) => {
   }
 };
 
+
+// Obtiene todos los reportes realizados por algun supervisor mediante su cedula
 const getReporteBySupervisor = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -220,7 +231,7 @@ WHERE clase.supervisor = ?`,
   }
 };
 
-//👀
+// Obtiene todos los reportes realizados por algun supervisor si el id coincide con el id de la clase
 const getReporteByClase = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -253,7 +264,7 @@ const getReporteByClase = async (req, res) => {
   }
 };
 
-// ✅
+// Obtiene todos los reportes realizados por algun supervisor si el id coincide con el id del salon
 const getReporteBySalon = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -286,6 +297,7 @@ WHERE clase.salon = ?`,
   }
 };
 
+// Registra un nuevo registro en la tabla reporte
 const registrarReporte = async (req, res) => {
   try {
     if (req.body !== undefined) {
@@ -319,6 +331,7 @@ const registrarReporte = async (req, res) => {
   }
 };
 
+// Elimina un registro preexistente de la tabla reporte
 const deleteReporte = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -347,6 +360,7 @@ const deleteReporte = async (req, res) => {
   }
 };
 
+// Actualiza un registro preexistente de la tabla reporte
 const updateReporte = async (req, res) => {
   try {
     if (req.params !== undefined && req.body !== undefined) {
@@ -381,6 +395,8 @@ const updateReporte = async (req, res) => {
 // EL USO ES EL SIGUIENTE: localhost:5000/api/reporte/supervisor/(aqui va la cedula del supervisor o si no la va a a usar poner un 0)/salon/(igual, el id del salon o si no se usa un 0)
 // localhost:5000/api/reporte/supervisor/1005054932/salon/3
 
+
+// Filtra los reportes si se pasan los parametros cedula del supervisor y/o id del salon
 const filterBySupAndSal = async (req, res) => {
   try {
     if (req.params !== undefined) {

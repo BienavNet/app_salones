@@ -1,6 +1,7 @@
 import { connection } from "./../database/database.js";
 
-// ✅
+
+/// Almacena un nuevo registro de la tabla horario en la base de datos
 const saveHorario = async (req, res) => {
   if (!req.body && req.body != undefined && req.body !== "")
     res.status(400).send("Bad Request.");
@@ -48,6 +49,8 @@ const saveHorario = async (req, res) => {
   }
 };
 
+
+// Actualiza un registro pre existente de la tabla horario si el id pasado coincide con el almacenado
 const updateHorario = async (req, res) => {
   try {
     if (req.body !== undefined && req.body !== "") {
@@ -84,6 +87,8 @@ const updateHorario = async (req, res) => {
   }
 };
 
+
+// Elimina un registro preexistente de la tabla horario si el id pasado coincide con el almacenado
 const deleteHorario = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -116,6 +121,8 @@ const deleteHorario = async (req, res) => {
   }
 };
 
+
+/// Obtiene el horario de los docentes por medio de la cedula.
 const getHorarios = async (req, res) => {
   try {
     
@@ -136,6 +143,8 @@ const getHorarios = async (req, res) => {
   }
 };
 
+
+/// Obtiene un horario en especifico si el id pasado coincide con alguno que se encuentre registrado en la base de datos.
 const getHorarioById = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -219,6 +228,8 @@ WHERE horario.id = ?`,
   }
 };
 
+
+/// Obtiene el horario de los docentes por medio de la cedula.
 const getHorariosByDocente = async (req, res) => {
   try {
     if (req.params !== undefined) {

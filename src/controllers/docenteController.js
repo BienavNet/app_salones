@@ -3,7 +3,8 @@ import { Validaciones } from "../assets/validation.js";
 import bcrypt from "bcryptjs";
 import { SALTROUNDS } from "../config.js";
 
-// ✅
+
+/* Este metodo obtiene los registros de la tabla siempre y cuando el parametro pasado coincida con la cedula del docente*/
 const getDocentes = async (req, res, next) => {
   try {
     
@@ -18,7 +19,7 @@ const getDocentes = async (req, res, next) => {
   }
 };
 
-// ✅
+/* Este metodo obtiene el id de la tabla si los parametros coinciden con la cedula del docente */
 const getDocenteIdByCedula = async (req, res) => {
   try {
     const { cedula } = req.params;
@@ -42,6 +43,8 @@ const getDocenteIdByCedula = async (req, res) => {
   }
 };
 
+
+/* Este metodo obtiene los registros de la tabla si el parametro coincide con la cedula del docente */
 const getDocenteByCedula = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -61,6 +64,8 @@ const getDocenteByCedula = async (req, res) => {
   }
 };
 
+
+/* Este metodo obtiene los registros de la tabla si el parametro coincide con el correo */
 const getPersonaByCorreo = async (correo, cedula) => {
   
   const query = `
@@ -84,7 +89,7 @@ const getPersonaByCorreo = async (correo, cedula) => {
   }
 };
 
-// ✅
+/* Este metodo obtiene los registros de la tabla si el parametro coincide con la cedula */
 const getCedulaDocente = async (cedula) => {
   
   const query = `
@@ -103,7 +108,8 @@ const getCedulaDocente = async (cedula) => {
   }
 };
 
-// ✅
+
+/* Este metodo obtiene los registros de una tabla si el parametro coincide con el correo */
 const getDocenteByCorreo = async (correo) => {
   
   const query = `
@@ -122,7 +128,8 @@ const getDocenteByCorreo = async (correo) => {
   }
 };
 
-// ✅
+
+/* Este metodo almacena registros en la tabla docente */
 const saveDocente = async (req, res) => {
   if (!req.body) {
     return res.status(400).send("Bad Request.");
@@ -205,7 +212,7 @@ const saveDocente = async (req, res) => {
   }
 };
 
-// ✅
+/* Este metodo actualiza los registros de la tabla docente si el parametro coincide con la cedula*/
 const updateDocente = async (req, res) => {
   try {
     res.setHeader("Content-Type", "application/json");
@@ -242,7 +249,7 @@ const updateDocente = async (req, res) => {
   }
 };
 
-// ✅
+/* Este metodo elimina un registro de la tabla docente siempre y cuando el parametro coincida con la cedula */
 const deleteDocente = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -274,11 +281,16 @@ const deleteDocente = async (req, res) => {
   }
 };
 
+
+/* Este metodo retorna la suma de los registros en la tabla docente */
 const countDocente = async (req, res) => {
   
   const [result] = await connection.query("SELECT COUNT(*) FROM docente");
   res.json(result[0]("COUNT(*)"));
 };
+
+/* Aqui exportamos todos los metodos previamente creados para luego usarlos en las rutas*/
+
 
 export const methods = {
   getDocentes,

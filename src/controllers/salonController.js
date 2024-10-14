@@ -1,5 +1,7 @@
 import { connection } from "./../database/database.js"
 
+
+// Obtiene todos los registros de la tabla categoria_salon
 const categorySalonID = async (req, res) => {
     console.log("entro update salon")
     try {    
@@ -13,6 +15,8 @@ const categorySalonID = async (req, res) => {
         res.status(500).send('Internal Server Error: ' + error.message)
     }
 }
+
+// Obtiene los registros de la tabla salon si el id pasado coincide con algun registro
 const getSalonById = async (req, res) => {
     try {
         if (req.params !== undefined){
@@ -39,6 +43,8 @@ const getSalonById = async (req, res) => {
     }
 }
 
+
+// Obtiene todos los registros de la tabla salon
 const getSalones = async (req, res) => {
     try {
         
@@ -53,6 +59,8 @@ const getSalones = async (req, res) => {
     }
 }
 
+
+// Actualiza un registro preexistente de la tabla salon
 const updateSalon = async (req, res) => {
     try {
         if ( req.params !== undefined && req.body !== undefined){

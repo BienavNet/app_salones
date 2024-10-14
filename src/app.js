@@ -18,14 +18,18 @@ import notificacionRoute from "./routes/notificacion.route.js"
 //Crypto port file gen 
 import { PORT } from "./config.js";
 import { initSocketServer } from "./utils/WebsocketServer.js";
+
+// Crea una nueva app
 const app = express();
+
+// Crea un nuevo servidor donde va a estar hosteado el web socket
 const server = http.createServer(app);
 initSocketServer(server);
 
-// Settings app
+// Se inicializa la app con un puerto de escucha de peticiones
 app.set("port", PORT)
 
-// Middlewares
+// Se crean diversos middlewares para el tratamiento de las peticiones
 app.use(cors({
     origin: '*', // mientras le ponemos el dominio del frontend
   }))
@@ -33,7 +37,7 @@ app.use(morgan("dev"))
 app.use(express.json())
 app.use(cookieParser())
 
-// Routes
+// Se importan todas las rutas creadas previamente que se conectan con los controladores para generar la funcionalidad del api
 app.use("/api/docente", docenteRoute)
 app.use("/api/supervisor", supervisorRoute)
 app.use("/api/login", loginRoute)
