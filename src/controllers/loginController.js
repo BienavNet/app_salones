@@ -1,6 +1,9 @@
 import { Validaciones } from "../assets/validation.js";
 import { connection } from "./../database/database.js";
 import { tokensMethods as tokens } from "./../functions.js";
+
+
+// Revisa las variables y las consulta en la respectiva tabla, dependiendo del rol y si coincide todo envia un mensaje de respuesta correcto y crea los token y las cookies para permitir el inicio de sesion
 const checkLogin = async (req, res) => {
   if (
     !req.body ||

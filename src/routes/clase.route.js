@@ -2,24 +2,54 @@ import { Router } from "express";
 import { methods as claseMethods} from "./../controllers/claseController.js"
 import { tokensMethods } from "../functions.js";
 const router = Router();
-//agg filtro por docente
+
+
+// Consultamos si el token que realizo la peticion esta autorizado como cualquiera de los 3 roles
 tokensMethods.isAuthorized(router, ["supervisor", "docente", "director"])
-router.get("/horario/:horario", claseMethods.getClaseByHorario)  //👀 //docente, opcional  director
-router.get("/salon/:salon", claseMethods.getClaseBySalon)  //👀 /docente , opcional  director
+
+// Se consulta el cotrolador clase, el metodo getClasebyHorario 
+router.get("/horario/:horario", claseMethods.getClaseByHorario)
+
+// Se consulta el cotrolador clase, el metodo getClaseBySalon 
+router.get("/salon/:salon", claseMethods.getClaseBySalon)
+
+// Se consulta el cotrolador clase, el metodo filterBySupSalDiaHor 
 router.get("/supervisor/:cedula/salon/:salon/dia/:dia/horario/:horario", claseMethods.filterBySupSalDiaHor)  //👀 //supervisor, clases por supervisor en director
 
+
+// Consultamos si el token que realizo la peticion esta autorizado como cualquiera de los 2 roles
 tokensMethods.isAuthorized(router, ["supervisor", "director"])
-router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor) // ✅  // SUPERVISOR ID LOGIN
+
+// Se consulta el cotrolador clase, el metodo getClaseBySupervisor 
+router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor)
+
+// Se consulta el cotrolador clase, el metodo filterByDoc 
 router.get("/docente/:cedula", claseMethods.filterByDoc)
+
+// Se consulta el cotrolador clase, el metodo filterByDate 
 router.get("/docente/:cedula/fecha/:fecha", claseMethods.filterByDate)
 
+
+// Consultamos si el token que realizo la peticion esta autorizado como director
 tokensMethods.isAuthorized(router, ["director"])
-router.get("/", claseMethods.getClases)  // ✅
-router.post("/register", claseMethods.registerClase) // ✅
-router.get("/:id", claseMethods.getIdClase) // pendiente
-router.get("/timetable/:id", claseMethods.getClassHorarioId) // ✅
-router.delete("/delete/:id", claseMethods.deleteClase) // ✅
-router.patch("/update/:id", claseMethods.updateClase) // ⏱️
+
+// Se consulta el cotrolador clase, el metodo getClases 
+router.get("/", claseMethods.getClases)
+
+// Se consulta el cotrolador clase, el metodo registerClase 
+router.post("/register", claseMethods.registerClase)
+
+// Se consulta el cotrolador clase, el metodo getIdClase 
+router.get("/:id", claseMethods.getIdClase)
+
+// Se consulta el cotrolador clase, el metodo getClassHorarioId 
+router.get("/timetable/:id", claseMethods.getClassHorarioId)
+
+// Se consulta el cotrolador clase, el metodo deleteClase 
+router.delete("/delete/:id", claseMethods.deleteClase)
+
+// Se consulta el cotrolador clase, el metodo updateClase 
+router.patch("/update/:id", claseMethods.updateClase)
 
 
 

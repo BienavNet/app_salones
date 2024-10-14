@@ -1,5 +1,9 @@
 import { connection } from "./../database/database.js";
 
+/* Documento controlador para la tabla Clase */
+
+
+/* Este metodo obtiene todas las clases que se encuentran almacenadas en la base de datos*/
 const getClases = async (req, res) => {
   try {
     const [result] = await connection.query(
@@ -23,6 +27,8 @@ const getClases = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+/* Este metodo obtiene todas las clases que se encuentran almacenadas en la base de datos, siempre y cuando coincida con el ID de la tabla horario*/
 const getClassHorarioId = async (req, res) => {
   try {
     const { id } = req.params;
@@ -49,6 +55,9 @@ const getClassHorarioId = async (req, res) => {
       });
   }
 };
+
+
+/* Este metodo obtiene todas las clases que se encuentran almacenadas en la base de datos, siempre y cuando coincida con el ID de la tabla clase*/
 const getIdClase = async (req, res) => {
   try {
     const { id } = req.params;
@@ -75,6 +84,9 @@ const getIdClase = async (req, res) => {
       });
   }
 };
+
+
+/* Este metodo obtiene todas las clases que se encuentran almacenadas en la base de datos, siempre y cuando coincida con el ID de la tabla horario*/
 const getClaseByHorario = async (req, res) => {
   try {
     const { horario } = req.params;
@@ -102,6 +114,8 @@ const getClaseByHorario = async (req, res) => {
   }
 };
 
+
+/* Este metodo obtiene todas las clases que se encuentran almacenadas en la base de datos, siempre y cuando coincida con el nombre de la tabla salon*/
 const getClaseBySalon = async (req, res) => {
   try {
     const { salon } = req.params;
@@ -129,6 +143,8 @@ const getClaseBySalon = async (req, res) => {
   }
 };
 
+
+/* Este metodo obtiene todas las clases que se encuentran almacenadas en la base de datos, siempre y cuando coincida con la CEDULA de la tabla supervisor*/
 const getClaseBySupervisor = async (req, res) => {
   try {
     const { cedula } = req.params;
@@ -169,6 +185,8 @@ const getClaseBySupervisor = async (req, res) => {
   }
 };
 
+/* Este metodo registra una nueva clase */
+
 const registerClase = async (req, res) => {
   try {
     const { horario, salon, supervisor, estado, fecha } = req.body;
@@ -202,6 +220,8 @@ const registerClase = async (req, res) => {
   }
 };
 
+
+/* Este metodo elimina una clase previamente creada, siempre y cuando el ID pasado, sea el mismo ID de la tabla clase */
 const deleteClase = async (req, res) => {
   try {
     const { id } = req.params;
@@ -231,6 +251,8 @@ const deleteClase = async (req, res) => {
   }
 };
 
+/* Este metodo actualiza cualquier valor menos el id de una clase, siempre y cuando el ID pasado sea el mismo de la tabla clase */
+
 const updateClase = async (req, res) => {
   // fecha, supervisor, dia, salon
   try {
@@ -257,6 +279,8 @@ const updateClase = async (req, res) => {
   }
 };
 
+
+/* Este metodo es un filtro, que obtiene los valores dependiendo del parametro pasado. Puede ser la cedula del supervisor, el nombre del salon, el dia o el id del horario */
 const filterBySupSalDiaHor = async (req, res) => {
   try {
     const { cedula, salon, dia, horario } = req.params;
@@ -355,6 +379,8 @@ const filterBySupSalDiaHor = async (req, res) => {
   }
 };
 
+/* Este metodo es un filtro que obtiene los datos de la clase a partir de la cedula del Docente */
+
 const filterByDoc = async (req, res) => {
   try {
     const { cedula } = req.params;
@@ -376,6 +402,8 @@ const filterByDoc = async (req, res) => {
     return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+/* Este metodo es un filtro que obtiene los datos a partir del parametro fecha */
 
 const filterByDate = async (req, res) => {
   try {
@@ -403,6 +431,8 @@ const filterByDate = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+/* Aqui exportamos todos los metodos previamente creados para luego usarlos en las rutas*/
 
 export const methods = {
   getClases,

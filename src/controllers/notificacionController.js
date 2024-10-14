@@ -1,6 +1,4 @@
 import { connection} from "../database/database.js";
-import { NotificationMessages as messages } from "../assets/notificationsMessages.js";
-import { io } from "../utils/WebsocketServer.js";
 
 //cuenta las notifaciones no leidas
 export const getUnreadCount = async (userId) => {
@@ -15,6 +13,8 @@ export const getUnreadCount = async (userId) => {
   return unreadResult[0].no_leida;
 };
 
+
+/* Obtiene las notificaciones de la base de datos dependiendo de la cedula y si la notificacion no ha sido leida */
 const getNotifications = async (req, res) => {
   try {
     const { cedula, estado } = req.params;
@@ -72,6 +72,8 @@ const getNotifications = async (req, res) => {
   }
 };
 
+
+/// Obtiene todas las notificaciones registradas en la base de datos
 const getAll = async (req, res) => {
   try {
     
@@ -86,6 +88,9 @@ const getAll = async (req, res) => {
   }
 };
 
+
+
+/// Estandariza los mensajes de respuesta de las notificaciones
 const getMessage = (id, params) => {
   
   try {
@@ -106,6 +111,8 @@ const getMessage = (id, params) => {
   }
 }
 
+
+/// Consulta el mensaje de respuesta segun la accion, y envia la notificacion a la persona que le corresponda dicha cedula
 const sendNotification = async (req, res) => {
   try {
     if (req.body !== undefined) {
@@ -148,6 +155,9 @@ const sendNotification = async (req, res) => {
   }
 };
 
+
+
+// Cambia el estado de la notificacion
 const editNotificacion = async (req, res) => {
   try {
     const { id } = req.params;

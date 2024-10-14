@@ -1,5 +1,7 @@
 import { connection } from "./../database/database.js";
 
+/* Este metodo obtiene todos los registros de la tabla detallehorario siempre y cuando los parametos coincidan con el id de la tabla */
+
 const getDetalleHorariosByHorarioId = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -26,6 +28,9 @@ const getDetalleHorariosByHorarioId = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+/* Este metodo obtiene todos los registros de la tabla detallehorario siempre y cuando los parametos coincidan con el id de la tabla */
+
 const getDetalleHorarioById = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -54,6 +59,8 @@ const getDetalleHorarioById = async (req, res) => {
   }
 };
 
+/* Esta metodo obtiene todos los registros de la tabla siempre y cuando el parametro coincida con la cedula del docente */
+
 const getDetallesHorarioByDocente = async (req, res) => {
   try {
     if (req.params != undefined) {
@@ -80,6 +87,9 @@ const getDetallesHorarioByDocente = async (req, res) => {
   }
 };
 
+
+/* Esta metodo obtiene todos los registros de la tabla siempre y cuando el parametro coincida con el id del horario */
+
 const getDetallesHorariosByHorario = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -101,6 +111,8 @@ const getDetallesHorariosByHorario = async (req, res) => {
   }
 };
 
+/* Este metodo obtiene todos los registros de la tabla */
+
 const getAllDetallesHorario = async (req, res) => {
   try {
     const [result] = await connection.query("SELECT * FROM detalle_horario");
@@ -114,6 +126,8 @@ const getAllDetallesHorario = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+/* Este metodo almacena nuevos registros en la tabla */
 
 const saveDetalleHorario = async (req, res) => {
   try {
@@ -152,6 +166,8 @@ const saveDetalleHorario = async (req, res) => {
   }
 };
 
+/* Este metodo elimina un registro de la tabla siempre y cuando el parametro coincida con el id */
+
 const deleteDetalleHorario = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -178,6 +194,8 @@ const deleteDetalleHorario = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+/* Este metodo actualiza cualquier registro de la tabla siempre y cuando el parametro coincida con el id  */
 
 const updateDetalleHorario = async (req, res) => {
   try {
@@ -214,6 +232,8 @@ const updateDetalleHorario = async (req, res) => {
   }
 };
 
+/* Este metodo filtra los registros de la tabla y devuelve los que coinciden con el parametro dia */
+
 const filterByDay = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -237,6 +257,9 @@ const filterByDay = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+
+/* Aqui exportamos todos los metodos previamente creados para luego usarlos en las rutas*/
 
 export const methods = {
   getDetalleHorarioById,

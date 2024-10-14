@@ -4,6 +4,10 @@ import { tokensMethods } from "../functions.js";
 
 const router = Router();
 
-router.post("/", loginMethods.checkLogin); // ✅
+
+// Se consulta el cotrolador login, el metodo checkLogin 
+router.post("/", loginMethods.checkLogin);
+
+// Importa un nuevo controlador, y revisa si la sesion es valida o no
 router.get("/sesion", tokensMethods.checkSession); // ✅
 export default router;

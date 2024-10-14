@@ -1,5 +1,8 @@
 import { connection } from "./../database/database.js";
 
+
+/* Este metodo obtiene los datos de comentario, siempre y cuando el parametro pasado coincida con el ID de la tabla comentario. */
+
 const getComentarioById = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -31,6 +34,9 @@ WHERE comentario.id = ?`,
   }
 };
 // ✅
+
+/* Este metodo obtiene los datos de comentario, siempre y cuando el parametro pasado coincida con la CEDULA de la tabla docente. */
+
 const getComentarioByDocente = async (req, res) => {
   try {
     const { cedula } = req.params;
@@ -62,6 +68,9 @@ const getComentarioByDocente = async (req, res) => {
   }
 };
 
+/* Este metodo obtiene los datos de comentario, siempre y cuando el parametro pasado coincida con el ID de la tabla salon. */
+
+
 const getComentarioBySalon = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -91,6 +100,8 @@ WHERE salon.id = ?`,
   }
 };
 
+
+/* Este metodo obtiene todos registros de la tabla comentarios. */
 const getAllComentarios = async (req, res) => {
   try {
     const [result] = await connection.query(`
@@ -118,6 +129,8 @@ JOIN
   }
 };
 
+
+/* Este metodo permite registrar nuevos registros en la tabla comentarios. */
 const registerComentario = async (req, res) => {
   try {
     if (req.body !== undefined) {
@@ -154,6 +167,8 @@ const registerComentario = async (req, res) => {
   }
 };
 
+/* Este metodo permite eliminar registros almacenados en la tabla comentarios. */
+
 const deleteComentarioById = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -182,6 +197,8 @@ const deleteComentarioById = async (req, res) => {
   }
 };
 
+/* Este metodo permite eliminar todas las concurrencias de los registros almacenados en la tabla comentarios, siempre y cuando coincida el parametro pasado con la cedula del docente. */
+
 const deleteAllComentariosByDocente = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -209,6 +226,8 @@ const deleteAllComentariosByDocente = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+/* Este metodo filtra los registros de la tabla comentario con los parametros: cedula del docente o id del salon */
 
 const filterByDocAndSal = async (req, res) => {
   try {
@@ -254,6 +273,9 @@ const filterByDocAndSal = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+
+/* Aqui exportamos todos los metodos previamente creados para luego usarlos en las rutas*/
+
 
 export const methods = {
   getComentarioById,

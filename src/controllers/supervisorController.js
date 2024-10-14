@@ -3,6 +3,8 @@ import { SALTROUNDS } from "../config.js";
 import { connection } from "./../database/database.js";
 import bcrypt from "bcryptjs";
 
+
+// Obtiene los registros de la tabla supervisor si el correo coincide con el correo registrado
 const getSupervisorByCorreo = async (correo) => {
   const query = `
   SELECT persona.*, supervisor.id as docente_id 
@@ -20,6 +22,8 @@ const getSupervisorByCorreo = async (correo) => {
   }
 };
 
+
+// Consulta en la tabla persona si el registro contiene el correo pasado
 const getPersonaByCorreo = async (correo, cedula) => {
   const query = `
     SELECT * 
@@ -41,7 +45,8 @@ const getPersonaByCorreo = async (correo, cedula) => {
     });
   }
 };
-// ✅
+
+// Obtiene todos los registros de la tabla supervisor 
 const getSupervisores = async (req, res) => {
   try {
     const [result] = await connection.query(
@@ -52,7 +57,8 @@ const getSupervisores = async (req, res) => {
     res.status(200).send("Internal Server Error: " + error.message);
   }
 };
-// ✅
+
+// Obtiene el campo id de la tabla supervisor si el parametro pasado coincide con la cedula 
 const getSupervisorIdByCedula = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -71,6 +77,7 @@ const getSupervisorIdByCedula = async (req, res) => {
   }
 };
 
+// Obtiene los registros de la tabla supervisor si el parametro pasado coincide con la cedula
 const getSupervisorByCedula = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -89,7 +96,7 @@ const getSupervisorByCedula = async (req, res) => {
   }
 };
 
-// ✅
+// Guarda un nuevo registro en la tabla supervisor
 const saveSupervisor = async (req, res) => {
   if (!req.body) {
     return res.status(400).send("Bad Request.");
@@ -164,6 +171,7 @@ const saveSupervisor = async (req, res) => {
   }
 };
 
+// Actualiza un registro preexistente en la tabla supervisor
 const updateSupervisor = async (req, res) => {
   try {
     res.setHeader("Content-Type", "application/json");
@@ -202,7 +210,7 @@ const updateSupervisor = async (req, res) => {
   }
 };
 
-// ✅
+// Elimina un registro preexistente de la tabla supervisor
 const deleteSupervisor = async (req, res) => {
   try {
     if (req.params !== undefined) {
