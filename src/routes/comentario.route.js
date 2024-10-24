@@ -20,7 +20,7 @@ router.delete("/delete/docente/:cedula", comentarioMethods.deleteAllComentariosB
 router.delete("/delete/:id", comentarioMethods.deleteComentarioById)
 
 // Se consulta el cotrolador comentario, el metodo filterByDocAndSal 
-router.get("/docente/:cedula/salon/:salon", comentarioMethods.filterByDocAndSal)  //👀
+router.get("/docente/:cedula/salon/:salon", comentarioMethods.filterByDocAndSal) 
 
 
 // Consultamos si el token que realizo la peticion esta autorizado como director

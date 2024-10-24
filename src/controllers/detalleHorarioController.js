@@ -6,8 +6,6 @@ const getDetalleHorariosByHorarioId = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { id } = req.params;
-      console.log("id entrando", id);
-
       const [result] = await connection.query(
         "SELECT id, horario FROM detalle_horario WHERE horario = " + id + ""
       );
@@ -44,7 +42,6 @@ const getDetalleHorarioById = async (req, res) => {
          WHERE detalle_horario.horario = ?`,
         [id]
       );
-      console.log("result de detalle_horario", result);
       if (result.length > 0) {
         return res.status(200).json(result);
       }

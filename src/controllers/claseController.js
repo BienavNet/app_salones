@@ -282,98 +282,56 @@ const updateClase = async (req, res) => {
 
 /* Este metodo es un filtro, que obtiene los valores dependiendo del parametro pasado. Puede ser la cedula del supervisor, el nombre del salon, el dia o el id del horario */
 const filterBySupSalDiaHor = async (req, res) => {
+
   try {
     const { cedula, salon, dia, horario } = req.params;
-    if (!cedula)
-      return res
-        .status(400)
-        .json({ status: "error", message: "Bad Request: Missing cedula." });
+    console.log(cedula, salon, dia, horario, " DATOS ENTRANDO filterBySupSalDiaHor");
 
-    let query = "";
-    if (cedula != 0 && salon != 0 && dia != 0 && horario != 0)
-      //cuando tiene todos los filtros aplicados
-      query =
-        "SELECT clase.*, detalle_horario.dia, detalle_horario.hora_inicio, hora_fin, horario.asignatura FROM clase JOIN supervisor ON clase.supervisor = supervisor.id JOIN persona ON persona.id = supervisor.persona JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE persona.cedula = " +
-        cedula +
-        " AND clase.salon=" +
-        salon +
-        " AND clase.horario=" +
-        horario +
-        " AND detalle_horario.dia = " +
-        dia +
-        "";
-    else if (cedula != 0 && salon != 0 && dia != 0 && horario == 0)
-      // filtro de cedula, salon, dia
-      query =
-        "SELECT clase.* FROM clase JOIN supervisor ON clase.supervisor = supervisor.id JOIN persona ON persona.id = supervisor.persona JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE persona.cedula = " +
-        cedula +
-        " AND clase.salon=" +
-        salon +
-        " AND detalle_horario.dia = " +
-        dia +
-        "";
-    else if (cedula != 0 && salon != 0 && dia == 0 && horario == 0)
-      // filtro cedula y salon
-      query =
-        "SELECT clase.* FROM clase JOIN supervisor ON clase.supervisor = supervisor.id JOIN persona ON persona.id = supervisor.persona JOIN horario ON clase.horario = horario.id WHERE persona.cedula = " +
-        cedula +
-        " AND clase.salon=" +
-        salon +
-        "";
-    else if (cedula != 0 && salon == 0 && dia == 0 && horario == 0)
-      // devuelve solo si se le envio la cedula
-      query =
-        "SELECT clase.*, salon.numero_salon, categoria_salon.categoria, docente_persona.nombre AS nombre_docente, docente_persona.apellido AS apellido_docente, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura FROM clase JOIN supervisor ON supervisor.id = clase.supervisor JOIN persona AS supervisor_persona ON supervisor_persona.id = supervisor.persona JOIN salon ON salon.id = clase.salon JOIN categoria_salon ON categoria_salon.id = salon.categoria_salon JOIN horario ON horario.id = clase.horario JOIN detalle_horario ON detalle_horario.horario = horario.id JOIN docente ON docente.id = horario.docente JOIN persona AS docente_persona ON docente_persona.id = docente.persona WHERE supervisor_persona.cedula = " +
-        cedula +
-        "";
-    else if (cedula !== 0 && salon != 0 && dia != 0 && horario != 0)
-      //todos los filtros
-      query =
-        "SELECT clase.* FROM clase JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE clase.salon=" +
-        salon +
-        " AND clase.horario=" +
-        horario +
-        " AND detalle_horario.dia = " +
-        dia +
-        "";
-    else if (cedula !== 0 && salon != 0 && dia != 0 && horario == 0)
-      // filtro de salon y dia
-      query =
-        "SELECT clase.* FROM clase JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE clase.salon=" +
-        salon +
-        " AND detalle_horario.dia = " +
-        dia +
-        "";
-    else if (cedula !== 0 && salon != 0 && dia == 0 && horario == 0)
-      // filtro de salon
-      query = "SELECT clase.* FROM clase WHERE clase.salon=" + salon + "";
-    else if (cedula !== 0 && salon == 0 && dia != 0 && horario != 0)
-      // filtro de dia y horario
-      query =
-        "SELECT clase.* FROM clase JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE clase.horario=" +
-        horario +
-        " AND detalle_horario.dia = " +
-        dia +
-        "";
-    else if (cedula !== 0 && salon == 0 && dia != 0 && horario == 0)
-      //filtro de solo dias
-      query =
-        "SELECT clase.* FROM clase JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE detalle_horario.dia = " +
-        dia +
-        "";
-    else if (cedula !== 0 && salon == 0 && dia == 0 && horario != 0)
-      //filtro de solo horario
-      query = "SELECT clase.* FROM clase WHERE clase.horario=" + horario + "";
-    else {
-      res.status(400).json({ status: "error", message: "Bad request." });
-      return;
+    if (!cedula) return res.status(400).json({ status: "error", message: "Bad Request: Missing cedula." });
+    let query = `
+      SELECT clase.*, 
+             salon.numero_salon, 
+             categoria_salon.categoria, 
+             docente_persona.nombre AS nombre_docente, 
+             docente_persona.apellido AS apellido_docente, 
+             detalle_horario.hora_inicio, 
+             detalle_horario.hora_fin, 
+             horario.asignatura
+      FROM clase 
+      JOIN supervisor ON clase.supervisor = supervisor.id
+      JOIN persona AS supervisor_persona ON supervisor_persona.id = supervisor.persona
+      JOIN salon ON salon.id = clase.salon
+      JOIN categoria_salon ON categoria_salon.id = salon.categoria_salon
+      JOIN horario ON horario.id = clase.horario
+      JOIN detalle_horario ON detalle_horario.horario = horario.id
+      JOIN docente ON docente.id = horario.docente
+      JOIN persona AS docente_persona ON docente_persona.id = docente.persona
+      WHERE supervisor_persona.cedula = ${cedula}
+    `;
+
+    // Filtros dinámicos
+    if (salon != 0) {
+      query += ` AND clase.salon = ${salon}`;
     }
+    if (dia != 0) {
+      query += ` AND detalle_horario.dia = '${dia}'`;
+    }
+    if (horario != 0) {
+      query += ` AND clase.horario = ${horario}`;
+    }
+
     const [result] = await connection.query(query);
+
     if (result.length > 0) {
       res.status(200).json(result);
       return;
+    }else {
+      return res.status(200).json({
+        status: "success",
+        message: "No se encontró información para los filtros seleccionados.",
+        result: []
+      });
     }
-    return res.status(400).json({ status: "error", message: "Bad request." });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }

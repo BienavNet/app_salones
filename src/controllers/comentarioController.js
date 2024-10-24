@@ -40,7 +40,6 @@ WHERE comentario.id = ?`,
 const getComentarioByDocente = async (req, res) => {
   try {
     const { cedula } = req.params;
-    console.log(cedula, "cedula de comentario x docente");
     if (!cedula || cedula.trim() === "") {
       return res
         .status(400)
@@ -58,7 +57,6 @@ const getComentarioByDocente = async (req, res) => {
         `,
       [cedula]
     );
-    console.log("resutltado de docente por comentario", result)
     if (result.length > 0) {
      return res.status(200).json(result);
     }
