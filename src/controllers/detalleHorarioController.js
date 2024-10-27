@@ -63,11 +63,12 @@ const getDetallesHorarioByDocente = async (req, res) => {
     if (req.params != undefined) {
       const { cedula } = req.params;
       const [result] = await connection.query(
-       `SELECT detalle_horario.dia, horario.id as horario, horario.asignatura, persona.nombre, persona.apellido
+        `SELECT detalle_horario.dia, horario.id as horario, horario.asignatura, persona.nombre, persona.apellido
        FROM detalle_horario 
        JOIN horario ON horario.id = detalle_horario.horario 
        JOIN docente ON docente.id = horario.docente 
-       JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?`,[cedula]
+       JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?`,
+        [cedula]
       );
 
       if (result.length > 0) {
@@ -84,27 +85,30 @@ const getDetallesHorarioByDocente = async (req, res) => {
   }
 };
 
-
 /* Esta metodo obtiene todos los registros de la tabla siempre y cuando el parametro coincida con el id del horario */
 
 const getDetallesHorariosByHorario = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { horario } = req.params;
-      const [result] = await connection.query(`
-      SELECT detalle_horario.dia, horario.asignatura, persona.nombre, persona.apellido FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id WHERE horario.id = ?`,[horario]);
+      const [result] = await connection.query(
+        `
+      SELECT detalle_horario.dia, horario.asignatura, persona.nombre, persona.apellido, clase.id AS id_class, clase.fecha, categoria_salon.categoria , salon.numero_salon, salon.nombre AS nombre_salon FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id JOIN clase ON clase.horario = horario.id JOIN salon ON clase.salon = salon.id JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id WHERE horario.id = ?`,
+        [horario]
+      );
+
       if (result.length > 0) {
         return res.status(200).json(result);
       }
-      res.status(404).json({
+
+      return res.status(404).json({
         status: "error",
         message: "No se obtuvo ningun dato desde el servidor.",
       });
-      return;
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    return res.status(400).json({ status: "error", message: "Bad request." });
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
 
@@ -199,12 +203,10 @@ const updateDetalleHorario = async (req, res) => {
     const { id } = req.params;
     const data = req.body;
     if (!id || !data || Object.keys(data).length === 0) {
-      return res
-        .status(400)
-        .json({
-          status: "error",
-          message: "Bad request: ID o datos faltantes.",
-        });
+      return res.status(400).json({
+        status: "error",
+        message: "Bad request: ID o datos faltantes.",
+      });
     }
     const [result] = await connection.query(
       `UPDATE detalle_horario SET ? WHERE id = ?`,
@@ -233,28 +235,35 @@ const updateDetalleHorario = async (req, res) => {
 
 const filterByDay = async (req, res) => {
   try {
-    if (req.params !== undefined) {
-      const { dia, cedula } = req.params;
-      const connection = await database.getConnection();
-      const [result] = await connection.query(
-        "SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura FROM detalle horario JOIN horario ON horario.id = detalle_horario.horario JOIN persona ON docente.persona = persona.id WHERE detalle_horario.dia = " +
-          dia +
-          " AND persona.cedula = " +
-          cedula +
-          " "
-      );
-
-      if (result.length > 0) {
-        res.status(200).json(result);
-        return;
-      }
-      res.status(400).json({ status: "error", message: "Bad request." });
+    const { dia, cedula } = req.params;
+    if (!dia || !cedula) {
+      return res
+        .status(400)
+        .json({ status: "error", message: "Missing required parameters." });
+    }
+    const [result] = await connection.query(
+      `SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura, persona.nombre, persona.apellido, clase.id AS id_class, clase.fecha, categoria_salon.categoria, salon.numero_salon, salon.nombre AS nombre_salon 
+FROM detalle_horario
+JOIN horario ON horario.id = detalle_horario.horario
+JOIN docente ON docente.id = horario.docente
+JOIN persona ON docente.persona = persona.id
+JOIN clase ON clase.horario = horario.id
+JOIN salon ON clase.salon = salon.id
+JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id
+WHERE detalle_horario.dia = ? AND persona.cedula = ?`,
+      [dia, cedula]
+    );
+    if (result.length > 0) {
+      return res.status(200).json(result);
+    } else {
+      return res
+        .status(404)
+        .json({ status: "error", message: "No records found." });
     }
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
-
 
 /* Aqui exportamos todos los metodos previamente creados para luego usarlos en las rutas*/
 

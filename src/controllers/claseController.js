@@ -285,8 +285,6 @@ const filterBySupSalDiaHor = async (req, res) => {
 
   try {
     const { cedula, salon, dia, horario } = req.params;
-    console.log(cedula, salon, dia, horario, " DATOS ENTRANDO filterBySupSalDiaHor");
-
     if (!cedula) return res.status(400).json({ status: "error", message: "Bad Request: Missing cedula." });
     let query = `
       SELECT clase.*, 

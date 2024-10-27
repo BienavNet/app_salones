@@ -53,14 +53,15 @@ const getComentarioByDocente = async (req, res) => {
         JOIN salon on salon.id = comentario.salon 
         JOIN docente ON docente.id = comentario.docente 
         JOIN persona ON persona.id = docente.persona 
-        WHERE persona.cedula =? 
-        `,
-      [cedula]
+        WHERE persona.cedula = ? `, [cedula]
     );
     if (result.length > 0) {
      return res.status(200).json(result);
     }
-    return res.status(404).json({ status: "error", message: "Bad request. Teacher's comment not found." });
+    return res.status(200).json(
+      { status: "error", 
+        message: "Bad request. Teacher's comment not found." 
+      });
   } catch (error) {
     return res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -229,48 +230,44 @@ const deleteAllComentariosByDocente = async (req, res) => {
 
 const filterByDocAndSal = async (req, res) => {
   try {
-    if (req.params !== undefined) {
-      const { cedula, salon } = req.params;
-
-      let query = "";
-
-      if (cedula != 0 && salon != 0)
-        query =
-          "SELECT comentario.* FROM comentario JOIN docente ON comentario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula=" +
-          cedula +
-          " AND comentario.salon = " +
-          salon +
-          "";
-      else if (cedula != 0 && salon == 0)
-        query =
-          "SELECT comentario.* FROM comentario JOIN docente ON comentario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula=" +
-          cedula +
-          "";
-      else if (cedula == 0 && salon != 0)
-        query =
-          "SELECT comentario.* FROM comentario WHERE comentario.salon = " +
-          salon +
-          "";
-      else {
-        res.status(400).json({ status: "error", message: "Bad request." });
-        return;
-      }
-
-      const [result] = await connection.query(query);
-
-      if (result.length > 0) {
-        res.status(200).json(result);
-        return;
-      }
-
-      res.status(400).json({ status: "error", message: "Bad request." });
-      return;
+    if (!req.params) {
+      return res.status(400).json({ status: "error", message: "Missing parameters." });
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    const { cedula, salon } = req.params;
+    if (cedula == 0 && salon == 0) {
+      return res.status(400).json({ status: "error", message: "At least one parameter must be provided." });
+    }
+    let query = `
+      SELECT comentario.* 
+      FROM comentario 
+      LEFT JOIN docente ON comentario.docente = docente.id 
+      LEFT JOIN persona ON docente.persona = persona.id
+    `;
+    const conditions = [];
+    const params = [];
+
+    if (cedula != 0) {
+      conditions.push("persona.cedula = ?");
+      params.push(cedula);
+    }
+    if (salon != 0) {
+      conditions.push("comentario.salon = ?");
+      params.push(salon);
+    }
+    if (conditions.length > 0) {
+      query += " WHERE " + conditions.join(" AND ");
+    }
+    const [result] = await connection.query(query, params);
+    if (result.length > 0) {
+      return res.status(200).json(result);
+    } else {
+      return res.status(404).json({ status: "error", message: "No comments found." });
+    }
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    return res.status(500).json({ status: "error", message: "Internal Server Error: " + error.message });
   }
 };
+
 
 /* Aqui exportamos todos los metodos previamente creados para luego usarlos en las rutas*/
 
