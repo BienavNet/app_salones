@@ -219,17 +219,22 @@ const getHorariosByDocente = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      const [result] = await connection.query(
-        `
-       SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin ,clase.id AS id_class, clase.estado, clase.fecha, salon.numero_salon, salon.nombre, categoria_salon.categoria
-       FROM horario 
-       JOIN clase ON clase.horario = horario.id
-       JOIN salon ON clase.salon = salon.id
-       JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id 
-       JOIN docente ON horario.docente = docente.id 
-       JOIN persona ON docente.persona = persona.id 
-       JOIN detalle_horario ON horario.id = detalle_horario.horario 
-       WHERE persona.cedula = ?`,[cedula]);
+      // const [result] = await connection.query(
+      //   `
+      //  SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin ,clase.id AS id_class, clase.estado, clase.fecha, salon.numero_salon, salon.nombre, categoria_salon.categoria
+      //  FROM horario 
+      //  JOIN clase ON clase.horario = horario.id
+      //  JOIN salon ON clase.salon = salon.id
+      //  JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id 
+      //  JOIN docente ON horario.docente = docente.id 
+      //  JOIN persona ON docente.persona = persona.id 
+      //  JOIN detalle_horario ON horario.id = detalle_horario.horario 
+      //  WHERE persona.cedula = ?`,[cedula]);
+
+
+    /*SELECT DISTINCT horario.*, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, salon.nombre, salon.numero_salon FROM horario JOIN clase ON clase.horario = horario.id JOIN salon ON clase.salon = salon.id JOIN detalle_horario ON detalle_horario.horario = horario.id JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id WHERE persona.cedula = '1007582633'; */
+
+      const [result] = await connection.query('SELECT DISTINCT horario.*, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, salon.nombre, salon.numero_salon FROM horario JOIN clase ON clase.horario = horario.id JOIN salon ON clase.salon = salon.id JOIN detalle_horario ON detalle_horario.horario = horario.id JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id WHERE persona.cedula = '+ cedula +'')
       return res.status(200).json(result); 
     }
     return res.status(400).json({ status: "error", message: "Bad request." });

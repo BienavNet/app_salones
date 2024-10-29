@@ -24,6 +24,9 @@ router.get("/fechadocente/:cedula", claseMethods.filterByAllDate)
 // Se consulta el cotrolador clase, el metodo filterBySupSalDiaHor 
 router.get("/supervisor/:cedula/salon/:salon/dia/:dia/horario/:horario", claseMethods.filterBySupSalDiaHor)  // ✅
 
+// Se consulta el cotrolador clase, el metodo filterByDoc 
+router.get("/docente/:cedula", claseMethods.filterByDoc)
+
 
 // Consultamos si el token que realizo la peticion esta autorizado como cualquiera de los 2 roles
 tokensMethods.isAuthorized(router, ["supervisor", "director"])
@@ -31,8 +34,14 @@ tokensMethods.isAuthorized(router, ["supervisor", "director"])
 // Se consulta el cotrolador clase, el metodo getClaseBySupervisor 
 router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor)
 
+<<<<<<< HEAD
 // Se consulta el cotrolador clase, el metodo filterByDoc 
 router.get("/docente/:cedula", claseMethods.filterByDoc)
+=======
+// Se consulta el cotrolador clase, el metodo filterByDate 
+router.get("/docente/:cedula/fecha/:fecha", claseMethods.filterByDate)
+
+>>>>>>> 0c685b35589e49a38552e17a5a2b70bcaff7957f
 
 // Consultamos si el token que realizo la peticion esta autorizado como director
 tokensMethods.isAuthorized(router, ["director"])

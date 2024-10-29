@@ -47,6 +47,7 @@ const getComentarioByDocente = async (req, res) => {
     }
     
     const [result] = await connection.query(
+<<<<<<< HEAD
       `
         SELECT comentario.*, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido
         FROM comentario 
@@ -54,6 +55,10 @@ const getComentarioByDocente = async (req, res) => {
         JOIN docente ON docente.id = comentario.docente 
         JOIN persona ON persona.id = docente.persona 
         WHERE persona.cedula = ? `, [cedula]
+=======
+      `SELECT comentario.*, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido FROM comentario JOIN salon ON comentario.salon = salon.id JOIN persona ON comentario.docente = persona.id WHERE persona.cedula = ?;`,
+      [cedula]
+>>>>>>> 0c685b35589e49a38552e17a5a2b70bcaff7957f
     );
     if (result.length > 0) {
      return res.status(200).json(result);
@@ -133,16 +138,17 @@ JOIN
 const registerComentario = async (req, res) => {
   try {
     if (req.body !== undefined) {
-      const { comentario, docente, salon } = req.body;
+      const { comentario, docente, salon, fecha, clase } = req.body;
 
       if (
         comentario !== undefined &&
         docente !== undefined &&
-        salon !== undefined
+        salon !== undefined &&
+        fecha !== undefined &&
+        clase !== undefined
       ) {
         const [result] = await connection.query(
-          "INSERT INTO comentario SET ?",
-          req.body
+          `INSERT INTO comentario (comentario, docente, salon, fecha, clase) VALUES('${comentario}', '${docente}', '${salon}', '${fecha}', '${clase}')`
         );
         const { insertId, affectedRows } = result;
 

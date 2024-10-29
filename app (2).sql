@@ -3,12 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 03-09-2024 a las 05:42:11
+-- Tiempo de generación: 29-10-2024 a las 14:05:56
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
-CREATE DATABASE IF NOT EXISTS APP;
-USE APP;
-
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -336,19 +333,20 @@ INSERT INTO `clase` (`id`, `horario`, `salon`, `supervisor`, `estado`, `fecha`) 
 
 CREATE TABLE `comentario` (
   `id` int(11) NOT NULL,
-  `comentario` varchar(200) NOT NULL,
+  `comentario` varchar(250) DEFAULT NULL,
   `docente` int(11) DEFAULT NULL,
   `salon` int(11) DEFAULT NULL,
-  `fecha` date DEFAULT NULL
+  `fecha` date DEFAULT NULL,
+  `clase` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Volcado de datos para la tabla `comentario`
 --
 
-INSERT INTO `comentario` (`id`, `comentario`, `docente`, `salon`, `fecha`) VALUES
-(1, 'el salon contiene un mal olor a la hora de iniciar la clase, necesitamos estar alerta por ese lado', 1, 3, NULL),
-(2, 'una ventana está rota, creo que una piedra fue la causa', 3, 2, NULL);
+INSERT INTO `comentario` (`id`, `comentario`, `docente`, `salon`, `fecha`, `clase`) VALUES
+(1, 'comentario de prueba', 2, 3, '2024-10-28', 170),
+(2, 'comentando cualquier babosada.', 2, 1, '2024-10-29', 393);
 
 -- --------------------------------------------------------
 
@@ -473,12 +471,19 @@ INSERT INTO `horario` (`id`, `docente`, `asignatura`) VALUES
 
 CREATE TABLE `notificacion` (
   `id` int(11) NOT NULL,
-  `mensaje` varchar(100) NOT NULL,
+  `mensaje` varchar(200) DEFAULT NULL,
   `de` int(11) DEFAULT NULL,
   `para` int(11) DEFAULT NULL,
-  `estado` enum('leida','no leida') NOT NULL,
-  `fecha` date NOT NULL
+  `estado` varchar(50) DEFAULT NULL,
+  `fecha` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `notificacion`
+--
+
+INSERT INTO `notificacion` (`id`, `mensaje`, `de`, `para`, `estado`, `fecha`) VALUES
+(1, 'mensaje de prueba', 2, 1, 'no leida', '2024-10-28');
 
 -- --------------------------------------------------------
 
@@ -501,7 +506,7 @@ CREATE TABLE `persona` (
 
 INSERT INTO `persona` (`id`, `nombre`, `apellido`, `cedula`, `correo`, `contrasena`) VALUES
 (1, 'admin', 'admin1', 1003187623, 'admin12@gmail.com', 'admin123'),
-(2, 'didier', 'guerrero', 1007582633, 'didier12@gmail.com', '$2b$10$9Pe6yKMWLqI3s.fBpaLv0utfVWctFTcDaMaLEu/MNu4JuJ.4pEi7q'),
+(2, 'didier', 'guerrero', 1007582633, 'didier12@gmail.com', '12345'),
 (4, 'nombre', 'apelidyy', 4294967295, 'ramirezHerney@gmail.com', '$2b$10$b0ka.Zc4DHHab402LeENAejKPBUAM6t7FskB0Aclv56siSLhuRhqO'),
 (5, 'sapovisor', 'martinez', 1007582611, 'martinez12@gmail.com', 'Martinez_2024!'),
 (8, 'name', 'example', 4294967295, 'name2@gmail.com', 'Name123!'),
@@ -516,21 +521,21 @@ INSERT INTO `persona` (`id`, `nombre`, `apellido`, `cedula`, `correo`, `contrase
 CREATE TABLE `reporte` (
   `id` int(11) NOT NULL,
   `clase` int(11) DEFAULT NULL,
-  `comentario` varchar(250) NOT NULL
+  `comentario` varchar(250) NOT NULL,
+  `fecha` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-ALTER TABLE `reporte` ADD fecha datetime not null;
 
 --
 -- Volcado de datos para la tabla `reporte`
 --
 
-INSERT INTO `reporte` (`id`, `clase`, `comentario`) VALUES
-(1, 164, 'el docente no sea reportado en su hora de asignada a ala clase'),
-(2, 154, 'bien (y)'),
-(3, 146, 'bien (Y)'),
-(4, 164, 'bien (Y)'),
-(5, 275, 'bien (Y)');
+INSERT INTO `reporte` (`id`, `clase`, `comentario`, `fecha`) VALUES
+(1, 164, 'el docente no sea reportado en su hora de asignada a ala clase', '0000-00-00 00:00:00'),
+(2, 154, 'bien (y)', '0000-00-00 00:00:00'),
+(3, 146, 'bien (Y)', '0000-00-00 00:00:00'),
+(4, 164, 'bien (Y)', '0000-00-00 00:00:00'),
+(5, 275, 'bien (Y)', '0000-00-00 00:00:00'),
+(6, 250, 'Asistio al salon', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -602,8 +607,9 @@ ALTER TABLE `clase`
 --
 ALTER TABLE `comentario`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `docente` (`docente`),
-  ADD KEY `salon` (`salon`);
+  ADD KEY `salon` (`salon`),
+  ADD KEY `clase` (`clase`),
+  ADD KEY `comentario_ibfk_1` (`docente`);
 
 --
 -- Indices de la tabla `detalle_horario`
@@ -717,6 +723,12 @@ ALTER TABLE `horario`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=144;
 
 --
+-- AUTO_INCREMENT de la tabla `notificacion`
+--
+ALTER TABLE `notificacion`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT de la tabla `persona`
 --
 ALTER TABLE `persona`
@@ -726,7 +738,7 @@ ALTER TABLE `persona`
 -- AUTO_INCREMENT de la tabla `reporte`
 --
 ALTER TABLE `reporte`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `salon`
@@ -756,8 +768,9 @@ ALTER TABLE `clase`
 -- Filtros para la tabla `comentario`
 --
 ALTER TABLE `comentario`
-  ADD CONSTRAINT `comentario_ibfk_1` FOREIGN KEY (`docente`) REFERENCES `docente` (`id`),
-  ADD CONSTRAINT `comentario_ibfk_2` FOREIGN KEY (`salon`) REFERENCES `salon` (`id`);
+  ADD CONSTRAINT `comentario_ibfk_1` FOREIGN KEY (`docente`) REFERENCES `persona` (`id`),
+  ADD CONSTRAINT `comentario_ibfk_2` FOREIGN KEY (`salon`) REFERENCES `salon` (`id`),
+  ADD CONSTRAINT `comentario_ibfk_3` FOREIGN KEY (`clase`) REFERENCES `clase` (`id`);
 
 --
 -- Filtros para la tabla `detalle_horario`
