@@ -94,6 +94,7 @@ const getAll = async (req, res) => {
 const getMessage = (id, params) => {
   
   try {
+    
     const messages = {
       "clase revisada": {
         "message": "El supervisor $de ha revisado la clase de $para"
@@ -115,11 +116,12 @@ const getMessage = (id, params) => {
 /// Consulta el mensaje de respuesta segun la accion, y envia la notificacion a la persona que le corresponda dicha cedula
 const sendNotification = async (req, res) => {
   try {
+    
     if (req.body !== undefined) {
       const { action, de, para } = req.body;
       if (action !== undefined && de !== undefined && para !== undefined) {
         const mensaje = getMessage(action, { "de": de, "para": para }) //modificacion para que filtre el id del mensaje en el archivo json y adicional reemplace los valores de y para en el mensaje
-        
+        console.log(mensaje)
         const [result] = await connection.query(
           `INSERT INTO notificacion (mensaje, de, para, estado, fecha) VALUES (?, ?, ?, 'no leida', NOW())`, [mensaje, de, para]);
         const { insertId, affectedRows } = result;

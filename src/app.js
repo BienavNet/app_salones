@@ -29,6 +29,7 @@ console.log("server started", initSocketServer)
 
 // Se inicializa la app con un puerto de escucha de peticiones
 app.set("port", PORT)
+console.log(PORT)
 
 // Middlewares
 app.use(cors())

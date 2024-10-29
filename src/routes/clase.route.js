@@ -16,15 +16,15 @@ router.get("/salon/:salon", claseMethods.getClaseBySalon)
 // Se consulta el cotrolador clase, el metodo filterBySupSalDiaHor 
 router.get("/supervisor/:cedula/salon/:salon/dia/:dia/horario/:horario", claseMethods.filterBySupSalDiaHor)  //👀 //supervisor, clases por supervisor en director
 
+// Se consulta el cotrolador clase, el metodo filterByDoc 
+router.get("/docente/:cedula", claseMethods.filterByDoc)
+
 
 // Consultamos si el token que realizo la peticion esta autorizado como cualquiera de los 2 roles
 tokensMethods.isAuthorized(router, ["supervisor", "director"])
 
 // Se consulta el cotrolador clase, el metodo getClaseBySupervisor 
 router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor)
-
-// Se consulta el cotrolador clase, el metodo filterByDoc 
-router.get("/docente/:cedula", claseMethods.filterByDoc)
 
 // Se consulta el cotrolador clase, el metodo filterByDate 
 router.get("/docente/:cedula/fecha/:fecha", claseMethods.filterByDate)

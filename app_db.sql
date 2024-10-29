@@ -6,6 +6,9 @@
 -- Tiempo de generación: 03-09-2024 a las 05:42:11
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
+CREATE DATABASE IF NOT EXISTS APP;
+USE APP;
+
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -469,13 +472,12 @@ INSERT INTO `horario` (`id`, `docente`, `asignatura`) VALUES
 --
 
 CREATE TABLE `notificacion` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `mensaje` varchar(100) NOT NULL,
   `de` int(11) DEFAULT NULL,
   `para` int(11) DEFAULT NULL,
   `estado` enum('leida','no leida') NOT NULL,
   `fecha` date NOT NULL
-   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -517,7 +519,7 @@ CREATE TABLE `reporte` (
   `comentario` varchar(250) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-ALTER TABLE `reporte` ADD fecha datetime, not null;
+ALTER TABLE `reporte` ADD fecha datetime not null;
 
 --
 -- Volcado de datos para la tabla `reporte`

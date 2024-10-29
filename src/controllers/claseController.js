@@ -348,7 +348,7 @@ const filterByDoc = async (req, res) => {
         .json({ status: "error", message: "Bad Request: Missing cedula." });
 
     const [result] = await connection.query(
-      `SELECT clase.* FROM clase JOIN horario ON clase.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ${cedula}`
+      `SELECT clase.fecha, clase.id as clase_id, horario.asignatura, detalle_horario.hora_inicio, detalle_horario.hora_fin, salon.numero_salon, salon.id as salon_id FROM clase JOIN horario ON clase.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id JOIN detalle_horario ON horario.id = detalle_horario.horario JOIN salon ON clase.salon = salon.id WHERE persona.cedula = ${cedula}`
     );
 
     if (result.length > 0) {
