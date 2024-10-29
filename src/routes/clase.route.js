@@ -13,6 +13,14 @@ router.get("/horario/:horario", claseMethods.getClaseByHorario)
 // Se consulta el cotrolador clase, el metodo getClaseBySalon 
 router.get("/salon/:salon", claseMethods.getClaseBySalon)
 
+// Se consulta el cotrolador clase, el metodo filterByDate 
+router.get("/docente/:cedula/fecha/:fecha", claseMethods.filterByDate) // por una sola fecha
+
+// Se consulta el cotrolador clase, el metodo filterByAllDate 
+router.get("/fechadocente/:cedula", claseMethods.filterByAllDate)
+
+
+
 // Se consulta el cotrolador clase, el metodo filterBySupSalDiaHor 
 router.get("/supervisor/:cedula/salon/:salon/dia/:dia/horario/:horario", claseMethods.filterBySupSalDiaHor)  // ✅
 
@@ -25,10 +33,6 @@ router.get("/supervisor/:cedula", claseMethods.getClaseBySupervisor)
 
 // Se consulta el cotrolador clase, el metodo filterByDoc 
 router.get("/docente/:cedula", claseMethods.filterByDoc)
-
-// Se consulta el cotrolador clase, el metodo filterByDate 
-router.get("/docente/:cedula/fecha/:fecha", claseMethods.filterByDate)
-
 
 // Consultamos si el token que realizo la peticion esta autorizado como director
 tokensMethods.isAuthorized(router, ["director"])
