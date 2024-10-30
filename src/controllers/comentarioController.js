@@ -25,7 +25,7 @@ WHERE comentario.id = ?`,
         res.status(200).json(result);
         return;
       }
-      res.status(400).json({ status: "error", message: "Bad request." });
+      res.status(404).json({ status: "error", message: "Bad not found.." });
       return;
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -48,21 +48,19 @@ const getComentarioByDocente = async (req, res) => {
     
     const [result] = await connection.query(
       `
-        SELECT comentario.*, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido
+        SELECT comentario.*, salon.nombre AS nombre_salon, salon.numero_salon
         FROM comentario 
         JOIN salon on salon.id = comentario.salon 
         JOIN docente ON docente.id = comentario.docente 
         JOIN persona ON persona.id = docente.persona 
         WHERE persona.cedula = ? `, [cedula]
-      `SELECT comentario.*, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido FROM comentario JOIN salon ON comentario.salon = salon.id JOIN persona ON comentario.docente = persona.id WHERE persona.cedula = ?;`,
-      [cedula]
     );
     if (result.length > 0) {
      return res.status(200).json(result);
     }
-    return res.status(200).json(
+    return res.status(404).json(
       { status: "error", 
-        message: "Bad request. Teacher's comment not found." 
+        message: "Teacher's comment not found." 
       });
   } catch (error) {
     return res.status(500).send("Internal Server Error: " + error.message);

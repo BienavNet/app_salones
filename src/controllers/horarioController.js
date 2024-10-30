@@ -1,6 +1,5 @@
 import { connection } from "./../database/database.js";
 
-
 /// Almacena un nuevo registro de la tabla horario en la base de datos
 const saveHorario = async (req, res) => {
   if (!req.body && req.body != undefined && req.body !== "")
@@ -10,7 +9,6 @@ const saveHorario = async (req, res) => {
     const { docente, asignatura } = req.body;
 
     if (typeof docente === "number" && typeof asignatura === "string") {
-      
       const [result] = await connection.query(
         "INSERT INTO horario SET ?",
         req.body
@@ -47,7 +45,6 @@ const saveHorario = async (req, res) => {
   }
 };
 
-
 // Actualiza un registro pre existente de la tabla horario si el id pasado coincide con el almacenado
 const updateHorario = async (req, res) => {
   try {
@@ -55,7 +52,6 @@ const updateHorario = async (req, res) => {
       if (req.params !== undefined) {
         const { id } = req.params;
         if (req.body !== undefined) {
-          
           const [result] = await connection.query(
             "UPDATE horario SET ? WHERE id = " + id + "",
             req.body
@@ -82,7 +78,6 @@ const updateHorario = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
-
 
 // Elimina un registro preexistente de la tabla horario si el id pasado coincide con el almacenado
 const deleteHorario = async (req, res) => {
@@ -112,7 +107,6 @@ const deleteHorario = async (req, res) => {
   }
 };
 
-
 /// Obtiene el horario de los docentes por medio de la cedula.
 const getHorarios = async (req, res) => {
   try {
@@ -130,7 +124,6 @@ const getHorarios = async (req, res) => {
     return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
-
 
 /// Obtiene un horario en especifico si el id pasado coincide con alguno que se encuentre registrado en la base de datos.
 const getHorarioById = async (req, res) => {
@@ -213,29 +206,17 @@ WHERE horario.id = ?`,
   }
 };
 
-
 /// Obtiene el horario de los docentes por medio de la cedula.
 const getHorariosByDocente = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      // const [result] = await connection.query(
-      //   `
-      //  SELECT horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin ,clase.id AS id_class, clase.estado, clase.fecha, salon.numero_salon, salon.nombre, categoria_salon.categoria
-      //  FROM horario 
-      //  JOIN clase ON clase.horario = horario.id
-      //  JOIN salon ON clase.salon = salon.id
-      //  JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id 
-      //  JOIN docente ON horario.docente = docente.id 
-      //  JOIN persona ON docente.persona = persona.id 
-      //  JOIN detalle_horario ON horario.id = detalle_horario.horario 
-      //  WHERE persona.cedula = ?`,[cedula]);
-
-
-    /*SELECT DISTINCT horario.*, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, salon.nombre, salon.numero_salon FROM horario JOIN clase ON clase.horario = horario.id JOIN salon ON clase.salon = salon.id JOIN detalle_horario ON detalle_horario.horario = horario.id JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id WHERE persona.cedula = '1007582633'; */
-
-      const [result] = await connection.query('SELECT DISTINCT horario.*, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, salon.nombre, salon.numero_salon FROM horario JOIN clase ON clase.horario = horario.id JOIN salon ON clase.salon = salon.id JOIN detalle_horario ON detalle_horario.horario = horario.id JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id WHERE persona.cedula = '+ cedula +'')
-      return res.status(200).json(result); 
+      const [result] = await connection.query(
+        "SELECT DISTINCT horario.*, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, salon.nombre, salon.numero_salon FROM horario JOIN clase ON clase.horario = horario.id JOIN salon ON clase.salon = salon.id JOIN detalle_horario ON detalle_horario.horario = horario.id JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id WHERE persona.cedula = " +
+          cedula +
+          ""
+      );
+      return res.status(200).json(result);
     }
     return res.status(400).json({ status: "error", message: "Bad request." });
   } catch (error) {
