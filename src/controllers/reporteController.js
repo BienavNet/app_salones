@@ -397,8 +397,6 @@ const filterBySupAndSal = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula, salon } = req.params;
-      
-
       let query = "";
 
       if (cedula != 0 && salon != 0) {
@@ -427,7 +425,7 @@ const filterBySupAndSal = async (req, res) => {
         return;
       }
 
-      res.status(400).json({ status: "error", message: "Bad request." });
+      res.status(404).json({ status: "error", message: "Not found." });
       return;
     }
     res.status(400).json({ status: "error", message: "Bad request." });
