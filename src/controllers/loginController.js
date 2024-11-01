@@ -45,7 +45,15 @@ const checkLogin = async (req, res) => {
 
         if (roleResult.length > 0) {
           const { id_rol } = roleResult[0];
+          let directorId;
+          if (["docente", "supervisor"].includes(rol)) {
+            const directorQuery = "SELECT persona FROM director LIMIT 1";
+            const [directorResult] = await connection.query(directorQuery);
+            if (directorResult.length > 0) {
+              directorId = directorResult[0].persona;
+            }
 
+          }
           if (id_rol !== undefined && id_rol !== "") {
             // Generar el token
             const token = tokens.signToken({
@@ -54,6 +62,7 @@ const checkLogin = async (req, res) => {
               nombre,
               user: correo,
               rol,
+              directorId
             });
 
             // Configurar las cookies y la cabecera de autorización

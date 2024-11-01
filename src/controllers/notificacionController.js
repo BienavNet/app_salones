@@ -1,4 +1,5 @@
 import { connection} from "../database/database.js";
+import { io } from "../utils/WebsocketServer.js";
 
 //cuenta las notifaciones no leidas
 export const getUnreadCount = async (userId) => {
@@ -119,7 +120,9 @@ const sendNotification = async (req, res) => {
     
     if (req.body !== undefined) {
       const { action, de, para } = req.body;
+      console.log(action, de, para + "notificacion");
       if (action !== undefined && de !== undefined && para !== undefined) {
+
         const mensaje = getMessage(action, { "de": de, "para": para }) //modificacion para que filtre el id del mensaje en el archivo json y adicional reemplace los valores de y para en el mensaje
         console.log(mensaje)
         const [result] = await connection.query(
@@ -133,19 +136,17 @@ const sendNotification = async (req, res) => {
             message: "Notificación almacenada y enviada correctamente",
           });
           console.log(" unreadCount data para", data, para);
-          io.to(para).emit("count-notification", data);
-          return;
+          
+          return io.to(para).emit("count-notification", data);
         }
-        res.status(400).json({
+        return res.status(400).json({
           status: "error",
           message: "Error en la inserción de datos.",
         });
-        return;
       }
-      res
+      return res
         .status(400)
         .json({ status: "error", message: "Bad request: faltan campos." });
-      return;
     }
 
     res.status(400).json({
@@ -153,6 +154,7 @@ const sendNotification = async (req, res) => {
       message: "Bad request: datos no proporcionados.",
     });
   } catch (error) {
+    console.error("Error:", error);
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };

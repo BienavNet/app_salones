@@ -1,6 +1,5 @@
 import { connection } from "./../database/database.js";
 
-
 /* Este metodo obtiene los datos de comentario, siempre y cuando el parametro pasado coincida con el ID de la tabla comentario. */
 
 const getComentarioById = async (req, res) => {
@@ -45,7 +44,7 @@ const getComentarioByDocente = async (req, res) => {
         .status(400)
         .json({ status: "error", message: "Bad Request: Missing cedula." });
     }
-    
+
     const [result] = await connection.query(
       `
         SELECT comentario.*, salon.nombre AS nombre_salon, salon.numero_salon
@@ -53,22 +52,21 @@ const getComentarioByDocente = async (req, res) => {
         JOIN salon on salon.id = comentario.salon 
         JOIN docente ON docente.id = comentario.docente 
         JOIN persona ON persona.id = docente.persona 
-        WHERE persona.cedula = ? `, [cedula]
+        WHERE persona.cedula = ? `,
+      [cedula]
     );
     if (result.length > 0) {
-     return res.status(200).json(result);
+      return res.status(200).json(result);
     }
-    return res.status(404).json(
-      { status: "error", 
-        message: "Teacher's comment not found." 
-      });
+    return res
+      .status(404)
+      .json({ status: "error", message: "Teacher's comment not found." });
   } catch (error) {
     return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
 
 /* Este metodo obtiene los datos de comentario, siempre y cuando el parametro pasado coincida con el ID de la tabla salon. */
-
 
 const getComentarioBySalon = async (req, res) => {
   try {
@@ -99,7 +97,6 @@ WHERE salon.id = ?`,
   }
 };
 
-
 /* Este metodo obtiene todos registros de la tabla comentarios. */
 const getAllComentarios = async (req, res) => {
   try {
@@ -128,13 +125,11 @@ JOIN
   }
 };
 
-
 /* Este metodo permite registrar nuevos registros en la tabla comentarios. */
 const registerComentario = async (req, res) => {
   try {
     if (req.body !== undefined) {
       const { comentario, docente, salon, fecha, clase } = req.body;
-
       if (
         comentario !== undefined &&
         docente !== undefined &&
@@ -143,10 +138,10 @@ const registerComentario = async (req, res) => {
         clase !== undefined
       ) {
         const [result] = await connection.query(
-          `INSERT INTO comentario (comentario, docente, salon, fecha, clase) VALUES('${comentario}', '${docente}', '${salon}', '${fecha}', '${clase}')`
+          `INSERT INTO comentario (comentario, docente, salon, fecha, clase) VALUES (?, ?, ?, ?, ?)`,
+          [comentario, docente, salon, fecha, clase]
         );
         const { insertId, affectedRows } = result;
-
         if (affectedRows == 1 && insertId !== undefined) {
           res.status(200).json({
             status: "ok",
@@ -232,17 +227,24 @@ const deleteAllComentariosByDocente = async (req, res) => {
 const filterByDocAndSal = async (req, res) => {
   try {
     if (!req.params) {
-      return res.status(400).json({ status: "error", message: "Missing parameters." });
+      return res
+        .status(400)
+        .json({ status: "error", message: "Missing parameters." });
     }
     const { cedula, salon } = req.params;
     if (cedula == 0 && salon == 0) {
-      return res.status(400).json({ status: "error", message: "At least one parameter must be provided." });
+      return res
+        .status(400)
+        .json({
+          status: "error",
+          message: "At least one parameter must be provided.",
+        });
     }
     let query = `
       SELECT comentario.* 
       FROM comentario 
-      LEFT JOIN docente ON comentario.docente = docente.id 
-      LEFT JOIN persona ON docente.persona = persona.id
+      JOIN docente ON comentario.docente = docente.id 
+      JOIN persona ON docente.persona = persona.id
     `;
     const conditions = [];
     const params = [];
@@ -262,16 +264,21 @@ const filterByDocAndSal = async (req, res) => {
     if (result.length > 0) {
       return res.status(200).json(result);
     } else {
-      return res.status(404).json({ status: "error", message: "No comments found." });
+      return res
+        .status(404)
+        .json({ status: "error", message: "No comments found." });
     }
   } catch (error) {
-    return res.status(500).json({ status: "error", message: "Internal Server Error: " + error.message });
+    return res
+      .status(500)
+      .json({
+        status: "error",
+        message: "Internal Server Error: " + error.message,
+      });
   }
 };
 
-
 /* Aqui exportamos todos los metodos previamente creados para luego usarlos en las rutas*/
-
 
 export const methods = {
   getComentarioById,
