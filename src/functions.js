@@ -40,7 +40,6 @@ const isAuthorized = (router, roles) =>{
             access_token = token.split(' ')[1]  // extrae el token sin el prefijo "Bearer"
         }
         else{ access_token = req.cookies.access_token}
-    
         if (access_token){
             const token_decoded = verifyToken(access_token)
             if (token_decoded !== "token expired" && token_decoded !== "Bad token"){

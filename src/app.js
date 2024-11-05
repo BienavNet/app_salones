@@ -25,7 +25,6 @@ const app = express();
 // Crea un nuevo servidor donde va a estar hosteado el web socket
 const server = http.createServer(app);
 initSocketServer(server);
-console.log("server started", initSocketServer)
 
 // Se inicializa la app con un puerto de escucha de peticiones
 app.set("port", PORT)
@@ -47,10 +46,10 @@ app.use(cookieParser())
 app.use("/api/docente", docenteRoute)
 app.use("/api/supervisor", supervisorRoute)
 app.use("/api/login", loginRoute)
+app.use("/api/horarios/detalles/", detalle_horarioRoute)
 app.use("/api/horarios/", horarioRoute)
 app.use("/api/clase/", claseRoute)
 app.use("/api/comentarios/", comentarioRoute)
-app.use("/api/horarios/detalles/", detalle_horarioRoute)
 app.use("/api/reporte/", reporteRoute)
 app.use("/api/salon/", salonRoute)
 app.use("/api/notificaciones/", notificacionRoute)
