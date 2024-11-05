@@ -230,8 +230,17 @@ const deleteClase = async (req, res) => {
         .status(400)
         .json({ status: "error", message: "Bad Request: Missing id." });
 
+    
+    const [result1] = await connection.query(
+      "DELETE FROM reporte WHERE reporte.clase = ?", [id]
+    )
+
+    const [result2] = await connection.query(
+      "DELETE FROM comentario WHERE comentario.clase = ?", [id]
+    )
+
     const [result] = await connection.query(
-      "DELETE clase, reporte FROM clase LEFT JOIN reporte ON clase.id = reporte.clase WHERE clase.id = ?",
+      "DELETE FROM clase WHERE clase.id = ?",
       [id]
     );
 

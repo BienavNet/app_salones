@@ -89,6 +89,12 @@ const deleteHorario = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { id } = req.params;
+
+      const [query1] = await connection.query(
+        "DELETE detalle_horario FROM detalle_horario WHERE detalle_horario.horario = ?",
+        [id]
+      )
+
       const [result] = await connection.query(
         "DELETE FROM horario WHERE id = " + id + ""
       );

@@ -250,6 +250,31 @@ const deleteDocente = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
+
+      const [query1] = await connection.query(
+        "DELETE reporte FROM reporte JOIN clase ON reporte.clase = clase.id JOIN horario ON clase.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
+        [cedula]
+      )
+
+      const [query2] = await connection.query(
+        "DELETE comentario FROM comentario JOIN clase ON comentario.clase = clase.id JOIN horario ON clase.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
+        [cedula]
+      )
+
+      const [query3] = await connection.query(
+        "DELETE clase FROM clase JOIN horario ON horario.id = clase.horario JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
+        [cedula]
+      )
+
+      const [query4] = await connection.query(
+        "DELETE detalle_horario FROM detalle_horario JOIN horario ON detalle_horario.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
+        [cedula]
+      )
+
+      const [query5] = await connection.query(
+        "DELETE horario FROM horario JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
+        [cedula]
+      )
       
       const [result] = await connection.query(
         "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +

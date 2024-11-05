@@ -215,6 +215,19 @@ const deleteSupervisor = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
+
+      const [query1] = await connection.query(
+        "SELECT * FROM supervisor JOIN persona ON supervisor.persona = persona.id WHERE persona.cedula!=? ORDER BY RAND() LIMIT 1;",
+        [cedula]
+      )
+
+      const newSupId = query1.id
+
+      const [query2] = await connection.query(
+        "UPDATE clase JOIN supervisor ON clase.supervisor = supervisor.id JOIN persona ON supervisor.persona = persona.id SET clase.supervisor = ? WHERE persona.cedula = ?",
+        [newSupId, cedula]
+      )
+
       const [result] = await connection.query(
         "DELETE supervisor, persona FROM supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
           cedula +
