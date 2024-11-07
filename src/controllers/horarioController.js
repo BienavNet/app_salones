@@ -122,9 +122,9 @@ const getHorarios = async (req, res) => {
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(400).json({
+    res.status(404).json({
       status: "error",
-      message: "No se pudo obtener la informacion de la base de datos.",
+      message: "not found schedules.",
     });
   } catch (error) {
     return res.status(500).send("Internal Server Error: " + error.message);

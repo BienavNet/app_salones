@@ -19,7 +19,7 @@ const getDocenteQMasComentariosHaRealizado = async (req, res) => {
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    res.status(400).json({ status: "error", message: "not found teacher more comments made" });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -40,7 +40,7 @@ LIMIT 3;`);
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    res.status(404).json({ status: "error", message: "not found classroom more comment has" });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -60,7 +60,7 @@ LIMIT 3;`);
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    res.status(404).json({ status: "error", message: "not found room more used" });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -80,7 +80,7 @@ LIMIT 3;`);
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    res.status(404).json({ status: "error", message: "no found room less used" });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -89,7 +89,6 @@ LIMIT 3;`);
 // Hace una consulta y genera un reporte, en este caso envia los dias de la semana que mas se han utilizado en orden descendente
 const getCantidadDiaMasAsignado = async (req, res) => {
   try {
-    
     const [result] = await connection.query(`
 SELECT dia AS dia, COUNT(dia) AS cantidad_repeticiones
 FROM detalle_horario
@@ -99,7 +98,7 @@ LIMIT 3;`);
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    res.status(404).json({ status: "error", message: "not found days asigned" });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -155,7 +154,7 @@ LIMIT 3;
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    res.status(404).json({ status: "error", message: "not found hour more frecuencies" });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -177,7 +176,7 @@ const getReportes = async (req, res) => {
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    res.status(404).json({ status: "error", message: "not found all report" });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }

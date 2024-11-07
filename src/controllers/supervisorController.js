@@ -3,7 +3,6 @@ import { SALTROUNDS } from "../config.js";
 import { connection } from "./../database/database.js";
 import bcrypt from "bcryptjs";
 
-
 // Obtiene los registros de la tabla supervisor si el correo coincide con el correo registrado
 const getSupervisorByCorreo = async (correo) => {
   const query = `
@@ -21,7 +20,6 @@ const getSupervisorByCorreo = async (correo) => {
     });
   }
 };
-
 
 // Consulta en la tabla persona si el registro contiene el correo pasado
 const getPersonaByCorreo = async (correo, cedula) => {
@@ -46,7 +44,7 @@ const getPersonaByCorreo = async (correo, cedula) => {
   }
 };
 
-// Obtiene todos los registros de la tabla supervisor 
+// Obtiene todos los registros de la tabla supervisor
 const getSupervisores = async (req, res) => {
   try {
     const [result] = await connection.query(
@@ -58,7 +56,7 @@ const getSupervisores = async (req, res) => {
   }
 };
 
-// Obtiene el campo id de la tabla supervisor si el parametro pasado coincide con la cedula 
+// Obtiene el campo id de la tabla supervisor si el parametro pasado coincide con la cedula
 const getSupervisorIdByCedula = async (req, res) => {
   try {
     if (req.params !== undefined) {
@@ -131,19 +129,22 @@ const saveSupervisor = async (req, res) => {
         });
       }
     }
-    
-  const hashedPassword = await bcrypt.hash(contrasena, SALTROUNDS);
 
-  await connection.beginTransaction();
+    const hashedPassword = await bcrypt.hash(contrasena, SALTROUNDS);
+
+    await connection.beginTransaction();
     const formatData = {
       nombre,
       apellido,
       cedula,
       correo,
-      contrasena:hashedPassword,
+      contrasena: hashedPassword,
     };
-   
-    let result = await connection.query("INSERT INTO persona SET ?", formatData);
+
+    let result = await connection.query(
+      "INSERT INTO persona SET ?",
+      formatData
+    );
     if (result.affectedRows > 0) {
       const { insertId } = result;
       result = await connection.query(
@@ -151,9 +152,9 @@ const saveSupervisor = async (req, res) => {
       );
       await connection.commit();
       return res.status(200).json({
-          status: "ok",
-          message: "Datos almacenados en la base de datos correctamente",
-        });
+        status: "ok",
+        message: "Datos almacenados en la base de datos correctamente",
+      });
     } else {
       return res.status(400).send("Bad Request.");
     }
@@ -185,19 +186,15 @@ const updateSupervisor = async (req, res) => {
 
         const { affectedRows } = result;
         if (affectedRows > 0) {
-          res
-            .status(200)
-            .json({
-              status: "ok",
-              message: "Datos actualizados correctamente.",
-            });
+          res.status(200).json({
+            status: "ok",
+            message: "Datos actualizados correctamente.",
+          });
         } else {
-          res
-            .status(400)
-            .json({
-              status: "bad request",
-              message: "No se encontro la cedula en los registros.",
-            });
+          res.status(400).json({
+            status: "bad request",
+            message: "No se encontro la cedula en los registros.",
+          });
         }
 
         return;
@@ -219,35 +216,52 @@ const deleteSupervisor = async (req, res) => {
       const [query1] = await connection.query(
         "SELECT * FROM supervisor JOIN persona ON supervisor.persona = persona.id WHERE persona.cedula!=? ORDER BY RAND() LIMIT 1;",
         [cedula]
-      )
+      );
+      const idpersona = query1.persona;
+      const newSupId = query1.id;
 
-      const newSupId = query1.id
-
-      const [query2] = await connection.query(
+      await connection.query(
         "UPDATE clase JOIN supervisor ON clase.supervisor = supervisor.id JOIN persona ON supervisor.persona = persona.id SET clase.supervisor = ? WHERE persona.cedula = ?",
         [newSupId, cedula]
-      )
+      );
+      try {
+        await connection.query(
+          `DELETE FROM notificacion
+  WHERE id IN (
+      SELECT notificacion.id
+      FROM notificacion
+      JOIN supervisor ON supervisor.persona = notificacion.de OR supervisor.persona = notificacion.para
+      JOIN persona ON supervisor.persona = persona.id
+      WHERE persona.id = ?)
+  `,
+          [idpersona]
+        );
+      } catch (error) {
+        throw new Error("No found supervisor in the database");
+      }
 
+      //  "DELETE notificacion FROM notificacion JOIN supervisor ON supervisor.persona = notificacion.de OR supervisor.persona = notificacion.para JOIN persona ON supervisor.persona = persona.id WHERE persona.cedula = ?", [cedula]
       const [result] = await connection.query(
-        "DELETE supervisor, persona FROM supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
+        "DELETE supervisor FROM supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
           cedula +
           ""
       );
+
+      await connection.query(
+        "DELETE persona FROM persona WHERE persona.cedula = " + cedula + ""
+      );
+
       const { affectedRows } = result;
       if (affectedRows > 0) {
-        res
-          .status(200)
-          .json({
-            status: "ok",
-            message: "Datos eliminados de la base de datos.",
-          });
+        res.status(200).json({
+          status: "ok",
+          message: "Datos eliminados de la base de datos.",
+        });
       } else {
-        res
-          .status(400)
-          .json({
-            status: "bad request",
-            message: "No se encontro la cedula en los registros.",
-          });
+        res.status(400).json({
+          status: "bad request",
+          message: "No se encontro la cedula en los registros.",
+        });
       }
       return;
     }

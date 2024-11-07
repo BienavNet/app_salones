@@ -22,7 +22,7 @@ const getClases = async (req, res) => {
       res.status(200).json(result);
       return;
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    res.status(404).json({ status: "error", message: "not found class." });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
