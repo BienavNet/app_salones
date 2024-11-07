@@ -3,11 +3,9 @@ import { Validaciones } from "../assets/validation.js";
 import bcrypt from "bcryptjs";
 import { SALTROUNDS } from "../config.js";
 
-
 /* Este metodo obtiene los registros de la tabla siempre y cuando el parametro pasado coincida con la cedula del docente*/
 const getDocentes = async (req, res, next) => {
   try {
-    
     const [result] = await connection.query(
       "SELECT persona.apellido, persona.nombre, persona.correo, persona.cedula , docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona"
     );
@@ -24,11 +22,12 @@ const getDocenteIdByCedula = async (req, res) => {
     if (!cedula) {
       return res.status(400).send("Bad Request: Missing cedula");
     }
-    
+
     try {
       const [result] = await connection.query(
-       `
-       SELECT persona.*, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = ?`,[cedula]
+        `
+       SELECT persona.*, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = ?`,
+        [cedula]
       );
       return res.status(200).json(result);
     } catch (error) {
@@ -39,13 +38,12 @@ const getDocenteIdByCedula = async (req, res) => {
   }
 };
 
-
 /* Este metodo obtiene los registros de la tabla si el parametro coincide con la cedula del docente */
 const getDocenteByCedula = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      
+
       //const [result] = await connection.query("SELECT p.*, d.* FROM persona as p, docente as d WHERE p.cedula = " +cedula+ " and d.persona = p.id")
       const [result] = await connection.query(
         "SELECT persona.*, docente.id as docente_id FROM persona INNER JOIN docente ON persona.id = docente.persona WHERE persona.cedula = " +
@@ -60,10 +58,8 @@ const getDocenteByCedula = async (req, res) => {
   }
 };
 
-
 /* Este metodo obtiene los registros de la tabla si el parametro coincide con el correo */
 const getPersonaByCorreo = async (correo, cedula) => {
-  
   const query = `
     SELECT * 
     FROM persona 
@@ -87,7 +83,6 @@ const getPersonaByCorreo = async (correo, cedula) => {
 
 /* Este metodo obtiene los registros de la tabla si el parametro coincide con la cedula */
 const getCedulaDocente = async (cedula) => {
-  
   const query = `
   SELECT persona.*, docente.id as docente_id 
   FROM persona
@@ -104,10 +99,8 @@ const getCedulaDocente = async (cedula) => {
   }
 };
 
-
 /* Este metodo obtiene los registros de una tabla si el parametro coincide con el correo */
 const getDocenteByCorreo = async (correo) => {
-  
   const query = `
   SELECT persona.*, docente.id as docente_id 
   FROM persona 
@@ -123,7 +116,6 @@ const getDocenteByCorreo = async (correo) => {
     });
   }
 };
-
 
 /* Este metodo almacena registros en la tabla docente */
 const saveDocente = async (req, res) => {
@@ -143,7 +135,7 @@ const saveDocente = async (req, res) => {
       .status(400)
       .json({ status: "Bad Request.", message: validationError.message });
   }
-  
+
   try {
     const persona = await getPersonaByCorreo(correo, cedula);
     if (persona) {
@@ -216,7 +208,6 @@ const updateDocente = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
       if (req.body !== undefined) {
-        
         const [result] = await connection.query(
           "UPDATE persona SET ? WHERE cedula = ?",
           [req.body, cedula]
@@ -251,67 +242,85 @@ const deleteDocente = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
 
-      const [query1] = await connection.query(
+      const selectedPerosna = await connection.query(
+        `SELECT id FROM persona WHERE cedula = ?`,
+        [cedula]
+      );
+      const idpersona = selectedPerosna[0].id;
+      // Primero eliminamos las relaciones
+      await connection.query(
         "DELETE reporte FROM reporte JOIN clase ON reporte.clase = clase.id JOIN horario ON clase.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
         [cedula]
-      )
+      );
 
-      const [query2] = await connection.query(
+      await connection.query(
         "DELETE comentario FROM comentario JOIN clase ON comentario.clase = clase.id JOIN horario ON clase.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
         [cedula]
-      )
+      );
 
-      const [query3] = await connection.query(
+      await connection.query(
         "DELETE clase FROM clase JOIN horario ON horario.id = clase.horario JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
         [cedula]
-      )
+      );
 
-      const [query4] = await connection.query(
+      await connection.query(
         "DELETE detalle_horario FROM detalle_horario JOIN horario ON detalle_horario.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
         [cedula]
-      )
+      );
 
-      const [query5] = await connection.query(
+      await connection.query(
         "DELETE horario FROM horario JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
         [cedula]
-      )
-      
-      const [result] = await connection.query(
-        "DELETE docente, persona FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = " +
-          cedula +
-          ""
       );
-      const { affectedRows } = result;
-      if (affectedRows > 0) {
-        res.status(200).json({
-          status: "ok",
-          message: "Datos eliminados de la base de datos.",
-        });
-      } else {
-        res.status(400).json({
-          status: "bad request",
-          message: "No se encontro la cedula en los registros.",
-        });
+      try {
+        await connection.query(
+          `DELETE FROM notificacion
+  WHERE id IN (
+      SELECT notificacion.id
+      FROM notificacion
+      JOIN docente ON docente.persona = notificacion.de OR docente.persona = notificacion.para
+      JOIN persona ON docente.persona = persona.id
+      WHERE persona.id = ?)
+  `,
+          [idpersona]
+        );
+      } catch (error) {
+        throw new Error("No found teacher in the database");
       }
+      // Primero eliminamos el docente
+      await connection.query(
+        "DELETE docente FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = ?",
+        [cedula]
+      );
+
+      // Finalmente eliminamos la persona
+      await connection.query(
+        "DELETE persona FROM persona WHERE persona.cedula = ?",
+        [cedula]
+      );
+
+      // Si todo ha ido bien, respondemos
+      res.status(200).json({
+        status: "ok",
+        message: "Datos eliminados de la base de datos.",
+      });
+
       return;
     }
-
     res.status(400).send("Bad Request.");
   } catch (error) {
+    console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
 
-
 /* Este metodo retorna la suma de los registros en la tabla docente */
 const countDocente = async (req, res) => {
-  
   const [result] = await connection.query("SELECT COUNT(*) FROM docente");
   res.json(result[0]("COUNT(*)"));
 };
 
 /* Aqui exportamos todos los metodos previamente creados para luego usarlos en las rutas*/
-
 
 export const methods = {
   getDocentes,
