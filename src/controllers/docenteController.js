@@ -242,71 +242,67 @@ const deleteDocente = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
 
-      const selectedPerosna = await connection.query(
+      const [selectedPerosna] = await connection.query(
         `SELECT id FROM persona WHERE cedula = ?`,
         [cedula]
       );
       const idpersona = selectedPerosna[0].id;
-      // Primero eliminamos las relaciones
+      
+      // Eliminar las notificaciones asociadas al docente
+      try {
+        await connection.query(
+          `DELETE FROM notificacion
+           WHERE de = ? OR para = ?`,
+          [idpersona, idpersona]
+        );
+      } catch (error) {
+        throw new Error("No found teacher in the database", error);
+      }
+      // Primero eliminamos las relaciones con reporte
       await connection.query(
         "DELETE reporte FROM reporte JOIN clase ON reporte.clase = clase.id JOIN horario ON clase.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
         [cedula]
       );
 
+      // eliminamos comentarios antes de eliminar docente
       await connection.query(
-        "DELETE comentario FROM comentario JOIN clase ON comentario.clase = clase.id JOIN horario ON clase.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
+        "DELETE FROM comentario WHERE docente IN (SELECT id FROM docente WHERE persona IN (SELECT id FROM persona WHERE cedula = ?))",
         [cedula]
       );
 
+      // eliminamos  clase,
       await connection.query(
         "DELETE clase FROM clase JOIN horario ON horario.id = clase.horario JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
         [cedula]
       );
-
+      // eliminamos detalle_horario
       await connection.query(
         "DELETE detalle_horario FROM detalle_horario JOIN horario ON detalle_horario.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
         [cedula]
       );
-
+      // eliminamos  horario
       await connection.query(
         "DELETE horario FROM horario JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?",
         [cedula]
       );
-      try {
-        await connection.query(
-          `DELETE FROM notificacion
-  WHERE id IN (
-      SELECT notificacion.id
-      FROM notificacion
-      JOIN docente ON docente.persona = notificacion.de OR docente.persona = notificacion.para
-      JOIN persona ON docente.persona = persona.id
-      WHERE persona.id = ?)
-  `,
-          [idpersona]
-        );
-      } catch (error) {
-        throw new Error("No found teacher in the database");
-      }
-      // Primero eliminamos el docente
+
+      // Eliminamos al docente
       await connection.query(
-        "DELETE docente FROM docente JOIN persona ON persona.id = docente.persona WHERE persona.cedula = ?",
+        "DELETE FROM docente WHERE persona IN (SELECT id FROM persona WHERE cedula = ?)",
         [cedula]
       );
 
       // Finalmente eliminamos la persona
-      await connection.query(
-        "DELETE persona FROM persona WHERE persona.cedula = ?",
-        [cedula]
-      );
+      await connection.query("DELETE FROM persona WHERE cedula = ?", [cedula]);
 
       // Si todo ha ido bien, respondemos
       res.status(200).json({
         status: "ok",
         message: "Datos eliminados de la base de datos.",
       });
-
       return;
     }
+
     res.status(400).send("Bad Request.");
   } catch (error) {
     console.error(error);

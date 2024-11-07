@@ -227,14 +227,8 @@ const deleteSupervisor = async (req, res) => {
       try {
         await connection.query(
           `DELETE FROM notificacion
-  WHERE id IN (
-      SELECT notificacion.id
-      FROM notificacion
-      JOIN supervisor ON supervisor.persona = notificacion.de OR supervisor.persona = notificacion.para
-      JOIN persona ON supervisor.persona = persona.id
-      WHERE persona.id = ?)
-  `,
-          [idpersona]
+           WHERE de = ? OR para = ?`,
+          [idpersona, idpersona]
         );
       } catch (error) {
         throw new Error("No found supervisor in the database");
