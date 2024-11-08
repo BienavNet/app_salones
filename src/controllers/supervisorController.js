@@ -212,7 +212,16 @@ const deleteSupervisor = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
+      const [supervisores] = await connection.query(
+        "SELECT COUNT(*) AS total FROM supervisor;"
+      );
 
+      if (supervisores[0].total <= 1) {
+        return res.status(400).json({
+          status: "bad request",
+          message: "Debe haber al menos un supervisor en la base de datos.",
+        });
+      }
       const [query1] = await connection.query(
         "SELECT * FROM supervisor JOIN persona ON supervisor.persona = persona.id WHERE persona.cedula!=? ORDER BY RAND() LIMIT 1;",
         [cedula]
@@ -265,6 +274,72 @@ const deleteSupervisor = async (req, res) => {
   }
 };
 
+const defaultItemStatus = async (req, res) => {
+  try {
+    const [query] = await connection.query("SELECT * FROM supervisor WHERE defaultItem = 1 ORDER BY defaultItem DESC");
+    if (query.length > 0) {
+      return res.status(200).json({
+        status: "ok",
+        message: "Se han encontrado los registros con defaultItem.",
+        data: query,
+      });
+    } else {
+      return res.status(404).json({
+        status: "not found",
+        message: "No se encontraron registros para defaultItem.",
+      });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    return res.status(500).json({
+      status: "error",
+      message: "Hubo un problema al obtener los registros.",
+    });
+  }
+};
+
+const updateDefaultItemStatus = async (req, res) => {
+  if (!req.params || !req.params.id) {
+    return res.status(400).send("Bad Request. Missing parameters.");
+  }
+
+  try {
+    const { id } = req.params;
+
+    const [existingSupervisor] = await connection.query(
+      `SELECT id FROM supervisor WHERE defaultItem = 1 LIMIT 1`
+    );
+
+    if (existingSupervisor.length > 0) {
+      await connection.query(
+        `UPDATE supervisor SET defaultItem = NULL WHERE defaultItem = 1`
+      );
+    }
+    const [result] = await connection.query(
+      `UPDATE supervisor SET defaultItem = 1 WHERE persona = ?`,
+      [id]
+    );
+
+    const { affectedRows } = result;
+    if (affectedRows > 0) {
+      return res
+        .status(200)
+        .json({ status: "ok", message: "Default supervisor successfully." });
+    } else {
+      return res
+        .status(400)
+        .json({
+          status: "not found",
+          message: "Problemas al actualizar por defecto un supervisor",
+        });
+    }
+  } catch (error) {
+    console.error("Error al actualizar el supervisor por defecto:", error);
+    return res.status(500).send("Internal Server Error");
+  }
+};
+
+
 export const methods = {
   getSupervisores,
   getSupervisorIdByCedula,
@@ -272,4 +347,6 @@ export const methods = {
   saveSupervisor,
   updateSupervisor,
   deleteSupervisor,
+  defaultItemStatus,
+  updateDefaultItemStatus,
 };

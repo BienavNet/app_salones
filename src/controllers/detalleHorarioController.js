@@ -9,7 +9,7 @@ const getDetalleHorariosByHorarioId = async (req, res) => {
       const [result] = await connection.query(
         "SELECT id, horario FROM detalle_horario WHERE horario = " + id + ""
       );
-
+    console.log(result);
       if (result.length > 0) {
         res.status(200).json(result);
         return;
