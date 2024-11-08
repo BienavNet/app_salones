@@ -212,18 +212,34 @@ const deleteSupervisor = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-      const [supervisores] = await connection.query(
-        "SELECT COUNT(*) AS total FROM supervisor;"
+
+      // Verificar si hay más de un supervisor y si el supervisor a eliminar es el de defaultItem = 1
+      const [resultCount] = await connection.query(
+        `SELECT COUNT(*) AS total_supervisores,
+                MAX(CASE WHEN defaultItem = 1 THEN 1 ELSE 0 END) AS is_default_supervisor
+         FROM supervisor
+         JOIN persona ON supervisor.persona = persona.id
+         WHERE persona.cedula = ?`,
+        [cedula]
       );
 
-      if (supervisores[0].total <= 1) {
+      const { total_supervisores, is_default_supervisor } = resultCount[0];
+
+      // Verificar que haya más de un supervisor y que el supervisor no sea el default
+      if (total_supervisores <= 1) {
         return res.status(400).json({
           status: "bad request",
           message: "Debe haber al menos un supervisor en la base de datos.",
         });
       }
+      if (is_default_supervisor === 1) {
+        return res.status(400).json({
+          status: "bad request",
+          message: "No se puede eliminar el supervisor por defecto.",
+        });
+      }
       const [query1] = await connection.query(
-        "SELECT * FROM supervisor JOIN persona ON supervisor.persona = persona.id WHERE persona.cedula!=? ORDER BY RAND() LIMIT 1;",
+        "SELECT * FROM supervisor JOIN persona ON supervisor.persona = persona.id WHERE persona.cedula != ? ORDER BY RAND() LIMIT 1;",
         [cedula]
       );
       const idpersona = query1.persona;
@@ -233,6 +249,7 @@ const deleteSupervisor = async (req, res) => {
         "UPDATE clase JOIN supervisor ON clase.supervisor = supervisor.id JOIN persona ON supervisor.persona = persona.id SET clase.supervisor = ? WHERE persona.cedula = ?",
         [newSupId, cedula]
       );
+
       try {
         await connection.query(
           `DELETE FROM notificacion
@@ -240,18 +257,20 @@ const deleteSupervisor = async (req, res) => {
           [idpersona, idpersona]
         );
       } catch (error) {
-        throw new Error("No found supervisor in the database");
+        return res.status(400).json({
+          status: "bad request",
+          message: "No found supervisor in the database with notification",
+        });
       }
 
-      //  "DELETE notificacion FROM notificacion JOIN supervisor ON supervisor.persona = notificacion.de OR supervisor.persona = notificacion.para JOIN persona ON supervisor.persona = persona.id WHERE persona.cedula = ?", [cedula]
       const [result] = await connection.query(
         "DELETE supervisor FROM supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
           cedula +
           ""
       );
-
       await connection.query(
-        "DELETE persona FROM persona WHERE persona.cedula = " + cedula + ""
+        "DELETE persona FROM persona WHERE persona.cedula = ?",
+        [cedula]
       );
 
       const { affectedRows } = result;
@@ -268,15 +287,17 @@ const deleteSupervisor = async (req, res) => {
       }
       return;
     }
-    res.status(400).send("Bad Request.");
+    return res.status(400).send("Bad Request.");
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
 
 const defaultItemStatus = async (req, res) => {
   try {
-    const [query] = await connection.query("SELECT * FROM supervisor WHERE defaultItem = 1 ORDER BY defaultItem DESC");
+    const [query] = await connection.query(
+      "SELECT * FROM supervisor WHERE defaultItem = 1 ORDER BY defaultItem DESC"
+    );
     if (query.length > 0) {
       return res.status(200).json({
         status: "ok",
@@ -326,19 +347,16 @@ const updateDefaultItemStatus = async (req, res) => {
         .status(200)
         .json({ status: "ok", message: "Default supervisor successfully." });
     } else {
-      return res
-        .status(400)
-        .json({
-          status: "not found",
-          message: "Problemas al actualizar por defecto un supervisor",
-        });
+      return res.status(400).json({
+        status: "not found",
+        message: "Problemas al actualizar por defecto un supervisor",
+      });
     }
   } catch (error) {
     console.error("Error al actualizar el supervisor por defecto:", error);
     return res.status(500).send("Internal Server Error");
   }
 };
-
 
 export const methods = {
   getSupervisores,

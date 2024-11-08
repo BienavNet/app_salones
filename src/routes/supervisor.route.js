@@ -18,8 +18,8 @@ router.get("/cedula/:cedula", supervisorMethods.getSupervisorByCedula);
 tokensMethods.isAuthorized(router, ["director"]);
 
 router.get("/defaultItem/", supervisorMethods.defaultItemStatus);
-router.patch("/update/defaultItem/:id", supervisorMethods.updateDefaultItemStatus);
 
+router.patch("/update/defaultItem/:id", supervisorMethods.updateDefaultItemStatus);
 
 // Se consulta el cotrolador supervisor, el metodo getSupervisorIdByCedula 
 router.get("/:cedula", supervisorMethods.getSupervisorIdByCedula);
