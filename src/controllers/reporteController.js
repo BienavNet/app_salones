@@ -2,49 +2,6 @@ import { getMostCommon, getThreeMostCommon } from "../assets/function.js";
 import { connection } from "./../database/database.js";
 
 
-// Hace una consulta y genera un reporte, en este caso envia los docentes que mas comentarios han hecho, en orden descendente
-const getDocenteQMasComentariosHaRealizado = async (req, res) => {
-  try {
-    
-    const [result] = await connection.query(`
-              SELECT persona.cedula, COUNT(reporte.id) AS cantidad_comentarios
-            FROM reporte
-            JOIN clase ON reporte.clase = clase.id
-            JOIN horario ON clase.horario = horario.id
-            JOIN docente ON horario.docente = docente.id
-            JOIN persona ON docente.persona = persona.id
-            GROUP BY persona.cedula
-            ORDER BY cantidad_comentarios DESC
-            LIMIT 3`);
-    if (result.length > 0) {
-      return res.status(200).json(result);
-    }
-    res.status(400).json({ status: "error", message: "not found teacher more comments made" });
-  } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
-  }
-};
-
-// Hace una consulta y genera un reporte, en este caso envia los salones que mas comentarios han recibido en orden descendente
-const getsalonMasComentarioTiene = async (req, res) => {
-  try {
-    
-    const [result] = await connection.query(`
-SELECT salon.numero_salon, COUNT(reporte.id) AS cantidad_comentarios
-FROM reporte
-JOIN clase ON reporte.clase = clase.id
-JOIN salon ON clase.salon = salon.id
-GROUP BY salon.numero_salon
-ORDER BY cantidad_comentarios DESC
-LIMIT 3;`);
-    if (result.length > 0) {
-      return res.status(200).json(result);
-    }
-    res.status(404).json({ status: "error", message: "not found classroom more comment has" });
-  } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
-  }
-};
 
 // Hace una consulta y genera un reporte, en este caso envia los salones que mas se han utilizado en orden descendente
 const getSalonMasUtilizado = async (req, res) => {
@@ -161,6 +118,29 @@ LIMIT 3;
 };
 
 
+// Hace una consulta y genera un reporte, en este caso envia los docentes que mas comentarios han hecho, en orden descendente
+const getDocenteQMasComentariosHaRealizado = async (req, res) => {
+  try {
+    
+    const [result] = await connection.query(`
+              SELECT persona.cedula, COUNT(reporte.id) AS cantidad_comentarios
+            FROM reporte
+            JOIN clase ON reporte.clase = clase.id
+            JOIN horario ON clase.horario = horario.id
+            JOIN docente ON horario.docente = docente.id
+            JOIN persona ON docente.persona = persona.id
+            GROUP BY persona.cedula
+            ORDER BY cantidad_comentarios DESC
+            LIMIT 3`);
+    if (result.length > 0) {
+      return res.status(200).json(result);
+    }
+    res.status(404).json({ status: "error", message: "not found teacher more comments made" });
+  } catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
+
 // Obtiene los reportes realizados por los supervisores
 const getReportes = async (req, res) => {
   try {
@@ -182,6 +162,26 @@ const getReportes = async (req, res) => {
   }
 };
 
+// Hace una consulta y genera un reporte, en este caso envia los salones que mas comentarios han recibido en orden descendente
+const getsalonMasComentarioTiene = async (req, res) => {
+  try {
+    
+    const [result] = await connection.query(`
+SELECT salon.numero_salon, COUNT(reporte.id) AS cantidad_comentarios
+FROM reporte
+JOIN clase ON reporte.clase = clase.id
+JOIN salon ON clase.salon = salon.id
+GROUP BY salon.numero_salon
+ORDER BY cantidad_comentarios DESC
+LIMIT 3;`);
+    if (result.length > 0) {
+      return res.status(200).json(result);
+    }
+    res.status(404).json({ status: "error", message: "not found classroom more comment has" });
+  } catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
 
 // Obtiene todos los reportes realizados por algun supervisor mediante su cedula
 const getReporteBySupervisor = async (req, res) => {
@@ -248,7 +248,6 @@ const getReporteByClase = async (req, res) => {
         `,
         [clase]
       );
-      console.log("result de reposte by clase", result);
       if (result) {
         return res.status(200).json(result);
       }

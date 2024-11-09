@@ -41,13 +41,6 @@ router.get("/salon/:salon", reporteMethods.getReporteBySalon)
 // Se consulta el cotrolador reporte, el metodo deleteReporte 
 router.delete("/delete/:id", reporteMethods.deleteReporte) 
 
-
-// Se consulta el cotrolador reporte, el metodo getDocenteQMasComentariosHaRealizado 
-router.get("/statistics/docente-mas-comentarios", reporteMethods.getDocenteQMasComentariosHaRealizado)
-
-// Se consulta el cotrolador reporte, el metodo getsalonMasComentarioTiene 
-router.get("/statistics/salon-mas-comentarios", reporteMethods.getsalonMasComentarioTiene) 
-
 // Se consulta el cotrolador reporte, el metodo getSalonMasUtilizado 
 router.get("/statistics/salon-mas-utilizado", reporteMethods.getSalonMasUtilizado)
 
@@ -60,4 +53,10 @@ router.get("/statistics/cantidad-dias-asignado", reporteMethods.getCantidadDiaMa
 // Se consulta el cotrolador reporte, el metodo getRangeHoursMasFrecuente 
 router.get("/statistics/hours-mas-frecuente", reporteMethods.getRangeHoursMasFrecuente) // ✅
 
+
+// Se consulta el cotrolador reporte, el metodo getDocenteQMasComentariosHaRealizado 
+router.get("/statistics/docente-mas-comentarios", reporteMethods.getDocenteQMasComentariosHaRealizado)
+
+// Se consulta el cotrolador reporte, el metodo getsalonMasComentarioTiene 
+router.get("/statistics/salon-mas-comentarios", reporteMethods.getsalonMasComentarioTiene) 
 export default router
