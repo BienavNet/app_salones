@@ -23,14 +23,11 @@ const getSupervisorByCorreo = async (correo) => {
 
 // Consulta en la tabla persona si el registro contiene el correo pasado
 const getPersonaByCorreo = async (correo, cedula) => {
-  const query = `
-    SELECT * 
-    FROM persona 
-    WHERE correo = ? OR cedula = ? 
-    LIMIT 1;
-  `;
   try {
-    const [result] = await connection.query(query, [correo, cedula]);
+    const [result] = await connection.query(
+      "SELECT * FROM persona WHERE correo = ? OR cedula = ? LIMIT 1",
+      [correo, cedula]
+    );
     if (result.length === 0) {
       return null; // No se encontró la persona
     }
@@ -100,6 +97,11 @@ const saveSupervisor = async (req, res) => {
     return res.status(400).send("Bad Request.");
   }
   const { nombre, apellido, cedula, correo, contrasena } = req.body;
+
+  if (!nombre || !apellido || !cedula || !correo || !contrasena) {
+    return res.status(400).send("Bad Request: Missing required fields.");
+  }
+
   try {
     Validaciones.nombre(nombre);
     Validaciones.apellido(apellido);
@@ -111,6 +113,7 @@ const saveSupervisor = async (req, res) => {
       .status(400)
       .json({ status: "Bad Request.", message: validationError.message });
   }
+
   try {
     const persona = await getPersonaByCorreo(correo, cedula);
     if (persona) {
@@ -129,10 +132,7 @@ const saveSupervisor = async (req, res) => {
         });
       }
     }
-
     const hashedPassword = await bcrypt.hash(contrasena, SALTROUNDS);
-
-    await connection.beginTransaction();
     const formatData = {
       nombre,
       apellido,
@@ -141,34 +141,35 @@ const saveSupervisor = async (req, res) => {
       contrasena: hashedPassword,
     };
 
-    let result = await connection.query(
+    const [result] = await connection.query(
       "INSERT INTO persona SET ?",
       formatData
     );
     if (result.affectedRows > 0) {
       const { insertId } = result;
-      result = await connection.query(
-        "INSERT INTO supervisor (persona) VALUES (" + insertId + ")"
+      const [supervisorResult] = await connection.query(
+        "INSERT INTO supervisor (persona) VALUES (?)",
+        [insertId]
       );
-      await connection.commit();
-      return res.status(200).json({
-        status: "ok",
-        message: "Datos almacenados en la base de datos correctamente",
-      });
+      if (supervisorResult.affectedRows > 0) {
+        return res.status(200).json({
+          status: "ok",
+          message: "Datos almacenados en la base de datos correctamente",
+        });
+      } else {
+        return res.status(400).json({
+          status: "Bad Request",
+          message: "No se pudo asignar la persona como supervisor.",
+        });
+      }
     } else {
       return res.status(400).send("Bad Request.");
     }
   } catch (error) {
-    if (connection) {
-      await connection.rollback();
-    }
-    console.error("Error en la transacción:", error.message);
-    if (!res.headersSent) {
-      return res.status(500).json({
-        status: "Internal Server Error",
-        message: "Error en la operación: " + error.message,
-      });
-    }
+    return res.status(500).json({
+      status: "Internal Server Error",
+      message: "Error en la operación: " + error.message,
+    });
   }
 };
 
@@ -213,65 +214,154 @@ const deleteSupervisor = async (req, res) => {
     if (req.params !== undefined) {
       const { cedula } = req.params;
 
-      // Verificar si hay más de un supervisor y si el supervisor a eliminar es el de defaultItem = 1
+      // Verificamos si hay supervisores y si el supervisor por defecto es el único en la base de datos
       const [resultCount] = await connection.query(
         `SELECT COUNT(*) AS total_supervisores,
                 MAX(CASE WHEN defaultItem = 1 THEN 1 ELSE 0 END) AS is_default_supervisor
          FROM supervisor
-         JOIN persona ON supervisor.persona = persona.id
-         WHERE persona.cedula = ?`,
-        [cedula]
+         JOIN persona ON supervisor.persona = persona.id`
       );
 
+      console.log(resultCount, "resultCount");
       const { total_supervisores, is_default_supervisor } = resultCount[0];
 
-      // Verificar que haya más de un supervisor y que el supervisor no sea el default
-      if (total_supervisores <= 1) {
+      // Validar si estamos intentando eliminar al único supervisor o al supervisor por defecto
+      if (total_supervisores <= 1 && is_default_supervisor === 1) {
         return res.status(400).json({
           status: "bad request",
-          message: "Debe haber al menos un supervisor en la base de datos.",
+          message:
+            "Debe haber al menos un supervisor en la base de datos y no se puede eliminar el supervisor por defecto.",
         });
       }
-      if (is_default_supervisor === 1) {
+
+      // Buscamos el supervisor a eliminar y asegurarnos de que no es el supervisor por defecto
+      const [supervisorToDelete] = await connection.query(
+        "SELECT * FROM supervisor WHERE persona IN (SELECT id FROM persona WHERE cedula = ?) AND defaultItem = 1",
+        [cedula]
+      );
+      console.log(supervisorToDelete, "supervisorToDelete");
+      if (supervisorToDelete.length > 0) {
         return res.status(400).json({
           status: "bad request",
           message: "No se puede eliminar el supervisor por defecto.",
         });
       }
+
+      // Obtener el id de supervisor correspondiente al persona.id de la cedula a eliminar
       const [query1] = await connection.query(
-        "SELECT * FROM supervisor JOIN persona ON supervisor.persona = persona.id WHERE persona.cedula != ? ORDER BY RAND() LIMIT 1;",
+        "SELECT supervisor.id, supervisor.persona FROM supervisor JOIN persona ON supervisor.persona = persona.id WHERE persona.cedula = ?",
         [cedula]
       );
-      const idpersona = query1.persona;
-      const newSupId = query1.id;
+      const superviosrToDeletePersona = query1[0]?.peronsa;
+      const supervisorToReassignId = query1[0]?.id;
 
-      await connection.query(
-        "UPDATE clase JOIN supervisor ON clase.supervisor = supervisor.id JOIN persona ON supervisor.persona = persona.id SET clase.supervisor = ? WHERE persona.cedula = ?",
-        [newSupId, cedula]
-      );
-
-      try {
-        await connection.query(
-          `DELETE FROM notificacion
-           WHERE de = ? OR para = ?`,
-          [idpersona, idpersona]
-        );
-      } catch (error) {
+      // Verificamos que el supervisor exista antes de realizar la asignación
+      if (!supervisorToReassignId) {
         return res.status(400).json({
           status: "bad request",
-          message: "No found supervisor in the database with notification",
+          message: "No se encontró el supervisor para la cédula proporcionada.",
         });
       }
 
-      const [result] = await connection.query(
-        "DELETE supervisor FROM supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
-          cedula +
-          ""
-      );
-      await connection.query(
-        "DELETE persona FROM persona WHERE persona.cedula = ?",
+      console.log(supervisorToReassignId, "supervisorToReassignId");
+
+      // Obtener un supervisor aleatorio para reasignar las clases
+      const [query2] = await connection.query(
+        "SELECT id FROM supervisor WHERE persona != (SELECT id FROM persona WHERE cedula = ?) ORDER BY RAND() LIMIT 1;",
         [cedula]
       );
+      const newSupId = query2[0].id;
+      console.log(newSupId, "newSupId");
+
+      // Reasignar las clases del supervisor a otro supervisor
+      const [updateClassesResult] = await connection.query(
+        "UPDATE clase SET supervisor = ? WHERE supervisor = ?",
+        [newSupId, supervisorToReassignId]
+      );
+
+      console.log(updateClassesResult, "updateClassesResult");
+
+      // Si no se a actualizó ninguna clase, reasignamos las clases donde supervisor se null
+      if (updateClassesResult.affectedRows === 0) {
+        const [classesToReassign] = await connection.query(
+          "SELECT * FROM clase WHERE supervisor IS NULL"
+        );
+
+        if (classesToReassign.length > 0) {
+          // Obtener el supervisor por defecto
+          const [defaultSupervisor] = await connection.query(
+            "SELECT id FROM supervisor WHERE defaultItem = 1"
+          );
+
+          // Si no hay supervisor por defecto, o si no hay clases para reasignar, salimos
+          if (!defaultSupervisor || defaultSupervisor.length === 0) {
+            console.log("No hay supervisor por defecto");
+            return;
+          }
+
+          const defaultSupervisorId = defaultSupervisor[0].id;
+          console.log("defaultSupervisor id", defaultSupervisorId);
+
+          // Obtener todos los supervisores disponibles, excluyendo al supervisor que estamos eliminando
+          const [availableSupervisors] = await connection.query(
+            "SELECT id FROM supervisor WHERE id != ?",
+            [newSupId]
+          );
+
+          console.log("availableSupervisors id", availableSupervisors);
+
+          // Si hay solo 2 supervisores disponibles, reasignamos todas las clases al supervisor por defecto
+          if (availableSupervisors.length === 1) {
+            console.log(
+              "Solo hay un supervisor disponible, reasignando todas las clases al supervisor por defecto"
+            );
+            // Reasignamos todas las clases al supervisor por defecto
+            for (const clase of classesToReassign) {
+              await connection.query(
+                "UPDATE clase SET supervisor = ? WHERE id = ?",
+                [defaultSupervisorId, clase.id]
+              );
+            }
+          } else {
+            // Si hay más de 2 supervisores disponibles, asignamos las clases de forma cíclica
+            const supervisors = availableSupervisors;
+            const numSupervisors = supervisors.length;
+            let supervisorIndex = 0;
+
+            console.log(
+              "Distribuyendo clases entre los supervisores restantes, incluyendo al supervisor por defecto"
+            );
+
+            for (const clase of classesToReassign) {
+              const selectedSupervisor = supervisors[supervisorIndex];
+              console.log("selectedSupervisor", selectedSupervisor);
+
+              await connection.query(
+                "UPDATE clase SET supervisor = ? WHERE id = ?",
+                [selectedSupervisor.id, clase.id]
+              );
+
+              supervisorIndex = (supervisorIndex + 1) % numSupervisors;
+              console.log("supervisorIndex", supervisorIndex);
+            }
+          }
+        }
+      }
+
+      // Eliminar las notificaciones asociadas al supervisor
+      await connection.query(
+        "DELETE FROM notificacion WHERE de = ? OR para = ?",
+        [superviosrToDeletePersona, superviosrToDeletePersona]
+      );
+
+      // Eliminar el supervisor de la base de datos
+      const [result] = await connection.query(
+        "DELETE FROM supervisor WHERE id = ?",
+        [supervisorToReassignId]
+      );
+
+      // Eliminar la persona asociada
+      await connection.query("DELETE FROM persona WHERE cedula = ?", [cedula]);
 
       const { affectedRows } = result;
       if (affectedRows > 0) {
@@ -282,7 +372,7 @@ const deleteSupervisor = async (req, res) => {
       } else {
         res.status(400).json({
           status: "bad request",
-          message: "No se encontro la cedula en los registros.",
+          message: "No se encontró la cédula en los registros.",
         });
       }
       return;

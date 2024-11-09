@@ -123,8 +123,12 @@ const saveDocente = async (req, res) => {
     return res.status(400).send("Bad Request.");
   }
   const { nombre, apellido, cedula, correo, contrasena } = req.body;
+
+  if (!nombre || !apellido || !cedula || !correo || !contrasena) {
+    return res.status(400).send("Bad Request: Missing required fields.");
+  }
+
   try {
-    // validaciones simples
     Validaciones.nombre(nombre);
     Validaciones.apellido(apellido);
     Validaciones.cedula(cedula);
@@ -167,36 +171,36 @@ const saveDocente = async (req, res) => {
       contrasena: hashedPassword,
     };
 
-    let result = await connection.query(
+    const [result] = await connection.query(
       "INSERT INTO persona SET ?",
       formatData
     );
 
     if (result.affectedRows > 0) {
       const { insertId } = result;
-      result = await connection.query(
-        "INSERT INTO docente (persona) VALUES (" + insertId + ")"
+      const [Docenteresult] = await connection.query(
+        "INSERT INTO docente (persona) VALUES (?)",
+        [insertId]
       );
-      await connection.commit();
-
-      return res.status(200).json({
-        status: "ok",
-        message: "Datos almacenados en la base de datos correctamente",
-      });
+      if (Docenteresult.affectedRows > 0) {
+        return res.status(200).json({
+          status: "ok",
+          message: "Datos almacenados en la base de datos correctamente",
+        });
+      } else {
+        return res.status(400).json({
+          status: "Bad Request",
+          message: "No se pudo asignar la persona como supervisor.",
+        });
+      }
     } else {
       throw new Error("No se pudo insertar el registro.");
     }
   } catch (error) {
-    if (connection) {
-      await connection.rollback();
-    }
-    console.error("Error en la transacción:", error.message);
-    if (!res.headersSent) {
-      return res.status(500).json({
-        status: "Internal Server Error",
-        message: "Error en la operación: " + error.message,
-      });
-    }
+    return res.status(500).json({
+      status: "Internal Server Error",
+      message: "Error en la operación: " + error.message,
+    });
   }
 };
 
@@ -247,7 +251,7 @@ const deleteDocente = async (req, res) => {
         [cedula]
       );
       const idpersona = selectedPerosna[0].id;
-      
+
       // Eliminar las notificaciones asociadas al docente
       try {
         await connection.query(
