@@ -14,13 +14,11 @@ const main = () => {
       // cuando el usuario es logeado
       socket.on("authenticate", async ({ userId, rol }) => {
         if (!userId || !rol) {
-          console.log("Autenticación fallida: falta userId o rol");
           return;
         }
         if (!io.sockets.adapter.rooms.get(userId)?.has(socket.id)) {
           socket.join(userId.toString()); // sala personal
         }
-
         if (!io.sockets.adapter.rooms.get(rol)?.has(socket.id)) {
           socket.join(rol); // sala grupal
         }
