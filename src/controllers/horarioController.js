@@ -138,7 +138,7 @@ const getHorarioById = async (req, res) => {
       const { id } = req.params;
       const [result] = await connection.query(
         `SELECT 
-horario.id, horario.asignatura, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre AS nombre_docente, persona.apellido AS apellido_docente, persona.cedula, docente.id AS docente_id, clase.salon, clase.estado, clase.fecha, salon.nombre, salon.numero_salon, salon.capacidad, salon.INTernet, salon.tv, 
+horario.id, horario.asignatura,detalle_horario.id as id_detallehorario, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre AS nombre_docente, persona.apellido AS apellido_docente, persona.cedula, docente.id AS docente_id, clase.salon, clase.estado, clase.fecha, salon.nombre, salon.numero_salon, salon.capacidad, salon.INTernet, salon.tv, 
 categoria_salon.categoria
 FROM horario
 JOIN detalle_horario ON horario.id = detalle_horario.horario
@@ -168,6 +168,7 @@ WHERE horario.id = ?`,
           INTernet,
           tv,
           categoria,
+          id_detallehorario
         } = row;
 
         if (!a[cedula]) {
@@ -193,6 +194,7 @@ WHERE horario.id = ?`,
           INTernet,
           tv,
           categoria,
+          id_detallehorario
         });
         return a;
       }, {});

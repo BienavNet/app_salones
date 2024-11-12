@@ -208,10 +208,8 @@ const updateDetalleHorario = async (req, res) => {
         message: "Bad request: ID o datos faltantes.",
       });
     }
-    const [result] = await connection.query(
-      `UPDATE detalle_horario SET ? WHERE id = ?`,
-      [id, data]
-    );
+    console.log(data, id + "datos actualizar");
+    const [result] = await connection.query(`UPDATE detalle_horario SET ? WHERE id = ?`,[data, id]);
     if (result.affectedRows === 1) {
       return res.status(200).json({
         status: "ok",
