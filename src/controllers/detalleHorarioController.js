@@ -63,11 +63,20 @@ const getDetallesHorarioByDocente = async (req, res) => {
     if (req.params != undefined) {
       const { cedula } = req.params;
       const [result] = await connection.query(
-        `SELECT detalle_horario.dia, horario.id as horario, horario.asignatura, persona.nombre, persona.apellido
-       FROM detalle_horario 
-       JOIN horario ON horario.id = detalle_horario.horario 
-       JOIN docente ON docente.id = horario.docente 
-       JOIN persona ON docente.persona = persona.id WHERE persona.cedula = ?`,
+        `SELECT detalle_horario.dia, 
+       MIN(horario.id) AS horario,
+       horario.asignatura, 
+       persona.nombre, 
+       persona.apellido
+FROM detalle_horario 
+JOIN horario ON horario.id = detalle_horario.horario 
+JOIN docente ON docente.id = horario.docente 
+JOIN persona ON docente.persona = persona.id 
+WHERE persona.cedula = ?
+GROUP BY detalle_horario.dia, 
+         horario.asignatura, 
+         persona.nombre, 
+         persona.apellido;`,
         [cedula]
       );
 
@@ -93,7 +102,30 @@ const getDetallesHorariosByHorario = async (req, res) => {
       const { horario } = req.params;
       const [result] = await connection.query(
         `
-      SELECT detalle_horario.dia, horario.asignatura, persona.nombre, persona.apellido, clase.id AS id_class, clase.fecha, categoria_salon.categoria , salon.numero_salon, salon.nombre AS nombre_salon FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id JOIN clase ON clase.horario = horario.id JOIN salon ON clase.salon = salon.id JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id WHERE horario.id = ?`,
+     SELECT detalle_horario.dia, 
+       horario.asignatura, 
+       persona.nombre, 
+       persona.apellido, 
+       MIN(clase.id) AS id_class, 
+       MIN(clase.fecha) AS fecha, 
+       categoria_salon.categoria, 
+       salon.numero_salon, 
+       salon.nombre AS nombre_salon
+FROM detalle_horario 
+JOIN horario ON horario.id = detalle_horario.horario 
+JOIN docente ON docente.id = horario.docente 
+JOIN persona ON docente.persona = persona.id 
+JOIN clase ON clase.horario = horario.id 
+JOIN salon ON clase.salon = salon.id 
+JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id 
+WHERE horario.id = ? 
+GROUP BY detalle_horario.dia, 
+         horario.asignatura, 
+         persona.nombre, 
+         persona.apellido, 
+         categoria_salon.categoria, 
+         salon.numero_salon, 
+         salon.nombre;`,
         [horario]
       );
 
@@ -239,7 +271,17 @@ const filterByDay = async (req, res) => {
         .json({ status: "error", message: "Missing required parameters." });
     }
     const [result] = await connection.query(
-      `SELECT detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, horario.asignatura, persona.nombre, persona.apellido, clase.id AS id_class, clase.fecha, categoria_salon.categoria, salon.numero_salon, salon.nombre AS nombre_salon 
+      `SELECT detalle_horario.dia, 
+       detalle_horario.hora_inicio, 
+       detalle_horario.hora_fin, 
+       horario.asignatura, 
+       persona.nombre, 
+       persona.apellido, 
+       MIN(clase.id) AS id_class,
+       MIN(clase.fecha) AS fecha, 
+       categoria_salon.categoria, 
+       salon.numero_salon, 
+       salon.nombre AS nombre_salon
 FROM detalle_horario
 JOIN horario ON horario.id = detalle_horario.horario
 JOIN docente ON docente.id = horario.docente
@@ -247,7 +289,18 @@ JOIN persona ON docente.persona = persona.id
 JOIN clase ON clase.horario = horario.id
 JOIN salon ON clase.salon = salon.id
 JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id
-WHERE detalle_horario.dia = ? AND persona.cedula = ?`,
+WHERE detalle_horario.dia = ? 
+  AND persona.cedula = ?
+GROUP BY detalle_horario.dia, 
+         detalle_horario.hora_inicio, 
+         detalle_horario.hora_fin, 
+         horario.asignatura, 
+         persona.nombre, 
+         persona.apellido, 
+         categoria_salon.categoria, 
+         salon.numero_salon, 
+         salon.nombre;
+`,
       [dia, cedula]
     );
     if (result.length > 0) {

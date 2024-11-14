@@ -241,8 +241,10 @@ const filterByDocAndSal = async (req, res) => {
         });
     }
     let query = `
-      SELECT comentario.* 
+      SELECT comentario.*, salon.numero_salon, salon.nombre as nombre_salon, categoria_salon.categoria
       FROM comentario 
+      JOIN salon ON comentario.salon = salon.id
+      JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id
       JOIN docente ON comentario.docente = docente.id 
       JOIN persona ON docente.persona = persona.id
     `;
