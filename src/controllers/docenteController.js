@@ -127,7 +127,7 @@ const saveDocente = async (req, res) => {
   if (!nombre || !apellido || !cedula || !correo || !contrasena) {
     return res.status(400).send("Bad Request: Missing required fields.");
   }
-
+console.log( nombre, apellido, cedula, correo, contrasena , " nombre, apellido, cedula, correo, contrasena")
   try {
     Validaciones.nombre(nombre);
     Validaciones.apellido(apellido);
@@ -142,6 +142,7 @@ const saveDocente = async (req, res) => {
 
   try {
     const persona = await getPersonaByCorreo(correo, cedula);
+    console.log(persona, "persona");
     if (persona) {
       const isDocentecorreo = await getDocenteByCorreo(correo);
       const isDocentecedual = await getCedulaDocente(cedula);
@@ -162,7 +163,6 @@ const saveDocente = async (req, res) => {
     //antes de crear el user haseamos la password
     const hashedPassword = await bcrypt.hash(contrasena, SALTROUNDS);
 
-    await connection.beginTransaction();
     const formatData = {
       nombre,
       apellido,
@@ -171,10 +171,7 @@ const saveDocente = async (req, res) => {
       contrasena: hashedPassword,
     };
 
-    const [result] = await connection.query(
-      "INSERT INTO persona SET ?",
-      formatData
-    );
+    const [result] = await connection.query("INSERT INTO persona SET ?",formatData);
 
     if (result.affectedRows > 0) {
       const { insertId } = result;
