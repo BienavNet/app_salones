@@ -8,7 +8,7 @@ const signToken = (payload) => {
             payload, 
             JWT_SECRET_KEY, 
             {
-            expiresIn: '1h'
+            expiresIn: '30d'
         })
         return token
     } catch (error) {
