@@ -2,7 +2,6 @@ import { connection } from "./../database/database.js";
 
 /* Documento controlador para la tabla Clase */
 
-
 /* Este metodo obtiene todas las clases que se encuentran almacenadas en la base de datos*/
 const getClases = async (req, res) => {
   try {
@@ -396,34 +395,6 @@ const filterByDate = async (req, res) => {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
-// const filterByAllDate = async (req, res)=>{
-//   try {
-//     const { cedula } = req.params;
-//     if (!cedula) {
-//       return res
-//         .status(400)
-//         .json({ status: "error", message: "Bad Request: Missing parameters." });
-//     }
-//     // Asumiendo que tienes una tabla de clases con la cédula del docente
-//     const [result] = await connection.query(
-//       `SELECT clase.*, horario.asignatura, persona.nombre, persona.apellido, salon.numero_salon, salon.nombre AS nombre_salon, detalle_horario.hora_inicio, detalle_horario.hora_fin, detalle_horario.dia FROM clase JOIN salon ON clase.salon = salon.id JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON persona.id = docente.persona WHERE persona.cedula = ?
-//       `,
-//       [cedula]
-//     ); if (result && result.length > 0) {
-//       res.status(200).json(result);
-//     } else {
-//       res
-//         .status(404)
-//         .json({
-//           status: "error",
-//           message: "No data found for filter by days",
-//         });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ error: "Error al obtener las clases" });
-//   }
-// }
-/* Aqui exportamos todos los metodos previamente creados para luego usarlos en las rutas*/
 
 export const methods = {
   getClases,

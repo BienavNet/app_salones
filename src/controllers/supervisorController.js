@@ -33,7 +33,6 @@ const getPersonaByCorreo = async (correo, cedula) => {
     }
     return result;
   } catch (error) {
-    console.error("Error en la consulta de persona:", error);
     throw new Error({
       status: 500,
       message: "Internal Server Error:" + error.message,
@@ -213,7 +212,6 @@ const deleteSupervisor = async (req, res) => {
   try {
     if (req.params !== undefined) {
       const { cedula } = req.params;
-
       // Verificamos si hay supervisores y si el supervisor por defecto es el único en la base de datos
       const [resultCount] = await connection.query(
         `SELECT COUNT(*) AS total_supervisores,
@@ -221,8 +219,6 @@ const deleteSupervisor = async (req, res) => {
          FROM supervisor
          JOIN persona ON supervisor.persona = persona.id`
       );
-
-      console.log(resultCount, "resultCount");
       const { total_supervisores, is_default_supervisor } = resultCount[0];
 
       // Validar si estamos intentando eliminar al único supervisor o al supervisor por defecto
@@ -239,7 +235,7 @@ const deleteSupervisor = async (req, res) => {
         "SELECT * FROM supervisor WHERE persona IN (SELECT id FROM persona WHERE cedula = ?) AND defaultItem = 1",
         [cedula]
       );
-      console.log(supervisorToDelete, "supervisorToDelete");
+
       if (supervisorToDelete.length > 0) {
         return res.status(400).json({
           status: "bad request",
@@ -263,23 +259,18 @@ const deleteSupervisor = async (req, res) => {
         });
       }
 
-      console.log(supervisorToReassignId, "supervisorToReassignId");
-
       // Obtener un supervisor aleatorio para reasignar las clases
       const [query2] = await connection.query(
         "SELECT id FROM supervisor WHERE persona != (SELECT id FROM persona WHERE cedula = ?) ORDER BY RAND() LIMIT 1;",
         [cedula]
       );
       const newSupId = query2[0].id;
-      console.log(newSupId, "newSupId");
 
       // Reasignar las clases del supervisor a otro supervisor
       const [updateClassesResult] = await connection.query(
         "UPDATE clase SET supervisor = ? WHERE supervisor = ?",
         [newSupId, supervisorToReassignId]
       );
-
-      console.log(updateClassesResult, "updateClassesResult");
 
       // Si no se a actualizó ninguna clase, reasignamos las clases donde supervisor se null
       if (updateClassesResult.affectedRows === 0) {
@@ -295,26 +286,18 @@ const deleteSupervisor = async (req, res) => {
 
           // Si no hay supervisor por defecto, o si no hay clases para reasignar, salimos
           if (!defaultSupervisor || defaultSupervisor.length === 0) {
-            console.log("No hay supervisor por defecto");
             return;
           }
 
           const defaultSupervisorId = defaultSupervisor[0].id;
-          console.log("defaultSupervisor id", defaultSupervisorId);
 
           // Obtener todos los supervisores disponibles, excluyendo al supervisor que estamos eliminando
           const [availableSupervisors] = await connection.query(
             "SELECT id FROM supervisor WHERE id != ?",
             [newSupId]
           );
-
-          console.log("availableSupervisors id", availableSupervisors);
-
           // Si hay solo 2 supervisores disponibles, reasignamos todas las clases al supervisor por defecto
           if (availableSupervisors.length === 1) {
-            console.log(
-              "Solo hay un supervisor disponible, reasignando todas las clases al supervisor por defecto"
-            );
             // Reasignamos todas las clases al supervisor por defecto
             for (const clase of classesToReassign) {
               await connection.query(
@@ -328,21 +311,14 @@ const deleteSupervisor = async (req, res) => {
             const numSupervisors = supervisors.length;
             let supervisorIndex = 0;
 
-            console.log(
-              "Distribuyendo clases entre los supervisores restantes, incluyendo al supervisor por defecto"
-            );
-
             for (const clase of classesToReassign) {
               const selectedSupervisor = supervisors[supervisorIndex];
-              console.log("selectedSupervisor", selectedSupervisor);
-
               await connection.query(
                 "UPDATE clase SET supervisor = ? WHERE id = ?",
                 [selectedSupervisor.id, clase.id]
               );
 
               supervisorIndex = (supervisorIndex + 1) % numSupervisors;
-              console.log("supervisorIndex", supervisorIndex);
             }
           }
         }
@@ -401,7 +377,6 @@ const defaultItemStatus = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Error:", error);
     return res.status(500).json({
       status: "error",
       message: "Hubo un problema al obtener los registros.",
@@ -443,7 +418,6 @@ const updateDefaultItemStatus = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Error al actualizar el supervisor por defecto:", error);
     return res.status(500).send("Internal Server Error");
   }
 };

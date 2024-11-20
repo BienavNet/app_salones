@@ -30,14 +30,13 @@ initSocketServer(server);
 app.set("port", PORT)
 
 function checkBusinessHours(req, res, next) {
-  const currentHour = new Date().getHours(); // Obtiene la hora actual en formato 24 horas
-
+  const currentHour = new Date().getHours(); 
+   console.log(currentHour, " currrentHours")
   // Verifica si está entre las 11 PM (23) y las 6 AM (6)
   if (currentHour >= 23 || currentHour < 6) {
     return res.status(403).json({ message: "El servicio no está disponible fuera del horario laboral (11 PM a 6 AM)" });
   }
-
-  next(); // Si está dentro del horario laboral, pasa al siguiente middleware
+  next(); 
 }
 
 // Usar el middleware globalmente
