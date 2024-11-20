@@ -296,25 +296,39 @@ const registrarReporte = async (req, res) => {
   try {
     if (req.body !== undefined) {
       const { clase, comentario } = req.body;
+      const estado = req.params.estado;
 
-      if (clase !== undefined && comentario !== undefined) {
-        
-        const [result] = await connection.query(
-          "INSERT INTO reporte SET ?",
-          req.body
-        );
-
-        const { affectedRows } = result;
-
+      if (clase !== undefined && comentario !== undefined &&  estado !== undefined) {
+        console.log(" la clase del registrar reporte para el supervisor es:", clase)
+        console.log(" estoad:", estado)
+        const [status] = await connection.query("UPDATE clase SET estado = ? WHERE clase.id = ?;", [estado, clase])
+       console.log(" status:", status)
+        const { affectedRows}  = status;
+        console.log(" affected rows:", affectedRows)
+        console.log("req.body: ", req.body)
         if (affectedRows == 1) {
-          res.status(200).json({
-            status: "ok",
-            message: "Datos almacenados correctamente en el servidor.",
-          });
+          console.log("req.body:2 ", req.body)
+          const [result] = await connection.query(
+            "INSERT INTO reporte SET ?",
+            req.body
+          );
+          console.log("req.body3: ", req.body)
+          console.log(" result:", result);
+  
+          const { affectedRows } = result;
+  
+          if (affectedRows == 1) {
+            res.status(200).json({
+              status: "ok",
+              message: "Datos almacenados correctamente en el servidor.",
+            });
+            return;
+          }
+          res.status(400).json({ status: "error", message: "Bad request." });
           return;
+        } else {
+          res.status(400).send({ status: "error", message: "clase no found." });
         }
-        res.status(400).json({ status: "error", message: "Bad request." });
-        return;
       }
       res.status(400).json({ status: "error", message: "Bad request." });
       return;

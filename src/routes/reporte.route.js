@@ -17,7 +17,7 @@ tokensMethods.isAuthorized(router, ["supervisor", "director"])
 router.get("/supervisor/:id", reporteMethods.getReporteBySupervisor)
 
 // Se consulta el cotrolador reporte, el metodo registrarReporte 
-router.post("/register", reporteMethods.registrarReporte)
+router.post("/register/:estado", reporteMethods.registrarReporte)
 
 // Se consulta el cotrolador reporte, el metodo filterBySupAndSal 
 router.get("/supervisor/:cedula/salon/:salon", reporteMethods.filterBySupAndSal)
