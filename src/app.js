@@ -1,4 +1,5 @@
 import express from "express";
+import moment from "moment-timezone";
 import morgan from "morgan";
 import cors from "cors"
 import cookieParser from "cookie-parser";
@@ -30,9 +31,7 @@ initSocketServer(server);
 app.set("port", PORT)
 
 function checkBusinessHours(req, res, next) {
-  const currentHour = new Date().getHours(); 
-   console.log(currentHour, " currrentHours")
-  // Verifica si está entre las 11 PM (23) y las 6 AM (6)
+  const currentHour = moment.tz("America/Bogota").hours();
   if (currentHour >= 23 || currentHour < 6) {
     return res.status(403).json({ message: "El servicio no está disponible fuera del horario laboral (11 PM a 6 AM)" });
   }

@@ -89,13 +89,19 @@ const getAll = async (req, res) => {
   }
 };
 
-
-
 /// Estandariza los mensajes de respuesta de las notificaciones
-const getMessage = (id, params) => {
-  
+const getMessage = async (id, params) => {
+  const [result] = await connection.query(
+    `SELECT p1.nombre AS de_nombre, p2.nombre AS para_nombre
+     FROM persona p1, persona p2
+     WHERE p1.id = ? AND p2.id = ?`,
+    [params.de, params.para]
+  );
   try {
-    
+    if (result.length === 0) {
+      throw new Error('No se encontraron personas con los IDs proporcionados');
+    }
+    const { de_nombre, para_nombre } = result[0];
     const messages = {
       "clase revisada": {
         "message": "El supervisor $de ha revisado la clase de $para"
@@ -107,7 +113,7 @@ const getMessage = (id, params) => {
         "message": "El docente $de ha realizado un comentario"
       }
     }
-    return messages[id].message.replace('$de', params.de).replace('$para', params.para)
+    return messages[id].message.replace('$de', de_nombre).replace('$para', para_nombre)
   } catch (error) {
     return undefined
   }
@@ -120,11 +126,8 @@ const sendNotification = async (req, res) => {
     
     if (req.body !== undefined) {
       const { action, de, para } = req.body;
-      console.log(action, de, para + "notificacion");
       if (action !== undefined && de !== undefined && para !== undefined) {
-
-        const mensaje = getMessage(action, { "de": de, "para": para }) //modificacion para que filtre el id del mensaje en el archivo json y adicional reemplace los valores de y para en el mensaje
-        console.log(mensaje)
+        const mensaje = await getMessage(action, { "de": de, "para": para }) //modificacion para que filtre el id del mensaje en el archivo json y adicional reemplace los valores de y para en el mensaje
         const [result] = await connection.query(
           `INSERT INTO notificacion (mensaje, de, para, estado, fecha) VALUES (?, ?, ?, 'no leida', NOW())`, [mensaje, de, para]);
         const { insertId, affectedRows } = result;
@@ -135,8 +138,10 @@ const sendNotification = async (req, res) => {
             id: insertId,
             message: "Notificación almacenada y enviada correctamente",
           });
-          console.log(" unreadCount data para", data, para);
-          
+          io.to(para).emit("new_notificacion",{
+            success:true,
+            messageId:insertId
+          })
           return io.to(para).emit("count-notification", data);
         }
         return res.status(400).json({
@@ -148,13 +153,11 @@ const sendNotification = async (req, res) => {
         .status(400)
         .json({ status: "error", message: "Bad request: faltan campos." });
     }
-
     res.status(400).json({
       status: "error",
       message: "Bad request: datos no proporcionados.",
     });
   } catch (error) {
-    console.error("Error:", error);
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };

@@ -73,7 +73,6 @@ const getPersonaByCorreo = async (correo, cedula) => {
     }
     return result;
   } catch (error) {
-    console.error("Error en la consulta de persona:", error);
     throw new Error({
       status: 500,
       message: "Internal Server Error:" + error.message,
@@ -127,7 +126,6 @@ const saveDocente = async (req, res) => {
   if (!nombre || !apellido || !cedula || !correo || !contrasena) {
     return res.status(400).send("Bad Request: Missing required fields.");
   }
-console.log( nombre, apellido, cedula, correo, contrasena , " nombre, apellido, cedula, correo, contrasena")
   try {
     Validaciones.nombre(nombre);
     Validaciones.apellido(apellido);
@@ -142,7 +140,6 @@ console.log( nombre, apellido, cedula, correo, contrasena , " nombre, apellido, 
 
   try {
     const persona = await getPersonaByCorreo(correo, cedula);
-    console.log(persona, "persona");
     if (persona) {
       const isDocentecorreo = await getDocenteByCorreo(correo);
       const isDocentecedual = await getCedulaDocente(cedula);
@@ -306,7 +303,6 @@ const deleteDocente = async (req, res) => {
 
     res.status(400).send("Bad Request.");
   } catch (error) {
-    console.error(error);
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };

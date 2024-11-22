@@ -299,22 +299,13 @@ const registrarReporte = async (req, res) => {
       const estado = req.params.estado;
 
       if (clase !== undefined && comentario !== undefined &&  estado !== undefined) {
-        console.log(" la clase del registrar reporte para el supervisor es:", clase)
-        console.log(" estoad:", estado)
         const [status] = await connection.query("UPDATE clase SET estado = ? WHERE clase.id = ?;", [estado, clase])
-       console.log(" status:", status)
         const { affectedRows}  = status;
-        console.log(" affected rows:", affectedRows)
-        console.log("req.body: ", req.body)
         if (affectedRows == 1) {
-          console.log("req.body:2 ", req.body)
           const [result] = await connection.query(
             "INSERT INTO reporte SET ?",
             req.body
           );
-          console.log("req.body3: ", req.body)
-          console.log(" result:", result);
-  
           const { affectedRows } = result;
   
           if (affectedRows == 1) {

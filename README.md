@@ -38,3 +38,6 @@ donde haran el deploy de la base de datos mirar si no exigen el soporte de **cac
 dado que mysql2/promise devuelve en una promesa un array de objetos utilizar
 > const [result] = conecction.query('sql')
 > res.json(result[0])
+
+Instalamos moment-timezone (valida y manipula fechas y horas en javascript)
+> npm i moment-timezone

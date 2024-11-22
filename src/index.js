@@ -4,11 +4,9 @@ import { io } from "./utils/WebsocketServer.js";
 import { getUnreadCount } from "./controllers/notificacionController.js";
 
 const main = () => {
-  console.log("###### API REST ######");
-  console.log("######################");
-
+  console.log("###### ************ API REST APP DE SALONES SUCCESSFULL ********* ######");
   server.listen(PORT, () => {
-    io.sockets.on("connection", (socket) => {
+      io.sockets.on("connection", (socket) => {
       console.log("CONEXION CON WEBSOCKET");
 
       // cuando el usuario es logeado
