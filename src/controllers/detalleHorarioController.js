@@ -179,22 +179,21 @@ const saveDetalleHorario = async (req, res) => {
         const { insertId, affectedRows } = result;
 
         if (affectedRows == 1) {
-          res.status(200).json({
+          return res.status(200).json({
             status: "ok",
             id: insertId,
             message: "Datos almacenados correctamente",
           });
-          return;
         }
-        res.status(400).json({ status: "error", message: "Bad request." });
-        return;
+        return res
+          .status(400)
+          .json({ status: "error", message: "Bad request." });
       }
-      res.status(400).json({ status: "error", message: "Bad request." });
-      return;
+      return res.status(400).json({ status: "error", message: "Bad request." });
     }
-    res.status(400).json({ status: "error", message: "Bad request." });
+    return res.status(400).json({ status: "error", message: "Bad request." });
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
 
@@ -239,7 +238,10 @@ const updateDetalleHorario = async (req, res) => {
         message: "Bad request: ID o datos faltantes.",
       });
     }
-    const [result] = await connection.query(`UPDATE detalle_horario SET ? WHERE id = ?`,[data, id]);
+    const [result] = await connection.query(
+      `UPDATE detalle_horario SET ? WHERE id = ?`,
+      [data, id]
+    );
     if (result.affectedRows === 1) {
       return res.status(200).json({
         status: "ok",
