@@ -189,7 +189,6 @@ const getClaseBySupervisor = async (req, res) => {
 const registerClase = async (req, res) => {
   try {
     const { horario, salon, supervisor, estado, fecha } = req.body;
-    console.log("REGISTER - horario, salon, supervisor, estado, fecha", horario, salon, supervisor, estado, fecha)
     if (!horario || !salon || !supervisor || !estado || !fecha) {
       return res
         .status(400)
@@ -216,7 +215,6 @@ const registerClase = async (req, res) => {
 
     return res.status(400).json({ status: "error", message: "Bad request." });
   } catch (error) {
-    console.error("Error en el servidor:", error);
     return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
