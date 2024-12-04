@@ -216,6 +216,7 @@ const registerClase = async (req, res) => {
 
     return res.status(400).json({ status: "error", message: "Bad request." });
   } catch (error) {
+    console.error("Error en el servidor:", error);
     return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
