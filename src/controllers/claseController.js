@@ -189,6 +189,7 @@ const getClaseBySupervisor = async (req, res) => {
 const registerClase = async (req, res) => {
   try {
     const { horario, salon, supervisor, estado, fecha } = req.body;
+    console.log("REGISTER - horario, salon, supervisor, estado, fecha", horario, salon, supervisor, estado, fecha)
     if (!horario || !salon || !supervisor || !estado || !fecha) {
       return res
         .status(400)
