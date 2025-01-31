@@ -47,7 +47,7 @@ const getComentarioByDocente = async (req, res) => {
 
     const [result] = await connection.query(
       `
-        SELECT comentario.*, salon.nombre AS nombre_salon, salon.numero_salon
+        SELECT comentario.*, persona.nombre, salon.nombre AS nombre_salon, salon.numero_salon
         FROM comentario 
         JOIN salon on salon.id = comentario.salon 
         JOIN docente ON docente.id = comentario.docente 

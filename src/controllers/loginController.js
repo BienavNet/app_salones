@@ -31,7 +31,6 @@ const checkLogin = async (req, res) => {
     const query =
       "SELECT id, nombre, cedula, contrasena FROM persona WHERE correo = ?";
     const [result] = await connection.query(query, [correo]);
-
     // Verificar si se encontró algún usuario
     if (result.length > 0) {
       const { id, nombre, cedula, contrasena: hashedPassword } = result[0];
@@ -51,7 +50,7 @@ const checkLogin = async (req, res) => {
       if (!isPasswordCorrect) {
         return res.status(401).json({
           status: "error",
-          message: hashedPassword.startsWith('$2a$10') ? "Credenciales incorrectas." : "La contraseña no está encriptada correctamente.",
+          message: hashedPassword.startsWith('$2a$10') ? "Credenciales incorrectas." : "Credenciales incorrectas..",
         });
       }
 
@@ -59,49 +58,53 @@ const checkLogin = async (req, res) => {
       const roleQuery = `SELECT id AS id_rol FROM ${rol} WHERE persona = ?`;
       const [roleResult] = await connection.query(roleQuery, [id]);
 
-      if (roleResult.length > 0) {
-        const { id_rol } = roleResult[0];
-        let directorId;
+      if (roleResult.length === 0) {
+        return res.status(403).json({
+          status: "error",
+          message: `Acceso denegado: Verifique el '${rol}'.`,
+        });
+      }
+      const { id_rol } = roleResult[0];
+      let directorId;
 
-        // Si el rol es docente o supervisor, obtener el director
-        if (["docente", "supervisor"].includes(rol)) {
-          const directorQuery = "SELECT persona FROM director LIMIT 1";
-          const [directorResult] = await connection.query(directorQuery);
-          if (directorResult.length > 0) {
-            directorId = directorResult[0].persona;
-          }
+      // Si el rol es docente o supervisor, obtener el director
+      if (["docente", "supervisor"].includes(rol)) {
+        const directorQuery = "SELECT persona FROM director LIMIT 1";
+        const [directorResult] = await connection.query(directorQuery);
+        if (directorResult.length > 0) {
+          directorId = directorResult[0].persona;
         }
+      }
 
-        if (id_rol) {
-          // Generar el token
-          const token = tokens.signToken({
-            id,
-            cedula,
-            nombre,
-            user: correo,
-            rol,
-            directorId,
-          });
+      if (id_rol) {
+        // Generar el token
+        const token = tokens.signToken({
+          id,
+          cedula,
+          nombre,
+          user: correo,
+          rol,
+          directorId,
+        });
 
-          // Configurar las cookies y la cabecera de autorización
-          res.set({ Authorization: token });
-          res.cookie("access_token", token, {
-            httpOnly: true,
-            sameSite: "strict",
-            maxAge: 1000 * 60 * 60 * 24 * 30, // 30 días
-          });
+        // Configurar las cookies y la cabecera de autorización
+        res.set({ Authorization: token });
+        res.cookie("access_token", token, {
+          httpOnly: true,
+          sameSite: "strict",
+          maxAge: 1000 * 60 * 60 * 24 * 30, // 30 días
+        });
 
-          return res.status(200).json({
-            status: "ok",
-            message: "Login correcto.",
-            access_token: token,
-          });
-        } else {
-          return res.status(400).json({
-            status: "error",
-            message: "Error al determinar el rol.",
-          });
-        }
+        return res.status(200).json({
+          status: "ok",
+          message: "Login correcto.",
+          access_token: token,
+        });
+      } else {
+        return res.status(400).json({
+          status: "error",
+          message: "Error al determinar el rol.",
+        });
       }
     } else {
       return res.status(401).json({

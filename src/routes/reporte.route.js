@@ -35,6 +35,9 @@ router.get("/", reporteMethods.getReportes)
 // Se consulta el cotrolador reporte, el metodo getReporteByClase 
 router.get("/clase/:clase", reporteMethods.getReporteByClase)
 
+// consulta todos los reporte x id
+router.get("/:id", reporteMethods.getReporteByID)
+
 // Se consulta el cotrolador reporte, el metodo getReporteBySalon 
 router.get("/salon/:salon", reporteMethods.getReporteBySalon)
 

@@ -41,3 +41,6 @@ dado que mysql2/promise devuelve en una promesa un array de objetos utilizar
 
 Instalamos moment-timezone (valida y manipula fechas y horas en javascript)
 > npm i moment-timezone
+
+send your first email using the Resend Node.js SDK.
+> npm install resend

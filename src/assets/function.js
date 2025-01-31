@@ -1,3 +1,5 @@
+import moment from "moment-timezone";
+
 export const getMostCommon = (items) => {
   const counts = items.reduce((acc, item) => {
     acc[item] = (acc[item] || 0) + 1;
@@ -7,10 +9,9 @@ export const getMostCommon = (items) => {
 };
 
 export const getThreeMostCommon = (data) => {
- // Crea un objeto para contar las ocurrencias de cada día
  const count = data.reduce((acc, item) => {
   const dia = item.dia;
-  if (dia) { // Asegúrate de que 'dia' no sea undefined o null
+  if (dia) {
     acc[dia] = (acc[dia] || 0) + 1;
   }
   return acc;
@@ -23,4 +24,9 @@ const sortedDias = Object.entries(count)
 
 // Devuelve el array de días junto con sus valores para el gráfico
 return sortedDias.map(([dia, cantidad]) => ({ dia, cantidad }));
+};
+
+
+export const DatesYYYYMMDD = (fecha) => {
+  return moment(fecha).format("YYYY-MM-DD");
 };

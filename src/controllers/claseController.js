@@ -1,3 +1,4 @@
+import { DatesYYYYMMDD } from "../assets/function.js";
 import { connection } from "./../database/database.js";
 
 /* Documento controlador para la tabla Clase */
@@ -358,7 +359,14 @@ const filterByDoc = async (req, res) => {
     );
 
     if (result.length > 0) {
-      return res.status(200).json(result);
+      const transformedResult = result.map(item => {
+        const formattedDate = DatesYYYYMMDD(item.fecha);
+        return {
+          ...item,
+          fecha: formattedDate
+        };
+      });
+      return res.status(200).json(transformedResult);
     }
 
     return res.status(400).json({ status: "error", message: "Bad request." });

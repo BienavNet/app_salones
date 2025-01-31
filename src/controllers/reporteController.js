@@ -1,12 +1,9 @@
 import { getMostCommon, getThreeMostCommon } from "../assets/function.js";
 import { connection } from "./../database/database.js";
 
-
-
 // Hace una consulta y genera un reporte, en este caso envia los salones que mas se han utilizado en orden descendente
 const getSalonMasUtilizado = async (req, res) => {
   try {
-    
     const [result] = await connection.query(`
 SELECT salon.numero_salon, COUNT(clase.id) AS cantidad_usos
 FROM clase
@@ -17,7 +14,9 @@ LIMIT 3;`);
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(404).json({ status: "error", message: "not found room more used" });
+    res
+      .status(404)
+      .json({ status: "error", message: "not found room more used" });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -26,7 +25,6 @@ LIMIT 3;`);
 // Hace una consulta y genera un reporte, en este caso envia los salones que mas se han utilizado en orden ascendente
 const getSalonMenosUtilizado = async (req, res) => {
   try {
-    
     const [result] = await connection.query(`
 SELECT salon.numero_salon, COUNT(clase.id) AS cantidad_usos
 FROM clase
@@ -37,7 +35,9 @@ LIMIT 3;`);
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(404).json({ status: "error", message: "no found room less used" });
+    res
+      .status(404)
+      .json({ status: "error", message: "no found room less used" });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -55,7 +55,9 @@ LIMIT 3;`);
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(404).json({ status: "error", message: "not found days asigned" });
+    res
+      .status(404)
+      .json({ status: "error", message: "not found days asigned" });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -64,7 +66,6 @@ LIMIT 3;`);
 // Hace una consulta y genera un reporte, en este caso envia las horas que mas frecuentes
 const getRangeHoursMasFrecuente = async (req, res) => {
   try {
-    
     const [result] = await connection.query(`
 WITH RECURSIVE Horas AS (
     SELECT
@@ -111,17 +112,17 @@ LIMIT 3;
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(404).json({ status: "error", message: "not found hour more frecuencies" });
+    res
+      .status(404)
+      .json({ status: "error", message: "not found hour more frecuencies" });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
 };
 
-
 // Hace una consulta y genera un reporte, en este caso envia los docentes que mas comentarios han hecho, en orden descendente
 const getDocenteQMasComentariosHaRealizado = async (req, res) => {
   try {
-    
     const [result] = await connection.query(`
               SELECT persona.cedula, COUNT(reporte.id) AS cantidad_comentarios
             FROM reporte
@@ -135,7 +136,12 @@ const getDocenteQMasComentariosHaRealizado = async (req, res) => {
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(404).json({ status: "error", message: "not found teacher more comments made" });
+    res
+      .status(404)
+      .json({
+        status: "error",
+        message: "not found teacher more comments made",
+      });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -144,15 +150,11 @@ const getDocenteQMasComentariosHaRealizado = async (req, res) => {
 // Obtiene los reportes realizados por los supervisores
 const getReportes = async (req, res) => {
   try {
-    
     const [result] = await connection.query(`
-          SELECT reporte.id AS reporte_id, reporte.*, clase.fecha, clase.estado, horario.asignatura, horario.id, persona.nombre, persona.apellido, persona.cedula, salon.nombre AS nombre_salon, salon.numero_salon, salon.INTernet, salon.tv
-          FROM reporte 
-          JOIN clase ON reporte.clase = clase.id 
-          JOIN horario ON clase.horario = horario.id
-          JOIN docente ON horario.docente = docente.id
-          JOIN persona ON docente.persona = persona.id 
-          JOIN salon ON clase.salon = salon.id`);
+      SELECT reporte.id AS reporte_id,reporte.comentario, reporte.clase As clase_id, clase.fecha, clase.estado, horario.asignatura, horario.id AS horario_id, persona.nombre, persona.apellido, salon.nombre AS nombre_salon, salon.numero_salon
+FROM reporte JOIN clase ON reporte.clase = clase.id JOIN horario ON clase.horario = horario.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id JOIN salon ON clase.salon = salon.id;    
+      
+      `);
     if (result.length > 0) {
       return res.status(200).json(result);
     }
@@ -165,7 +167,6 @@ const getReportes = async (req, res) => {
 // Hace una consulta y genera un reporte, en este caso envia los salones que mas comentarios han recibido en orden descendente
 const getsalonMasComentarioTiene = async (req, res) => {
   try {
-    
     const [result] = await connection.query(`
 SELECT salon.numero_salon, COUNT(reporte.id) AS cantidad_comentarios
 FROM reporte
@@ -177,7 +178,12 @@ LIMIT 3;`);
     if (result.length > 0) {
       return res.status(200).json(result);
     }
-    res.status(404).json({ status: "error", message: "not found classroom more comment has" });
+    res
+      .status(404)
+      .json({
+        status: "error",
+        message: "not found classroom more comment has",
+      });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);
   }
@@ -189,7 +195,6 @@ const getReporteBySupervisor = async (req, res) => {
     if (req.params !== undefined) {
       const { id } = req.params;
 
-      
       const [result] = await connection.query(
         `
 SELECT 
@@ -237,14 +242,14 @@ const getReporteByClase = async (req, res) => {
       const { clase } = req.params;
       const [result] = await connection.query(
         `
-        SELECT reporte.*, horario.asignatura, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido, clase.estado, clase.fecha
+        SELECT reporte.id AS reporte_id, reporte.comentario, horario.asignatura, salon.nombre AS nombre_salon, salon.numero_salon, persona.nombre, persona.apellido, clase.estado, clase.fecha
         FROM  reporte 
         JOIN clase ON reporte.clase = clase.id
         JOIN horario ON clase.horario = horario.id
         JOIN salon ON clase.salon = salon.id 
         JOIN docente ON horario.docente = docente.id
        JOIN persona ON docente.persona = persona.id 
-        WHERE reporte.clase = ?
+        WHERE reporte.clase = ?;
         `,
         [clase]
       );
@@ -260,6 +265,43 @@ const getReporteByClase = async (req, res) => {
   }
 };
 
+const getReporteByID = async (req, res) => {
+  try {
+    if (req.params !== undefined) {
+      const { id } = req.params;
+      const [result] = await connection.query(
+        `
+SELECT reporte.id AS reporte_id, reporte.comentario,
+       horario.asignatura, 
+       salon.nombre AS nombre_salon, 
+       salon.numero_salon, 
+       persona.nombre, 
+       persona.apellido, 
+       clase.estado, 
+       clase.fecha
+FROM  reporte 
+JOIN clase ON reporte.clase = clase.id
+JOIN horario ON clase.horario = horario.id
+JOIN salon ON clase.salon = salon.id 
+JOIN docente ON horario.docente = docente.id
+JOIN persona ON docente.persona = persona.id 
+WHERE reporte.id = ?;
+        `,
+        [id]
+      );
+      if (result) {
+        return res.status(200).json(result);
+      }
+      res.status(400).json({ status: "error", message: "Bad request." });
+      return;
+    }
+    res.status(400).json({ status: "error", message: "Bad request." });
+  } catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
+
+
 // Obtiene todos los reportes realizados por algun supervisor si el id coincide con el id del salon
 const getReporteBySalon = async (req, res) => {
   try {
@@ -267,7 +309,7 @@ const getReporteBySalon = async (req, res) => {
       const { salon } = req.params;
       const [result] = await connection.query(
         `
-      SELECT reporte.*, clase.estado,salon.numero_salon, clase.fecha, horario.asignatura, persona.nombre, persona.apellido
+      SELECT reporte.id AS reporte_id, reporte.comentario, clase.estado,salon.numero_salon, clase.fecha, horario.asignatura, persona.nombre, persona.apellido
 FROM reporte
 JOIN clase ON clase.id = reporte.clase
 JOIN horario ON clase.horario = horario.id
@@ -282,7 +324,9 @@ WHERE clase.salon = ?`,
         res.status(200).json(result);
         return;
       }
-      res.status(404).json({ status: "error", message: "report classroom not found." });
+      res
+        .status(404)
+        .json({ status: "error", message: "report classroom not found." });
       return;
     }
     res.status(400).json({ status: "error", message: "Bad request." });
@@ -298,16 +342,23 @@ const registrarReporte = async (req, res) => {
       const { clase, comentario } = req.body;
       const estado = req.params.estado;
 
-      if (clase !== undefined && comentario !== undefined &&  estado !== undefined) {
-        const [status] = await connection.query("UPDATE clase SET estado = ? WHERE clase.id = ?;", [estado, clase])
-        const { affectedRows}  = status;
+      if (
+        clase !== undefined &&
+        comentario !== undefined &&
+        estado !== undefined
+      ) {
+        const [status] = await connection.query(
+          "UPDATE clase SET estado = ? WHERE clase.id = ?;",
+          [estado, clase]
+        );
+        const { affectedRows } = status;
         if (affectedRows == 1) {
           const [result] = await connection.query(
             "INSERT INTO reporte SET ?",
             req.body
           );
           const { affectedRows } = result;
-  
+
           if (affectedRows == 1) {
             res.status(200).json({
               status: "ok",
@@ -336,7 +387,6 @@ const deleteReporte = async (req, res) => {
     if (req.params !== undefined) {
       const { id } = req.params;
 
-      
       const [result] = await connection.query(
         "DELETE reporte WHERE reporte.id = " + id + ""
       );
@@ -365,7 +415,6 @@ const updateReporte = async (req, res) => {
     if (req.params !== undefined && req.body !== undefined) {
       const { id } = req.params;
 
-      
       const [result] = await connection.query(
         "UPDATE reporte SET ? WHERE reporte.id = " + id + ""
       );
@@ -394,7 +443,6 @@ const updateReporte = async (req, res) => {
 // EL USO ES EL SIGUIENTE: localhost:5000/api/reporte/supervisor/(aqui va la cedula del supervisor o si no la va a a usar poner un 0)/salon/(igual, el id del salon o si no se usa un 0)
 // localhost:5000/api/reporte/supervisor/1005054932/salon/3
 
-
 // Filtra los reportes si se pasan los parametros cedula del supervisor y/o id del salon
 const filterBySupAndSal = async (req, res) => {
   try {
@@ -405,7 +453,10 @@ const filterBySupAndSal = async (req, res) => {
       if (cedula != 0 && salon != 0) {
         query =
           "SELECT reporte.id AS reporte_id, reporte.clase, reporte.comentario, clase.estado, clase.fecha, salon.nombre AS nombre_salon, salon.numero_salon, salon.capacidad, horario.asignatura, persona_docente.nombre AS nombre_docente, persona_docente.apellido AS apellido_docente, docente.id AS docente_id FROM reporte JOIN clase ON clase.id = reporte.clase JOIN salon ON clase.salon = salon.id JOIN horario ON clase.horario = horario.id JOIN docente ON docente.id = horario.docente JOIN persona AS persona_docente ON persona_docente.id = docente.persona JOIN supervisor ON supervisor.id = clase.supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
-          cedula + " AND clase.salon = " + salon + "";
+          cedula +
+          " AND clase.salon = " +
+          salon +
+          "";
       } else if (cedula != 0 && salon == 0) {
         query =
           "SELECT reporte.*, clase.fecha FROM reporte JOIN clase ON clase.id = reporte.clase JOIN supervisor ON supervisor.id = clase.supervisor JOIN persona ON persona.id = supervisor.persona WHERE persona.cedula = " +
@@ -448,7 +499,7 @@ export const methods = {
   getReporteByClase,
   getReporteBySalon,
   getReporteBySupervisor,
-  registrarReporte,
+  registrarReporte,getReporteByID,
   updateReporte,
   deleteReporte,
   filterBySupAndSal,

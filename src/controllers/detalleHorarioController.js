@@ -63,7 +63,7 @@ const getDetallesHorarioByDocente = async (req, res) => {
       const { cedula } = req.params;
       const [result] = await connection.query(
         `SELECT detalle_horario.dia, 
-       MIN(horario.id) AS horario,
+       MIN(horario.id) AS id,
        horario.asignatura, 
        persona.nombre, 
        persona.apellido
@@ -102,6 +102,7 @@ const getDetallesHorariosByHorario = async (req, res) => {
       const [result] = await connection.query(
         `
      SELECT detalle_horario.dia, 
+       horario.id,
        horario.asignatura, 
        persona.nombre, 
        persona.apellido, 
@@ -274,7 +275,8 @@ const filterByDay = async (req, res) => {
     const [result] = await connection.query(
       `SELECT detalle_horario.dia, 
        detalle_horario.hora_inicio, 
-       detalle_horario.hora_fin, 
+       detalle_horario.hora_fin,
+       horario.id, 
        horario.asignatura, 
        persona.nombre, 
        persona.apellido, 
