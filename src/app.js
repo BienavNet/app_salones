@@ -30,16 +30,16 @@ initSocketServer(server);
 // Se inicializa la app con un puerto de escucha de peticiones
 app.set("port", PORT)
 
-// function checkBusinessHours(req, res, next) {
-//   const currentHour = moment.tz("America/Bogota").hours();
-//   if (currentHour >= 23 || currentHour < 3) {
-//     return res.status(403).json({ message: "El servicio no está disponible fuera del horario laboral (11 PM a 6 AM)" });
-//   }
-//   next(); 
-// }
+function checkBusinessHours(req, res, next) {
+  const currentHour = moment.tz("America/Bogota").hours();
+  if (currentHour >= 23 || currentHour < 3) {
+    return res.status(403).json({ message: "El servicio no está disponible fuera del horario laboral (11 PM a 6 AM)" });
+  }
+  next(); 
+}
 
 // // Usar el middleware globalmente
-// app.use(checkBusinessHours);
+app.use(checkBusinessHours);
 // Middlewares
 app.use(cors())
 
