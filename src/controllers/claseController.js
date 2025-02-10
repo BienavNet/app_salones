@@ -8,13 +8,7 @@ const getClases = async (req, res) => {
   try {
     const [result] = await connection.query(
       `
-      SELECT 
-      clase.id, clase.fecha, horario.asignatura, persona.apellido AS docente_apellido, persona.nombre AS docente_nombre, salon.numero_salon  
-      FROM clase
-      JOIN horario ON clase.horario = horario.id
-      JOIN salon ON clase.salon = salon.id
-      JOIN docente ON horario.docente = docente.id
-      JOIN persona ON docente.persona = persona.id  
+      SELECT clase.id, clase.fecha, horario.asignatura, persona.apellido AS docente_apellido, persona.nombre AS docente_nombre, salon.numero_salon, clase.supervisor AS supervisor_id FROM clase JOIN horario ON clase.horario = horario.id JOIN salon ON clase.salon = salon.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id;
       `
     );
 
