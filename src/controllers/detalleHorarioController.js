@@ -262,6 +262,39 @@ const updateDetalleHorario = async (req, res) => {
   }
 };
 
+
+const updateDetalleHorarioByHorarioId = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+    if (!id || !data || Object.keys(data).length === 0) {
+      return res.status(400).json({
+        status: "error",
+        message: "Bad request: ID o datos faltantes.",
+      });
+    }
+    const [result] = await connection.query(
+      `UPDATE detalle_horario SET ? WHERE detalle_horario.horario = ?`,
+      [data, id]
+    );
+    if (result.affectedRows === 1) {
+      return res.status(200).json({
+        status: "ok",
+        message: "Datos actualizados correctamente.",
+      });
+    }
+    return res.status(404).json({
+      status: "error",
+      message:
+        "No se encontraron datos para actualizar con el ID proporcionado.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: "error",
+      message: "Error interno del servidor: " + error.message,
+    });
+  }
+};
 /* Este metodo filtra los registros de la tabla y devuelve los que coinciden con el parametro dia */
 
 const filterByDay = async (req, res) => {
@@ -328,6 +361,7 @@ export const methods = {
   saveDetalleHorario,
   deleteDetalleHorario,
   updateDetalleHorario,
+  updateDetalleHorarioByHorarioId,
   getDetalleHorariosByHorarioId,
   filterByDay,
 };

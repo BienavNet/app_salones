@@ -26,5 +26,6 @@ router.post("/save", detalle_horarioMethods.saveDetalleHorario)
 router.delete("/delete/:id", detalle_horarioMethods.deleteDetalleHorario)
 // Se consulta el cotrolador detalle_hoario, el metodo updateDetalleHorario 
 router.patch("/update/:id", detalle_horarioMethods.updateDetalleHorario)
+router.patch("/update/horario/:id", detalle_horarioMethods.updateDetalleHorarioByHorarioId)
 
 export default router
