@@ -81,12 +81,18 @@ const getSupervisorByCedula = async (req, res) => {
           cedula +
           ";"
       );
-      res.status(200).json(result);
+      if (result.length === 0) {
+        return res.status(404).json({
+          status: "not found",
+          message: "No se encontraron registros para la cédula proporcionada.",
+        });
+      }
+      return res.status(200).json(result);
     } else {
-      res.send(400, "Bad Request");
+      return res.send(400, "Bad Request");
     }
   } catch (error) {
-    res.status(200).send("Internal Server Error: " + error.message);
+    return res.status(200).send("Internal Server Error: " + error.message);
   }
 };
 

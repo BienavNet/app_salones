@@ -29,6 +29,12 @@ const getDocenteIdByCedula = async (req, res) => {
        SELECT persona.*, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = ?`,
         [cedula]
       );
+      if (result.length === 0) {
+        return res.status(404).json({
+          status: "error",
+          message: "No se encontró el docente.",
+        });
+      }
       return res.status(200).json(result);
     } catch (error) {
       res.status(500).send("Internal Server Error: " + error.message);

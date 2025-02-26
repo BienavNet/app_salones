@@ -38,6 +38,27 @@ const getSalonById = async (req, res) => {
     }
 }
 
+const getSalonId = async (req, res) => {
+    try {
+        if (req.params !== undefined){
+            const { number } = req.params
+            const [result] = await connection.query(
+                `
+            SELECT id as salon_id
+            FROM salon 
+            WHERE numero_salon = ?
+                `, [number])
+            if ( result.length > 0) {
+                return res.status(200).json(result)
+            }
+            return res.status(404).json({"status": "error", "message": "Classroom is missing ID."})
+        }
+        res.status(400).json({"status": "error", "message": "Bad request."})
+    } catch (error) {
+        res.status(500).send('Internal Server Error: ' + error.message)
+    }
+}
+
 
 // Obtiene todos los registros de la tabla salon
 const getSalones = async (req, res) => {
@@ -73,6 +94,7 @@ const updateSalon = async (req, res) => {
 
 export const methods = {
     getSalonById,
+    getSalonId,
     getSalones,
     updateSalon, 
     categorySalonID

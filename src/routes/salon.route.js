@@ -13,10 +13,15 @@ tokensMethods.isAuthorized(router, ["director"])
 // Se consulta el cotrolador salon, el metodo getSalonById 
 router.get("/:id", salonMethods.getSalonById)
 
+// Se consulta el controlador salon, el metodo getSalonId
+router.get("/salon/:number", salonMethods.getSalonId)
+
 // Se consulta el cotrolador salon, el metodo updateSalon 
 router.patch("/update/:id", salonMethods.updateSalon)
 
 // Se consulta el cotrolador salon, el metodo categorySalonID 
 router.get("/categoria-salon/salon", salonMethods.categorySalonID)
+
+
 export default router
 
