@@ -8,7 +8,7 @@ const getClases = async (req, res) => {
   try {
     const [result] = await connection.query(
       `
-      SELECT clase.id, clase.fecha, horario.asignatura, persona.apellido AS docente_apellido, persona.nombre AS docente_nombre, salon.numero_salon, clase.supervisor AS supervisor_id FROM clase JOIN horario ON clase.horario = horario.id JOIN salon ON clase.salon = salon.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id;
+      SELECT clase.id, clase.fecha, clase.estado, horario.asignatura, horario.id as horario_id, persona.apellido AS docente_apellido, persona.nombre AS docente_nombre, persona.cedula as docente_id, salon.numero_salon, clase.supervisor, persona_supervisor.nombre AS supervisor_nombre, persona_supervisor.apellido AS supervisor_apellido, persona_supervisor.cedula AS supervisor_id FROM clase JOIN horario ON clase.horario = horario.id JOIN salon ON clase.salon = salon.id JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id JOIN supervisor ON clase.supervisor = supervisor.id JOIN persona AS persona_supervisor ON supervisor.persona = persona_supervisor.id;
       `
     );
 
@@ -242,7 +242,8 @@ const updateClase = async (req, res) => {
     if (req.params !== undefined && req.body !== undefined) {
       const { id } = req.params;
       const [result] = await connection.query(
-        "UPDATE clase SET ? WHERE clase.id = " + id + ""
+        "UPDATE clase SET ? WHERE clase.id = ?",
+        [req.body, id]
       );
       const { affectedRows } = result;
 
