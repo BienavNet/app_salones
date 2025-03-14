@@ -12,7 +12,10 @@ router.get("/salon/:salon", claseMethods.getClaseBySalon);
 // Se consulta el cotrolador clase, el metodo filterByDate
 router.get("/docente/:cedula/fecha/:fecha", claseMethods.filterByDate); // por una sola fecha
 // Se consulta el cotrolador clase, el metodo filterBySupSalDiaHor
-router.get("/supervisor/:cedula/salon/:salon/dia/:dia/horario/:horario", claseMethods.filterBySupSalDiaHor); // ✅
+router.get(
+  "/supervisor/:cedula/salon/:salon/dia/:dia/horario/:horario",
+  claseMethods.filterBySupSalDiaHor
+); // ✅
 // Se consulta el cotrolador clase, el metodo filterByDoc
 router.get("/docente/:cedula", claseMethods.filterByDoc);
 // Se consulta el cotrolador clase, el metodo getClaseBySupervisor
@@ -34,6 +37,9 @@ router.get("/timetable/:id", claseMethods.getClassHorarioId);
 
 // Se consulta el cotrolador clase, el metodo deleteClase
 router.delete("/delete/:id", claseMethods.deleteClase);
+
+// Se consulta el cotrolador clase, elimina todas las clases
+router.delete("/delete/all", claseMethods.deleteClaseAll);
 
 // Se consulta el cotrolador clase, el metodo updateClase
 router.patch("/update/:id", claseMethods.updateClase);

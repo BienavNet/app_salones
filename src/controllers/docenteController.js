@@ -26,7 +26,7 @@ const getDocenteIdByCedula = async (req, res) => {
     try {
       const [result] = await connection.query(
         `
-       SELECT persona.*, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = ?`,
+       SELECT persona.id, persona.nombre, persona.apellido, persona.correo, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = ?`,
         [cedula]
       );
       if (result.length === 0) {
@@ -174,7 +174,10 @@ const saveDocente = async (req, res) => {
       contrasena: hashedPassword,
     };
 
-    const [result] = await connection.query("INSERT INTO persona SET ?",formatData);
+    const [result] = await connection.query(
+      "INSERT INTO persona SET ?",
+      formatData
+    );
 
     if (result.affectedRows > 0) {
       const { insertId } = result;

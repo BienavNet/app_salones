@@ -89,7 +89,7 @@ const deleteHorario = async (req, res) => {
       const [query1] = await connection.query(
         "DELETE detalle_horario FROM detalle_horario WHERE detalle_horario.horario = ?",
         [id]
-      )
+      );
 
       const [result] = await connection.query(
         "DELETE FROM horario WHERE id = " + id + ""
@@ -139,7 +139,31 @@ const getHorarioById = async (req, res) => {
       const { id } = req.params;
       const [result] = await connection.query(
         `
-        SELECT horario.id, horario.asignatura,detalle_horario.id as id_detallehorario, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, persona.nombre AS nombre_docente, persona.apellido AS apellido_docente, persona.cedula, docente.id AS docente_id, clase.salon, clase.estado, clase.fecha, clase.id AS id_class,salon.nombre, salon.numero_salon FROM horario JOIN detalle_horario ON horario.id = detalle_horario.horario JOIN docente ON horario.docente = docente.id JOIN persona ON docente.persona = persona.id JOIN clase ON horario.id = clase.horario JOIN salon ON clase.salon = salon.id JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id WHERE horario.id = ?`,
+        SELECT 
+    horario.id, 
+    horario.asignatura,
+    detalle_horario.id AS id_detallehorario, 
+    detalle_horario.dia, 
+    detalle_horario.hora_inicio, 
+    detalle_horario.hora_fin, 
+    persona.nombre AS nombre_docente, 
+    persona.apellido AS apellido_docente, 
+    persona.cedula, 
+    docente.id AS docente_id, 
+    clase.salon, 
+    clase.estado, 
+    clase.fecha, 
+    clase.id AS id_class, 
+    salon.nombre, 
+    salon.numero_salon 
+FROM horario 
+JOIN detalle_horario ON horario.id = detalle_horario.horario 
+JOIN docente ON horario.docente = docente.id 
+JOIN persona ON docente.persona = persona.id 
+LEFT JOIN clase ON horario.id = clase.horario
+LEFT JOIN salon ON clase.salon = salon.id
+LEFT JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id 
+WHERE horario.id = ?`,
         [id]
       );
       const JOINHORARIODATA = result.reduce((a, row) => {
@@ -157,10 +181,10 @@ const getHorarioById = async (req, res) => {
           hora_fin,
           numero_salon,
           estado,
-          id_detallehorario
+          id_detallehorario,
         } = row;
-        
-        const dateforma = DatesYYYYMMDD(fecha)
+
+        const dateforma = DatesYYYYMMDD(fecha);
 
         if (!a[cedula]) {
           a[cedula] = {
@@ -177,11 +201,11 @@ const getHorarioById = async (req, res) => {
           id_class,
           dia,
           estado,
-          fecha:dateforma,
+          fecha: dateforma,
           hora_inicio,
           hora_fin,
           numero_salon,
-          id_detallehorario
+          id_detallehorario,
         });
         return a;
       }, {});

@@ -205,12 +205,9 @@ const deleteClase = async (req, res) => {
         .status(400)
         .json({ status: "error", message: "Bad Request: Missing id." });
 
-    const [result1] = await connection.query(
-      "DELETE FROM reporte WHERE reporte.clase = ?",
-      [id]
-    );
+    await connection.query("DELETE FROM reporte WHERE reporte.clase = ?", [id]);
 
-    const [result2] = await connection.query(
+    await connection.query(
       "DELETE FROM comentario WHERE comentario.clase = ?",
       [id]
     );
@@ -219,6 +216,26 @@ const deleteClase = async (req, res) => {
       "DELETE FROM clase WHERE clase.id = ?",
       [id]
     );
+
+    const { affectedRows } = result;
+    if (affectedRows == 1) {
+      return res.status(200).json({
+        status: "ok",
+        message: "Datos eliminados correctamente en el servidor.",
+      });
+    }
+
+    return res.status(400).json({ status: "error", message: "Bad request." });
+  } catch (error) {
+    return res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
+
+/* Este metodo elimina todas las clase previamente creada, no es resersible */
+const deleteClaseAll = async (req, res) => {
+  try {
+    await connection.query("DELETE FROM reporte WHERE = 0");
+    const [result] = await connection.query("DELETE FROM clase WHERE = 0");
 
     const { affectedRows } = result;
     if (affectedRows == 1) {
@@ -391,6 +408,7 @@ export const methods = {
   getClaseBySupervisor,
   registerClase,
   deleteClase,
+  deleteClaseAll,
   updateClase,
   getIdClase,
   getClassHorarioId,

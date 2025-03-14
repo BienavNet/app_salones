@@ -101,31 +101,7 @@ const getDetallesHorariosByHorario = async (req, res) => {
       const { horario } = req.params;
       const [result] = await connection.query(
         `
-     SELECT detalle_horario.dia, 
-       horario.id,
-       horario.asignatura, 
-       persona.nombre, 
-       persona.apellido, 
-       MIN(clase.id) AS id_class, 
-       MIN(clase.fecha) AS fecha, 
-       categoria_salon.categoria, 
-       salon.numero_salon, 
-       salon.nombre AS nombre_salon
-FROM detalle_horario 
-JOIN horario ON horario.id = detalle_horario.horario 
-JOIN docente ON docente.id = horario.docente 
-JOIN persona ON docente.persona = persona.id 
-JOIN clase ON clase.horario = horario.id 
-JOIN salon ON clase.salon = salon.id 
-JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id 
-WHERE horario.id = ? 
-GROUP BY detalle_horario.dia, 
-         horario.asignatura, 
-         persona.nombre, 
-         persona.apellido, 
-         categoria_salon.categoria, 
-         salon.numero_salon, 
-         salon.nombre;`,
+     SELECT detalle_horario.dia, horario.id, horario.asignatura, persona.nombre, persona.apellido, MIN(clase.id) AS id_class, MIN(clase.fecha) AS fecha, categoria_salon.categoria, salon.numero_salon, salon.nombre AS nombre_salon FROM detalle_horario JOIN horario ON horario.id = detalle_horario.horario JOIN docente ON docente.id = horario.docente JOIN persona ON docente.persona = persona.id LEFT JOIN clase ON clase.horario = horario.id LEFT JOIN salon ON clase.salon = salon.id LEFT JOIN categoria_salon ON salon.categoria_salon = categoria_salon.id WHERE horario.id = ? GROUP BY detalle_horario.dia, horario.asignatura, persona.nombre, persona.apellido, categoria_salon.categoria, salon.numero_salon, salon.nombre;`,
         [horario]
       );
 
@@ -261,7 +237,6 @@ const updateDetalleHorario = async (req, res) => {
     });
   }
 };
-
 
 const updateDetalleHorarioByHorarioId = async (req, res) => {
   try {
