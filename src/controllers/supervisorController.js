@@ -364,6 +364,80 @@ const deleteSupervisor = async (req, res) => {
     return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+const deleteAllSupervisors = async (req, res) => {
+  try {
+    // Verificamos cuántos supervisores existen y si hay un supervisor por defecto
+    const [resultCount] = await connection.query(
+      `SELECT COUNT(*) AS total_supervisores,
+              MAX(CASE WHEN defaultItem = 1 THEN 1 ELSE 0 END) AS is_default_supervisor
+       FROM supervisor`
+    );
+    const { total_supervisores, is_default_supervisor } = resultCount[0];
+    if (total_supervisores === 1 && is_default_supervisor === 1) {
+      console.log("entro aca1");
+      return res.status(400).json({
+        status: "bad request",
+        message:
+          "Debe haber al menos un supervisor y no se puede eliminar el supervisor por defecto.",
+      });
+    }
+
+    // Obtener todos los supervisores que no sean el supervisor por defecto
+    const [supervisors] = await connection.query(
+      "SELECT id, persona FROM supervisor WHERE defaultItem IS NULL"
+    );
+
+    if (supervisors.length === 0) {
+      console.log("entro2");
+      return res.status(400).json({
+        status: "bad request",
+        message: "No hay supervisores para eliminar.",
+      });
+    }
+
+    // Lista de IDs de supervisores a eliminar
+    const supervisorIds = supervisors.map((s) => s.id);
+
+    // Establecer supervisor como NULL en las clases que tenían estos supervisores
+    if (supervisorIds.length > 0) {
+      await connection.query(
+        "UPDATE clase SET supervisor = NULL WHERE supervisor IN (?)",
+        [supervisorIds]
+      );
+    }
+
+    // Eliminar todas las notificaciones asociadas con los supervisores
+    const personaIds = supervisors.map((s) => s.persona);
+    if (personaIds.length > 0) {
+      await connection.query(
+        "DELETE FROM notificacion WHERE de IN (?) OR para IN (?)",
+        [personaIds, personaIds]
+      );
+    }
+
+    // Eliminar supervisores
+    if (supervisorIds.length > 0) {
+      await connection.query("DELETE FROM supervisor WHERE id IN (?)", [
+        supervisorIds,
+      ]);
+    }
+
+    // Eliminar personas asociadas a los supervisores eliminados
+    if (personaIds.length > 0) {
+      await connection.query("DELETE FROM persona WHERE id IN (?)", [
+        personaIds,
+      ]);
+    }
+
+    res.status(200).json({
+      status: "ok",
+      message: "Todos los supervisores han sido eliminados correctamente.",
+    });
+  } catch (error) {
+    console.error("Error en deleteAllSupervisors:", error);
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
 
 const defaultItemStatus = async (req, res) => {
   try {
@@ -437,4 +511,5 @@ export const methods = {
   deleteSupervisor,
   defaultItemStatus,
   updateDefaultItemStatus,
+  deleteAllSupervisors,
 };

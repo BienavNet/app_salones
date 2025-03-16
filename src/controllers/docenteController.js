@@ -316,6 +316,79 @@ const deleteDocente = async (req, res) => {
   }
 };
 
+const deleteDocenteAll = async (req, res) => {
+  try {
+    const [docenteCountResult] = await connection.query(
+      `SELECT COUNT(*) AS count FROM docente`
+    );
+
+    const docenteCount = docenteCountResult[0].count;
+
+    if (docenteCount === 0) {
+      return res.status(400).json({
+        status: "error",
+        message: "No hay docentes para eliminar.",
+      });
+    }
+    // Eliminar las notificaciones asociadas a todos los docentes
+    await connection.query(
+      `DELETE FROM notificacion
+       WHERE de IN (SELECT persona FROM docente)
+       OR para IN (SELECT persona FROM docente)`
+    );
+
+    // Eliminar relaciones en reporte
+    await connection.query(
+      `DELETE reporte FROM reporte
+       JOIN clase ON reporte.clase = clase.id
+       JOIN horario ON clase.horario = horario.id
+       JOIN docente ON horario.docente = docente.id`
+    );
+
+    // Eliminar comentarios asociados a los docentes
+    await connection.query(
+      `DELETE FROM comentario 
+       WHERE docente IN (SELECT id FROM docente)`
+    );
+
+    // Eliminar clases asociadas a los docentes
+    await connection.query(
+      `DELETE clase FROM clase
+       JOIN horario ON horario.id = clase.horario
+       JOIN docente ON horario.docente = docente.id`
+    );
+
+    // Eliminar detalle_horario asociado a los docentes
+    await connection.query(
+      `DELETE detalle_horario FROM detalle_horario
+       JOIN horario ON detalle_horario.horario = horario.id
+       JOIN docente ON horario.docente = docente.id`
+    );
+
+    // Eliminar horarios asociados a los docentes
+    await connection.query(
+      `DELETE horario FROM horario
+       JOIN docente ON horario.docente = docente.id`
+    );
+
+    // Eliminar docentes
+    await connection.query(`DELETE FROM docente`);
+
+    // Eliminar personas asociadas a los docentes
+    await connection.query(
+      `DELETE FROM persona 
+       WHERE id IN (SELECT persona FROM docente)`
+    );
+
+    res.status(200).json({
+      status: "ok",
+      message: "Todos los docentes han sido eliminados de la base de datos.",
+    });
+  } catch (error) {
+    res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
+
 /* Este metodo retorna la suma de los registros en la tabla docente */
 const countDocente = async (req, res) => {
   const [result] = await connection.query("SELECT COUNT(*) FROM docente");
@@ -333,4 +406,5 @@ export const methods = {
   deleteDocente,
   countDocente,
   getCedulaDocente,
+  deleteDocenteAll,
 };

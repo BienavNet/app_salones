@@ -234,18 +234,20 @@ const deleteClase = async (req, res) => {
 /* Este metodo elimina todas las clase previamente creada, no es resersible */
 const deleteClaseAll = async (req, res) => {
   try {
-    await connection.query("DELETE FROM reporte WHERE = 0");
-    const [result] = await connection.query("DELETE FROM clase WHERE = 0");
+    await connection.query("DELETE FROM reporte");
+    const [result] = await connection.query("DELETE FROM clase");
 
     const { affectedRows } = result;
-    if (affectedRows == 1) {
+    if (affectedRows > 0) {
       return res.status(200).json({
         status: "ok",
         message: "Datos eliminados correctamente en el servidor.",
       });
     }
 
-    return res.status(400).json({ status: "error", message: "Bad request." });
+    return res
+      .status(400)
+      .json({ status: "error", message: "No se eliminaron registros." });
   } catch (error) {
     return res.status(500).send("Internal Server Error: " + error.message);
   }

@@ -39,7 +39,7 @@ router.get("/timetable/:id", claseMethods.getClassHorarioId);
 router.delete("/delete/:id", claseMethods.deleteClase);
 
 // Se consulta el cotrolador clase, elimina todas las clases
-router.delete("/delete/all", claseMethods.deleteClaseAll);
+router.delete("/deleteall/", claseMethods.deleteClaseAll);
 
 // Se consulta el cotrolador clase, el metodo updateClase
 router.patch("/update/:id", claseMethods.updateClase);
