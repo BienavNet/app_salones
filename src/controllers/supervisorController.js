@@ -374,7 +374,6 @@ const deleteAllSupervisors = async (req, res) => {
     );
     const { total_supervisores, is_default_supervisor } = resultCount[0];
     if (total_supervisores === 1 && is_default_supervisor === 1) {
-      console.log("entro aca1");
       return res.status(400).json({
         status: "bad request",
         message:
@@ -388,7 +387,6 @@ const deleteAllSupervisors = async (req, res) => {
     );
 
     if (supervisors.length === 0) {
-      console.log("entro2");
       return res.status(400).json({
         status: "bad request",
         message: "No hay supervisores para eliminar.",

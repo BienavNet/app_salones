@@ -33,7 +33,7 @@ const getDetalleHorarioById = async (req, res) => {
     if (req.params !== undefined) {
       const { id } = req.params;
       const [result] = await connection.query(
-        `SELECT detalle_horario.*, clase.salon, salon.numero_salon
+        `SELECT detalle_horario.*, clase.salon, salon.numero_salon, clase.id as id_class
          FROM detalle_horario 
          jOIN horario ON detalle_horario.horario = horario.id
          JOIN clase ON horario.id = clase.horario

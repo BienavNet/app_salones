@@ -26,7 +26,7 @@ const getDocenteIdByCedula = async (req, res) => {
     try {
       const [result] = await connection.query(
         `
-       SELECT persona.id, persona.nombre, persona.apellido, persona.correo, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = ?`,
+       SELECT persona.id, persona.cedula, persona.nombre, persona.apellido, persona.correo, docente.id as docente_id, docente.persona as persona_id FROM docente INNER JOIN persona ON persona.id = docente.persona WHERE persona.cedula = ?`,
         [cedula]
       );
       if (result.length === 0) {
