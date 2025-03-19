@@ -321,7 +321,6 @@ const deleteDocenteAll = async (req, res) => {
     const [docenteCountResult] = await connection.query(
       `SELECT COUNT(*) AS count FROM docente`
     );
-
     const docenteCount = docenteCountResult[0].count;
 
     if (docenteCount === 0) {
@@ -330,14 +329,23 @@ const deleteDocenteAll = async (req, res) => {
         message: "No hay docentes para eliminar.",
       });
     }
-    // Eliminar las notificaciones asociadas a todos los docentes
+    const [personasAsociadas] = await connection.query(
+      `SELECT persona FROM docente`
+    );
+    const personasIds = personasAsociadas.map((row) => row.persona);
+
+    if (personasIds.length === 0) {
+      return res.status(400).json({
+        status: "error",
+        message: "No hay docentes con personas asociadas para eliminar.",
+      });
+    }
+
     await connection.query(
-      `DELETE FROM notificacion
-       WHERE de IN (SELECT persona FROM docente)
-       OR para IN (SELECT persona FROM docente)`
+      `DELETE FROM notificacion WHERE de IN (?) OR para IN (?)`,
+      [personasIds, personasIds]
     );
 
-    // Eliminar relaciones en reporte
     await connection.query(
       `DELETE reporte FROM reporte
        JOIN clase ON reporte.clase = clase.id
@@ -345,44 +353,33 @@ const deleteDocenteAll = async (req, res) => {
        JOIN docente ON horario.docente = docente.id`
     );
 
-    // Eliminar comentarios asociados a los docentes
     await connection.query(
-      `DELETE FROM comentario 
-       WHERE docente IN (SELECT id FROM docente)`
+      `DELETE FROM comentario WHERE docente IN (SELECT id FROM docente)`
     );
 
-    // Eliminar clases asociadas a los docentes
     await connection.query(
       `DELETE clase FROM clase
-       JOIN horario ON horario.id = clase.horario
+       JOIN horario ON clase.horario = horario.id
        JOIN docente ON horario.docente = docente.id`
     );
 
-    // Eliminar detalle_horario asociado a los docentes
     await connection.query(
       `DELETE detalle_horario FROM detalle_horario
        JOIN horario ON detalle_horario.horario = horario.id
        JOIN docente ON horario.docente = docente.id`
     );
 
-    // Eliminar horarios asociados a los docentes
     await connection.query(
-      `DELETE horario FROM horario
-       JOIN docente ON horario.docente = docente.id`
+      `DELETE horario FROM horario JOIN docente ON horario.docente = docente.id`
     );
-
-    // Eliminar docentes
     await connection.query(`DELETE FROM docente`);
-
-    // Eliminar personas asociadas a los docentes
-    await connection.query(
-      `DELETE FROM persona 
-       WHERE id IN (SELECT persona FROM docente)`
-    );
-
+    await connection.query(`DELETE FROM persona WHERE id IN (?)`, [
+      personasIds,
+    ]);
     res.status(200).json({
       status: "ok",
-      message: "Todos los docentes han sido eliminados de la base de datos.",
+      message:
+        "Todos los docentes y sus personas asociadas han sido eliminados.",
     });
   } catch (error) {
     res.status(500).send("Internal Server Error: " + error.message);

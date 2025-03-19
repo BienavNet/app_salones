@@ -366,14 +366,14 @@ const deleteSupervisor = async (req, res) => {
 };
 const deleteAllSupervisors = async (req, res) => {
   try {
-    // Verificamos cuántos supervisores existen y si hay un supervisor por defecto
     const [resultCount] = await connection.query(
       `SELECT COUNT(*) AS total_supervisores,
-              MAX(CASE WHEN defaultItem = 1 THEN 1 ELSE 0 END) AS is_default_supervisor
+              SUM(CASE WHEN defaultItem = 1 THEN 1 ELSE 0 END) AS default_supervisores
        FROM supervisor`
     );
-    const { total_supervisores, is_default_supervisor } = resultCount[0];
-    if (total_supervisores === 1 && is_default_supervisor === 1) {
+    const { total_supervisores, default_supervisores } = resultCount[0];
+
+    if (total_supervisores === default_supervisores) {
       return res.status(400).json({
         status: "bad request",
         message:
@@ -381,9 +381,8 @@ const deleteAllSupervisors = async (req, res) => {
       });
     }
 
-    // Obtener todos los supervisores que no sean el supervisor por defecto
     const [supervisors] = await connection.query(
-      "SELECT id, persona FROM supervisor WHERE defaultItem IS NULL"
+      "SELECT id, persona FROM supervisor WHERE defaultItem IS NULL OR defaultItem = 0"
     );
 
     if (supervisors.length === 0) {
@@ -392,11 +391,9 @@ const deleteAllSupervisors = async (req, res) => {
         message: "No hay supervisores para eliminar.",
       });
     }
-
-    // Lista de IDs de supervisores a eliminar
     const supervisorIds = supervisors.map((s) => s.id);
+    const personaIds = supervisors.map((s) => s.persona);
 
-    // Establecer supervisor como NULL en las clases que tenían estos supervisores
     if (supervisorIds.length > 0) {
       await connection.query(
         "UPDATE clase SET supervisor = NULL WHERE supervisor IN (?)",
@@ -404,8 +401,6 @@ const deleteAllSupervisors = async (req, res) => {
       );
     }
 
-    // Eliminar todas las notificaciones asociadas con los supervisores
-    const personaIds = supervisors.map((s) => s.persona);
     if (personaIds.length > 0) {
       await connection.query(
         "DELETE FROM notificacion WHERE de IN (?) OR para IN (?)",
@@ -413,19 +408,11 @@ const deleteAllSupervisors = async (req, res) => {
       );
     }
 
-    // Eliminar supervisores
-    if (supervisorIds.length > 0) {
-      await connection.query("DELETE FROM supervisor WHERE id IN (?)", [
-        supervisorIds,
-      ]);
-    }
+    await connection.query("DELETE FROM supervisor WHERE id IN (?)", [
+      supervisorIds,
+    ]);
 
-    // Eliminar personas asociadas a los supervisores eliminados
-    if (personaIds.length > 0) {
-      await connection.query("DELETE FROM persona WHERE id IN (?)", [
-        personaIds,
-      ]);
-    }
+    await connection.query("DELETE FROM persona WHERE id IN (?)", [personaIds]);
 
     res.status(200).json({
       status: "ok",
