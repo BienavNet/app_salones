@@ -113,6 +113,27 @@ const deleteHorario = async (req, res) => {
     return res.status(500).send("Internal Server Error: " + error.message);
   }
 };
+const deleteHorarioAll = async (req, res) => {
+  try {
+    await connection.query("DELETE FROM detalle_horario");
+    const [result] = await connection.query("DELETE FROM horario");
+    const { affectedRows } = result;
+
+    if (affectedRows > 0) {
+      return res.status(200).json({
+        status: "ok",
+        message: "Todos los datos han sido eliminados de la base de datos.",
+      });
+    } else {
+      return res.status(400).json({
+        status: "bad request",
+        message: "No se encontraron registros para eliminar.",
+      });
+    }
+  } catch (error) {
+    return res.status(500).send("Internal Server Error: " + error.message);
+  }
+};
 
 /// Obtiene el horario de los docentes por medio de la cedula.
 const getHorarios = async (req, res) => {
@@ -250,4 +271,5 @@ export const methods = {
   getHorarios,
   getHorarioById,
   getHorariosByDocente,
+  deleteHorarioAll,
 };

@@ -32,7 +32,7 @@ const getClassHorarioId = async (req, res) => {
         .json({ status: "error", message: "Bad Request: Missing id." });
 
     const [result] = await connection.query(
-      "SELECT id, horario FROM clase WHERE horario = ?",
+      "SELECT clase.id, clase.horario, detalle_horario.dia, detalle_horario.hora_inicio, detalle_horario.hora_fin, salon.numero_salon, salon.nombre AS nombre_salon FROM clase JOIN salon ON clase.salon = salon.id JOIN horario ON clase.horario = horario.id JOIN detalle_horario ON detalle_horario.horario = horario.id WHERE horario.id = ?",
       [id]
     );
 
@@ -273,7 +273,7 @@ const updateClase = async (req, res) => {
         });
         return;
       }
-      res.status(400).json({ status: "error", message: "Bad request." });
+      res.status(404).json({ status: "error", message: "Clase no encontrada" });
       return;
     }
     res.status(400).json({ status: "error", message: "Bad request." });
