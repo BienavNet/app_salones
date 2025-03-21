@@ -214,16 +214,19 @@ const getSupervisorEmailByClass = async (Idclass) => {
 };
 
 const getSupervisorIdByClass = async (idclass) => {
-  const [rows] = await connection.query(
-    `clase;
-SELECT persona.id 
-FROM clase 
-JOIN supervisor ON clase.supervisor = supervisor.id
-JOIN persona ON supervisor.persona = persona.id
-WHERE clase.id = ? LIMIT 1`,
-    [idclass]
-  );
-  return rows.length > 0 ? rows[0].supervisor_id : null;
+  try {
+    const [rows] = await connection.query(
+      `SELECT persona.id 
+       FROM clase 
+       JOIN supervisor ON clase.supervisor = supervisor.id
+       JOIN persona ON supervisor.persona = persona.id
+       WHERE clase.id = ? LIMIT 1`,
+      [idclass]
+    );
+    return rows.length > 0 ? rows[0].id : null;
+  } catch (error) {
+    return null;
+  }
 };
 
 /// Consulta el mensaje de respuesta segun la accion, y envia la notificacion a la persona que le corresponda dicha cedula
@@ -237,6 +240,12 @@ const sendNotification = async (req, res) => {
         para !== undefined &&
         idclass !== undefined
       ) {
+        console.log({
+          action,
+          de,
+          para,
+          idclass,
+        });
         const rol = await getRoleByTables(de);
         if (!rol) {
           return res.status(404).json({
@@ -246,6 +255,7 @@ const sendNotification = async (req, res) => {
         }
 
         const correoAdmin = await getParaByCorreo(para);
+
         if (!correoAdmin) {
           return res.status(404).json({
             status: "error",
@@ -262,9 +272,8 @@ const sendNotification = async (req, res) => {
         let destinatarios = [{ id: para, correo: correoAdmin }];
 
         if (rol === "docente") {
-          const supervisorId = await getSupervisorIdByClass(idclass); // Obtener ID del supervisor
+          const supervisorId = await getSupervisorIdByClass(idclass);
           const correoSupervisor = await getSupervisorEmailByClass(idclass);
-
           if (supervisorId) {
             destinatarios.push({ id: supervisorId, correo: correoSupervisor });
           }
@@ -277,9 +286,7 @@ const sendNotification = async (req, res) => {
           );
           return { insertId: result.insertId, para: destinatario.id };
         });
-
         const insertedNotifications = await Promise.all(insertPromises);
-
         const emailPromises = destinatarios.map((destinatario) =>
           sendNotificationEmail({
             nombre: de_nombre,
@@ -287,9 +294,7 @@ const sendNotification = async (req, res) => {
             mensaje: message,
           })
         );
-
         await Promise.all(emailPromises);
-
         res.status(200).json({
           status: "ok",
           message: "Notificaciones almacenadas y enviadas correctamente",
@@ -303,7 +308,6 @@ const sendNotification = async (req, res) => {
           });
           io.to(para).emit("count-notification", data);
         });
-
         return;
       }
       return res
@@ -315,7 +319,7 @@ const sendNotification = async (req, res) => {
       message: "Bad request: datos no proporcionados.",
     });
   } catch (error) {
-    res.status(500).send("Internal Server Error: " + error.message);
+    res.status(500).send("Internal Server Error: " + error);
   }
 };
 
