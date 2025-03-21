@@ -177,9 +177,9 @@ const getClassId = async (classId) => {
   try {
     const [result] = await connection.query(query, [classId]);
     if (result.length === 0) {
-      return null; 
+      return null;
     }
-    return result[0].id; 
+    return result[0].id;
   } catch (error) {
     throw new Error("Error fetching docente name: " + error.message);
   }
@@ -193,18 +193,18 @@ const getSupervisorEmailByClass = async (Idclass) => {
   JOIN persona ON supervisor.persona = persona.id 
   WHERE clase.id = ? LIMIT 1;
   `;
-  
+
   try {
     const [result] = await connection.query(query, [Idclass]);
     if (result.length === 0) {
-      ("No se encontró un supervisor para la clase con ID:", Idclass);
+      "No se encontró un supervisor para la clase con ID:", Idclass;
       return null;
     }
 
     const supervisorEmail = result[0]?.correo;
-    
+
     if (!supervisorEmail) {
-      ("No se encontró correo para el supervisor de la clase con ID:", Idclass);
+      "No se encontró correo para el supervisor de la clase con ID:", Idclass;
       return null;
     }
     return supervisorEmail;
@@ -213,14 +213,30 @@ const getSupervisorEmailByClass = async (Idclass) => {
   }
 };
 
+const getSupervisorIdByClass = async (idclass) => {
+  const [rows] = await connection.query(
+    `clase;
+SELECT persona.id 
+FROM clase 
+JOIN supervisor ON clase.supervisor = supervisor.id
+JOIN persona ON supervisor.persona = persona.id
+WHERE clase.id = ? LIMIT 1`,
+    [idclass]
+  );
+  return rows.length > 0 ? rows[0].supervisor_id : null;
+};
+
 /// Consulta el mensaje de respuesta segun la accion, y envia la notificacion a la persona que le corresponda dicha cedula
 const sendNotification = async (req, res) => {
   try {
     if (req.body !== undefined) {
       const { action, de, para, idclass } = req.body;
- 
-      if (action !== undefined && de !== undefined && para !== undefined && idclass !== undefined) {
-
+      if (
+        action !== undefined &&
+        de !== undefined &&
+        para !== undefined &&
+        idclass !== undefined
+      ) {
         const rol = await getRoleByTables(de);
         if (!rol) {
           return res.status(404).json({
@@ -229,70 +245,66 @@ const sendNotification = async (req, res) => {
           });
         }
 
-        const correo = await getParaByCorreo(para);
-        if (!correo) {
+        const correoAdmin = await getParaByCorreo(para);
+        if (!correoAdmin) {
           return res.status(404).json({
             status: "error",
-            message: "Correo del destinatario no encontrado.",
+            message: "Correo del administrador no encontrado.",
           });
         }
-        
-        const idDocenteAsociadoAlaclase = await getClassId(idclass)
 
-        const { message, de_nombre } = await getMessage(action, {de: de, para: idDocenteAsociadoAlaclase});
+        const idDocenteAsociadoAlaclase = await getClassId(idclass);
+        const { message, de_nombre } = await getMessage(action, {
+          de: de,
+          para: idDocenteAsociadoAlaclase,
+        });
 
-        const [result] = await connection.query(
-          `INSERT INTO notificacion (mensaje, de, para, estado, fecha) VALUES (?, ?, ?, 'no leida', NOW())`,
-          [message, de, para]
+        let destinatarios = [{ id: para, correo: correoAdmin }];
+
+        if (rol === "docente") {
+          const supervisorId = await getSupervisorIdByClass(idclass); // Obtener ID del supervisor
+          const correoSupervisor = await getSupervisorEmailByClass(idclass);
+
+          if (supervisorId) {
+            destinatarios.push({ id: supervisorId, correo: correoSupervisor });
+          }
+        }
+
+        const insertPromises = destinatarios.map(async (destinatario) => {
+          const [result] = await connection.query(
+            `INSERT INTO notificacion (mensaje, de, para, estado, fecha) VALUES (?, ?, ?, 'no leida', NOW())`,
+            [message, de, destinatario.id]
+          );
+          return { insertId: result.insertId, para: destinatario.id };
+        });
+
+        const insertedNotifications = await Promise.all(insertPromises);
+
+        const emailPromises = destinatarios.map((destinatario) =>
+          sendNotificationEmail({
+            nombre: de_nombre,
+            correo: destinatario.correo,
+            mensaje: message,
+          })
         );
 
-        const { insertId, affectedRows } = result;
-        if (affectedRows == 1 && insertId !== undefined) {
-          const emailPromises = [];
+        await Promise.all(emailPromises);
+
+        res.status(200).json({
+          status: "ok",
+          message: "Notificaciones almacenadas y enviadas correctamente",
+        });
+
+        insertedNotifications.forEach(async ({ insertId, para }) => {
           const data = await getUnreadCount(para);
-
-          if (rol === "supervisor") {
-            emailPromises.push(
-              sendNotificationEmail({
-                nombre: de_nombre,
-                correo: correo,
-                mensaje: message,
-              })
-            );
-          }
-
-          if (rol === "docente") {
-            const correoSupervisor = await getSupervisorEmailByClass(idclass);
-            const destinatarios = [correo];
-            if (correoSupervisor) {destinatarios.push(correoSupervisor);}
-            emailPromises.push(
-              sendNotificationEmail({
-                nombre: de_nombre,
-                correo: destinatarios.flat(),
-                mensaje: message,
-              })
-            );
-          }
-
-          await Promise.all(emailPromises);
-
-          res.status(200).json({
-            status: "ok",
-            id: insertId,
-            message: "Notificación almacenada y enviada correctamente",
-          });
-
           io.to(para).emit("new_notificacion", {
             success: true,
             messageId: insertId,
           });
-
-          return io.to(para).emit("count-notification", data);
-        }
-        return res.status(400).json({
-          status: "error",
-          message: "Error en la inserción de datos.",
+          io.to(para).emit("count-notification", data);
         });
+
+        return;
       }
       return res
         .status(400)
